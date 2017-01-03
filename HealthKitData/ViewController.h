@@ -8,8 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>
 
+@property (weak, nonatomic) IBOutlet UISegmentedControl *healthDataSegmentedController;
+@property (weak, nonatomic) IBOutlet UILabel *firstMetricLabel;
+@property (weak, nonatomic) IBOutlet UILabel *secondDetailMetricLabel;
+@property (weak, nonatomic) IBOutlet UITableView *dataTableView;
 
 @end
 
