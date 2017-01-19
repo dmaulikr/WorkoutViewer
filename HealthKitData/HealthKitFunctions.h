@@ -13,17 +13,15 @@
 
 @property (strong, nonatomic) HKHealthStore *healthStore;
 
--(HKAuthorizationStatus) authStatus:(HKObjectType *) hkType;
-
--(BOOL) canWriteHeart;
--(BOOL) canWriteLocation;
-
 -(void)requestPermission:(void (^)(BOOL success, NSError *err))completion;
-
-// Fetches the single most recent quantity of the specified type.
 
 - (void)mostRecentQuantitySampleOfType:(HKQuantityType *)quantityType predicate:(NSPredicate *)predicate completion:(void (^)(HKQuantity *mostRecentQuantity, NSError *error))completion;
 
++ (NSPredicate *)predicateForSamplesToday;
++ (NSPredicate *)predicateForSamplesWeek;
+
 - (void)getAllWorkouts:(void (^)(NSMutableArray *, NSError *))completion;
+- (void)getAllEnergyBurned:(void (^)(NSMutableArray *, NSError *))completion;
+- (void)getAllSources:(void (^)(NSMutableArray *, NSError *))completion;
 
 @end

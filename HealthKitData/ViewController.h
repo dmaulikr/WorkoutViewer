@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, NSURLSessionDelegate>
+@interface ViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, NSURLSessionDelegate, UITextFieldDelegate>
 
 @property (weak, nonatomic) IBOutlet UILabel *firstMetricLabel;
 @property (weak, nonatomic) IBOutlet UILabel *secondDetailMetricLabel;

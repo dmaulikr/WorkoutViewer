@@ -8,16 +8,20 @@
 
 #import "ViewController.h"
 #import "HealthKitFunctions.h"
+#import "InsetTextField.h"
+@import UserNotifications;
 
 @interface ViewController ()
 
 @property (strong, nonatomic) NSDate *lastSyncDate;
 @property (strong, nonatomic) NSString *slackUsername;
+@property (strong, nonatomic) NSNumber *totalEnergyBurnedForTheWeek;
 @property (strong, nonatomic) NSMutableArray *workouts;
+@property (strong, nonatomic) NSMutableArray *sources;
+@property (strong, nonatomic) NSMutableArray *energy;
 @property (strong, nonatomic) HealthKitFunctions *store;
-@property (weak, nonatomic) IBOutlet UITextField *slackUsernameTextField;
-@property (weak, nonatomic) IBOutlet UIButton *syncWorkoutButton;
 
+@property (weak, nonatomic) IBOutlet InsetTextField *slackUsernameTextField;
 @property (weak, nonatomic) IBOutlet UIView *uploadingWorkoutOverlayView;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *uploadingWorkoutSpinner;
 
@@ -27,19 +31,134 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+
     self.dataTableView.delegate = self;
     self.dataTableView.dataSource = self;
+    self.slackUsernameTextField.delegate = self;
     
     self.lastSyncDate = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastSyncDate"];
     self.slackUsername = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
     if (self.slackUsername != nil) {
         [self.slackUsernameTextField setText:self.slackUsername];
     }
-    self.workouts = [NSMutableArray new];
+    self.energy = [NSMutableArray new];
     
-    [self.uploadingWorkoutOverlayView setHidden:YES];
+    [self.uploadingWorkoutOverlayView setHidden:NO];
+    [self.uploadingWorkoutSpinner startAnimating];
 }
+- (IBAction)showAll:(UISwitch *)sender {
+    
+    if (sender.on) {
+        [self.energy removeAllObjects];
+
+        [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
+            [self.energy addObjectsFromArray:energy];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.dataTableView reloadData];
+                [self.uploadingWorkoutOverlayView setHidden:YES];
+                [self.uploadingWorkoutSpinner stopAnimating];
+            });
+            
+        }];
+    } else {
+        [self.energy removeAllObjects];
+
+        [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
+            
+            //[self.energy addObjectsFromArray:energy];
+            
+            for (HKQuantitySample *sample in energy) {
+                if ([[sample description] rangeOfString:@"Watch"].location == NSNotFound) {
+                    [self.energy addObject:sample];
+                }
+            }
+            
+            NSMutableArray *energies = energy;
+            
+            double totalBurned = 0.0;
+            for (HKQuantitySample *energy in energies) {
+                totalBurned += [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
+            }
+            
+            self.totalEnergyBurnedForTheWeek = @(totalBurned);
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.dataTableView reloadData];
+                [self.uploadingWorkoutOverlayView setHidden:YES];
+                [self.uploadingWorkoutSpinner stopAnimating];
+            });
+            
+            NSLog(@"Total Energy Burned: %0.f", totalBurned);
+        }];
+    }
+}
+
+- (IBAction)showWatchOnly:(UISwitch *)sender {
+    
+    if (sender.on) {
+        [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
+            
+            //[self.energy addObjectsFromArray:energy];
+            [self.energy removeAllObjects];
+            
+            for (HKQuantitySample *sample in energy) {
+                if ([[sample description] rangeOfString:@"Watch"].location != NSNotFound) {
+                    [self.energy addObject:sample];
+                }
+            }
+            
+            NSMutableArray *energies = energy;
+            
+            double totalBurned = 0.0;
+            for (HKQuantitySample *energy in energies) {
+                totalBurned += [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
+            }
+            
+            self.totalEnergyBurnedForTheWeek = @(totalBurned);
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.dataTableView reloadData];
+                [self.uploadingWorkoutOverlayView setHidden:YES];
+                [self.uploadingWorkoutSpinner stopAnimating];
+            });
+            
+            NSLog(@"Total Energy Burned: %0.f", totalBurned);
+        }];
+        
+    } else {
+        [self.energy removeAllObjects];
+
+        [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
+            
+            //[self.energy addObjectsFromArray:energy];
+            
+            for (HKQuantitySample *sample in energy) {
+                if ([[sample description] rangeOfString:@"Watch"].location == NSNotFound) {
+                    [self.energy addObject:sample];
+                }
+            }
+            
+            NSMutableArray *energies = energy;
+            
+            double totalBurned = 0.0;
+            for (HKQuantitySample *energy in energies) {
+                totalBurned += [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
+            }
+            
+            self.totalEnergyBurnedForTheWeek = @(totalBurned);
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.dataTableView reloadData];
+                [self.uploadingWorkoutOverlayView setHidden:YES];
+                [self.uploadingWorkoutSpinner stopAnimating];
+            });
+            
+            NSLog(@"Total Energy Burned: %0.f", totalBurned);
+        }];
+    }
+}
+
 
 #pragma mark - Register Health Kit
 
@@ -55,18 +174,40 @@
 }
 
 -(void)getDataForSegment {
+    
+    [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
 
-    [self.store getAllWorkouts:^(NSMutableArray *workouts, NSError *err) {
-        if (workouts) {
-            [self.workouts addObjectsFromArray:workouts];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.dataTableView reloadData];
-                //  push unsynced workouts to server
-            });
-            
+        //[self.energy addObjectsFromArray:energy];
+        
+        for (HKQuantitySample *sample in energy) {
+            if ([[sample description] rangeOfString:@"Watch"].location == NSNotFound) {
+                [self.energy addObject:sample];
+            }
+        }
+        
+        NSMutableArray *energies = energy;
+
+        double totalBurned = 0.0;
+        for (HKQuantitySample *energy in energies) {
+            totalBurned += [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
+        }
+        
+        self.totalEnergyBurnedForTheWeek = @(totalBurned);
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.dataTableView reloadData];
+            [self.uploadingWorkoutOverlayView setHidden:YES];
+            [self.uploadingWorkoutSpinner stopAnimating];
+        });
+
+        NSLog(@"Total Energy Burned: %0.f", totalBurned);
+    }];
+    
+    [self.store getAllSources:^(NSMutableArray *sources, NSError *err) {
+        if (err) {
+        
         } else {
-            NSLog(@"Can't get workouts - %@", [err description]);
+            self.sources = sources;
         }
     }];
 }
@@ -79,7 +220,7 @@
         
         //  get all workouts not uploaded last time
         
-        if (self.lastSyncDate == nil || ![self.slackUsernameTextField.text isEqualToString:self.slackUsername]) { //
+        if (self.lastSyncDate == nil || ![self.slackUsernameTextField.text isEqualToString:self.slackUsername]) {
             
             for (HKWorkout *workout in self.workouts) {
                 [workoutsSinceLastUploadedDate addObject:[self buildDictionaryForWorkout:workout]];
@@ -107,7 +248,6 @@
     [self.uploadingWorkoutOverlayView setHidden:NO];
     [self.uploadingWorkoutSpinner startAnimating];
     [self.dataTableView setUserInteractionEnabled:NO];
-    [self.syncWorkoutButton setEnabled:NO];
     [self.slackUsernameTextField setEnabled:NO];
 }
 
@@ -155,10 +295,10 @@
     // JSON Body
     
     NSDictionary* bodyObject = @{
-                                 @"timeStamp": @([[NSDate date] timeIntervalSince1970]),
-                                 @"lastSync": @([self.lastSyncDate timeIntervalSince1970]),
-                                 @"workouts": workouts,
-                                 @"slackUsername": self.slackUsernameTextField.text
+                                 @"timeStamp": @([@([[NSDate date] timeIntervalSince1970]) integerValue]),
+                                 @"lastSync": @([@([self.lastSyncDate timeIntervalSince1970]) integerValue]),
+                                 @"activeEnergy": self.totalEnergyBurnedForTheWeek,
+                                 @"slackUsername": [self.slackUsernameTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
                                  };
     
     NSLog(@"%@", [bodyObject description]);
@@ -168,7 +308,7 @@
     NSURLSessionDataTask* task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error == nil) {
             // Success
-            NSLog(@"URL Session Task Succeeded: HTTP %ld", ((NSHTTPURLResponse*)response).statusCode);
+            NSLog(@"URL Session Task Succeeded: HTTP %ld", (long)((NSHTTPURLResponse*)response).statusCode);
             self.lastSyncDate = [NSDate dateWithTimeIntervalSinceNow:0];
             [[NSUserDefaults standardUserDefaults] setObject:self.lastSyncDate forKey:@"lastSyncDate"];
             [[NSUserDefaults standardUserDefaults] setObject:self.slackUsernameTextField.text forKey:@"slackUsername"];
@@ -184,9 +324,9 @@
             [self.uploadingWorkoutOverlayView setHidden:YES];
             [self.uploadingWorkoutSpinner stopAnimating];
             [self.dataTableView setUserInteractionEnabled:YES];
-            [self.syncWorkoutButton setEnabled:YES];
             [self.slackUsernameTextField setEnabled:YES];
             
+            //[self showNotificationForWorkout];
         });
     }];
     [task resume];
@@ -197,11 +337,33 @@
     [self.slackUsernameTextField resignFirstResponder];
 }
 
+-(void)showNotificationForWorkout {
+    
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    
+    UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+    content.title = @"New Active Energy Logged!";
+    content.body = @"Uploading to FitBot now.. here come those Move Points!";
+    content.sound = [UNNotificationSound defaultSound];
+    
+    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
+                                                                                                    repeats:NO];
+    NSString *identifier = @"NewWorkoutLocalNotification";
+    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
+                                                                          content:content trigger:trigger];
+    
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            NSLog(@"Something went wrong scheduling a notification: %@",error);
+        }
+    }];
+}
+
 
 #pragma mark - TableView Delegate & Data Source
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.workouts.count;
+    return self.energy.count;
 }
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -210,53 +372,35 @@
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"healthCell"];
-    
-    NSDateFormatter *formatter = [NSDateFormatter new];
-    [formatter setDateStyle:NSDateFormatterShortStyle];
-    NSDateComponentsFormatter *dateFormatter = [[NSDateComponentsFormatter alloc] init];
-    dateFormatter.unitsStyle = NSDateComponentsFormatterUnitsStyleShort;
-    dateFormatter.includesApproximationPhrase = NO;
-    dateFormatter.includesTimeRemainingPhrase = NO;
-    dateFormatter.allowedUnits = NSCalendarUnitMinute;
-    
-    cell.detailTextLabel.text = @"";
-    HKWorkout *workout = [self.workouts objectAtIndex:indexPath.row];
-    [cell.detailTextLabel setText:[formatter stringFromDate:workout.startDate]];
-    [cell.textLabel setText:[dateFormatter stringFromTimeInterval:workout.duration]];
+    if ([self.energy count] > 1) {
+        
+        HKQuantitySample *energy = [self.energy objectAtIndex:indexPath.row];
+        
+        NSString *energyString = [NSString stringWithFormat:@"%.2f", [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]]];
+        
+        [cell.textLabel setText:[energyString stringByAppendingString:@" kCal"]];
+        
+        NSString *source;
+        if ([[energy description] rangeOfString:@"Watch"].location != NSNotFound) {
+            source = @"Watch";
+        } else if ([[energy description] rangeOfString:@"iPhone"].location != NSNotFound) {
+            source = @"iPhone";
+        } else if ([[energy description] rangeOfString:@"Human"].location != NSNotFound) {
+            source = @"Human";
+        } else if ([[energy description] rangeOfString:@"Endomondo"].location != NSNotFound) {
+            source = @"Endomondo";
+        } else {
+            source = @"Other";
+        }
+        
+        [cell.detailTextLabel setText:source];
+    }
 
     return cell;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    
-    UIAlertController *alert = [[UIAlertController alloc] init];
-    [alert setTitle:@"Workout Summary"];
-    
-    UIAlertAction *done = [UIAlertAction actionWithTitle:@"Done" style:UIAlertActionStyleDestructive handler:nil];
-    
-    NSDateFormatter *formatter = [NSDateFormatter new];
-    [formatter setDateStyle:NSDateFormatterMediumStyle];
-    [formatter setDateFormat:@"HH:mm"];
-    [formatter setLocale:[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"]];
-    
-    NSDateComponentsFormatter *dateFormatter = [[NSDateComponentsFormatter alloc] init];
-    dateFormatter.unitsStyle = NSDateComponentsFormatterUnitsStyleShort;
-    dateFormatter.includesApproximationPhrase = NO;
-    dateFormatter.includesTimeRemainingPhrase = NO;
-    dateFormatter.allowedUnits = NSCalendarUnitMinute;
-    
-    HKWorkout *workout = [self.workouts objectAtIndex:indexPath.row];
-    NSString *startDate = [formatter stringFromDate:workout.startDate];
-    NSString *endDate = [formatter stringFromDate:workout.endDate];
-    NSString *duration = [dateFormatter stringFromTimeInterval:workout.duration];
-    NSString *distanceInMiles = [NSString stringWithFormat:@"%.1f",[workout.totalDistance doubleValueForUnit:[HKUnit mileUnit]]];
-    NSString *energyBurned = [NSString stringWithFormat:@"%.0f", [workout.totalEnergyBurned doubleValueForUnit:[HKUnit kilocalorieUnit]]];
-    
-    [alert addAction:done];
-                           
-    [alert setMessage:[NSString stringWithFormat:@"Started: %@, Ended: %@, Duration: %@, Distance: %@ Miles, Energy Burned: %@ Calories", startDate, endDate, duration, distanceInMiles, energyBurned]];
-    [self presentViewController:alert animated:YES completion:nil];
 }
 
 #pragma mark - NSURLSession Delegate

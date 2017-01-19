@@ -87,50 +87,55 @@
     [self.healthStore executeQuery:sampleQuery];
 }
 
-// Calculates the user's total basal (resting) energy burn based off of their height, weight, age,
-// and biological sex. If there is not enough information, return an error.
-- (void)fetchTotalBasalBurn:(void(^)(HKQuantity *basalEnergyBurn, NSError *error))completion {
-    NSPredicate *todayPredicate = [self predicateForSamplesToday];
+- (void)getAllEnergyBurned:(void (^)(NSMutableArray *, NSError *))completion {
     
-    HKQuantityType *weightType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
-    HKQuantityType *heightType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
+    // 2. Order the workouts by date
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
     
-    [self mostRecentQuantitySampleOfType:weightType predicate:nil completion:^(HKQuantity *weight, NSError *weightError) {
-        if (!weight) {
-            completion(nil, weightError);
-            
-            return;
-        }
+    // 3. Create the query
+    HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned]
+                                                                 predicate:[HealthKitFunctions predicateForSamplesWeek]
+                                                                     limit:HKObjectQueryNoLimit
+                                                           sortDescriptors:@[sortDescriptor]
+                                                            resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
+                                  {
+                                      
+                                      if(!error && results){
+                                          NSMutableArray *energy = [NSMutableArray new];
+                                          for(HKQuantitySample *samples in results)
+                                          {
+                                              // your code here
+                                              HKQuantitySample *burned = (HKQuantitySample *)samples;
+                                              NSLog(@"%@", [burned description]);
+                                              [energy addObject:burned];
+                                          }
+                                          completion(energy, nil);
+                                      }else{
+                                          NSLog(@"Error retrieving energy %@",error);
+                                          completion(nil, error);
+                                      }
+                                  }];
+    
+    // Execute the query
+    [self.healthStore executeQuery:sampleQuery];
+}
+
+- (void)getAllSources:(void (^)(NSMutableArray *, NSError *))completion {
+    
+    HKSampleType *sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
+    
+    HKSourceQuery *query = [[HKSourceQuery alloc] initWithSampleType:sampleType samplePredicate:nil completionHandler:^(HKSourceQuery *query, NSSet *sources, NSError *error) {
         
-        [self mostRecentQuantitySampleOfType:heightType predicate:todayPredicate completion:^(HKQuantity *height, NSError *heightError) {
-            if (!height) {
-                completion(nil, heightError);
-                
-                return;
-            }
-            
-            NSError *dobError;
-            NSDate *dateOfBirth = [self.healthStore dateOfBirthWithError:&dobError];
-            if (!dateOfBirth) {
-                completion(nil, dobError);
-                
-                return;
-            }
-            
-            NSError *sexError;
-            HKBiologicalSexObject *biologicalSexObject = [self.healthStore biologicalSexWithError:&sexError];
-            if (!biologicalSexObject) {
-                completion(nil, sexError);
-                
-                return;
-            }
-            
-            // Once we have pulled all of the information without errors, calculate the user's total basal energy burn
-            HKQuantity *basalEnergyBurn = [self calculateBasalBurnTodayFromWeight:weight height:height dateOfBirth:dateOfBirth biologicalSex:biologicalSexObject];
-            
-            completion(basalEnergyBurn, nil);
-        }];
+        
+        if (error) {
+            NSLog(@"*** An error occured while gathering the sources for step date.%@ ***", error.localizedDescription);
+            abort();
+        } else {
+            completion([NSMutableArray arrayWithArray:[sources allObjects]], nil);
+        }
     }];
+    
+    [self.healthStore executeQuery:query];
 }
 
 - (HKQuantity *)calculateBasalBurnTodayFromWeight:(HKQuantity *)weight height:(HKQuantity *)height dateOfBirth:(NSDate *)dateOfBirth biologicalSex:(HKBiologicalSexObject *)biologicalSex {
@@ -185,13 +190,24 @@
 
 #pragma mark - Query Helper Methods
 
-- (NSPredicate *)predicateForSamplesToday {
++ (NSPredicate *)predicateForSamplesToday {
     NSCalendar *calendar = [NSCalendar currentCalendar];
     
     NSDate *now = [NSDate date];
     
     NSDate *startDate = [calendar startOfDayForDate:now];
     NSDate *endDate = [calendar dateByAddingUnit:NSCalendarUnitDay value:1 toDate:startDate options:0];
+    
+    return [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionStrictStartDate];
+}
+
++ (NSPredicate *)predicateForSamplesWeek {
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    
+    NSDate *now = [NSDate dateWithTimeIntervalSinceNow:-604800];
+    
+    NSDate *startDate = [calendar startOfDayForDate:now];
+    NSDate *endDate = [calendar dateByAddingUnit:NSCalendarUnitDay value:7 toDate:startDate options:0];
     
     return [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionStrictStartDate];
 }

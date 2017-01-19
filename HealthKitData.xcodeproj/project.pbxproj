@@ -15,6 +15,7 @@
 		A88BBF0C1E1656910078649D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A88BBF0A1E1656910078649D /* LaunchScreen.storyboard */; };
 		A88BBF151E165D8A0078649D /* HealthKitFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = A88BBF141E165D8A0078649D /* HealthKitFunctions.m */; };
 		A88BBF191E165E540078649D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A88BBF181E165E540078649D /* HealthKit.framework */; };
+		C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,8 @@
 		A88BBF141E165D8A0078649D /* HealthKitFunctions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HealthKitFunctions.m; sourceTree = "<group>"; };
 		A88BBF161E165E540078649D /* HealthKitData.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthKitData.entitlements; sourceTree = "<group>"; };
 		A88BBF181E165E540078649D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		C2057EEE1E2EC15800F2FF4F /* InsetTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InsetTextField.h; sourceTree = "<group>"; };
+		C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InsetTextField.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +75,8 @@
 				A88BBF021E1656910078649D /* ViewController.h */,
 				A88BBF031E1656910078649D /* ViewController.m */,
 				A88BBF051E1656910078649D /* Main.storyboard */,
+				C2057EEE1E2EC15800F2FF4F /* InsetTextField.h */,
+				C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */,
 				A88BBF131E165D8A0078649D /* HealthKitFunctions.h */,
 				A88BBF141E165D8A0078649D /* HealthKitFunctions.m */,
 				A88BBF081E1656910078649D /* Assets.xcassets */,
@@ -132,6 +137,9 @@
 						DevelopmentTeam = 42SJVK5ETL;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
 							com.apple.HealthKit = {
 								enabled = 1;
 							};
@@ -175,6 +183,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */,
 				A88BBF041E1656910078649D /* ViewController.m in Sources */,
 				A88BBF011E1656910078649D /* AppDelegate.m in Sources */,
 				A88BBF151E165D8A0078649D /* HealthKitFunctions.m in Sources */,
@@ -244,7 +253,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -285,7 +294,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
