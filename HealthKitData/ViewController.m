@@ -16,7 +16,6 @@
 @property (strong, nonatomic) NSDate *lastSyncDate;
 @property (strong, nonatomic) NSString *slackUsername;
 @property (strong, nonatomic) NSNumber *totalEnergyBurnedForTheWeek;
-@property (strong, nonatomic) NSMutableArray *workouts;
 @property (strong, nonatomic) NSMutableArray *sources;
 @property (strong, nonatomic) NSMutableArray *energy;
 @property (strong, nonatomic) HealthKitFunctions *store;
@@ -31,6 +30,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    self.store = [[HealthKitFunctions alloc] init];
+    self.store.healthStore = [HKHealthStore new];
 
     self.dataTableView.delegate = self;
     self.dataTableView.dataSource = self;
@@ -38,20 +40,57 @@
     
     self.lastSyncDate = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastSyncDate"];
     self.slackUsername = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
+    
     if (self.slackUsername != nil) {
         [self.slackUsernameTextField setText:self.slackUsername];
     }
+    
     self.energy = [NSMutableArray new];
     
     [self.uploadingWorkoutOverlayView setHidden:NO];
+    self.dataTableView.userInteractionEnabled = NO;
     [self.uploadingWorkoutSpinner startAnimating];
 }
+
+-(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+
+    [self.store requestPermission:^(BOOL success, NSError *err) {
+        if (success) {
+            NSLog(@"Health Kit Ready to Query");
+            [self getDataForSegment];
+        }
+    }];
+    
+    
+    if (self.slackUsername == nil) {
+        [self showAddUsernameAlert];
+    }
+}
+
+- (IBAction)manualSync:(id)sender {
+    [self uploadActiveEnergy];
+}
+
+
+-(void)showAddUsernameAlert {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Add your Slack username to Sync Data"
+                                                                   message:@"ex: \"adamrz\""
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"Neat!" style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * action) {}];
+    
+    [alert addAction:defaultAction];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 - (IBAction)showAll:(UISwitch *)sender {
     
     if (sender.on) {
         [self.energy removeAllObjects];
 
-        [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
+        [self.store getAllEnergyBurnedForever:^(NSMutableArray *energy, NSError *err) {
             [self.energy addObjectsFromArray:energy];
             
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -62,36 +101,41 @@
             
         }];
     } else {
-        [self.energy removeAllObjects];
-
-        [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
-            
-            //[self.energy addObjectsFromArray:energy];
-            
-            for (HKQuantitySample *sample in energy) {
-                if ([[sample description] rangeOfString:@"Watch"].location == NSNotFound) {
-                    [self.energy addObject:sample];
-                }
-            }
-            
-            NSMutableArray *energies = energy;
-            
-            double totalBurned = 0.0;
-            for (HKQuantitySample *energy in energies) {
-                totalBurned += [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
-            }
-            
-            self.totalEnergyBurnedForTheWeek = @(totalBurned);
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.dataTableView reloadData];
-                [self.uploadingWorkoutOverlayView setHidden:YES];
-                [self.uploadingWorkoutSpinner stopAnimating];
-            });
-            
-            NSLog(@"Total Energy Burned: %0.f", totalBurned);
-        }];
+        [self fetchEnergySamples];
     }
+}
+
+-(void)fetchEnergySamples {
+    
+    [self.energy removeAllObjects];
+    
+    [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
+        
+        //[self.energy addObjectsFromArray:energy];
+        
+        for (HKQuantitySample *sample in energy) {
+            if ([[sample description] rangeOfString:@"Watch"].location == NSNotFound) {
+                [self.energy addObject:sample];
+            }
+        }
+        
+        NSMutableArray *energies = energy;
+        
+        double totalBurned = 0.0;
+        for (HKQuantitySample *energy in energies) {
+            totalBurned += [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
+        }
+        
+        self.totalEnergyBurnedForTheWeek = @(totalBurned);
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.dataTableView reloadData];
+            [self.uploadingWorkoutOverlayView setHidden:YES];
+            [self.uploadingWorkoutSpinner stopAnimating];
+        });
+        
+        NSLog(@"Total Energy Burned: %0.f", totalBurned);
+    }];
 }
 
 - (IBAction)showWatchOnly:(UISwitch *)sender {
@@ -162,84 +206,49 @@
 
 #pragma mark - Register Health Kit
 
--(void)viewDidAppear:(BOOL)animated {
-    self.store = [[HealthKitFunctions alloc] init];
-    self.store.healthStore = [HKHealthStore new];
-    [self.store requestPermission:^(BOOL success, NSError *err) {
-        if (success) {
-            NSLog(@"Health Kit Ready to Query");
-            [self getDataForSegment];
-        }
-    }];
-}
-
 -(void)getDataForSegment {
     
     [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
 
+        //  Include watch data
         //[self.energy addObjectsFromArray:energy];
         
+        //  Excludes watch data
         for (HKQuantitySample *sample in energy) {
             if ([[sample description] rangeOfString:@"Watch"].location == NSNotFound) {
                 [self.energy addObject:sample];
             }
         }
         
-        NSMutableArray *energies = energy;
-
         double totalBurned = 0.0;
-        for (HKQuantitySample *energy in energies) {
+        for (HKQuantitySample *energy in self.energy) {
             totalBurned += [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
         }
         
         self.totalEnergyBurnedForTheWeek = @(totalBurned);
         
         dispatch_async(dispatch_get_main_queue(), ^{
+            [self.totalWeeklyEnergyBurnedLabel setText:[NSString stringWithFormat:@"Energy Burned in the last 7 Days: %0.f kCal", totalBurned]];
             [self.dataTableView reloadData];
+            self.dataTableView.userInteractionEnabled = YES;
             [self.uploadingWorkoutOverlayView setHidden:YES];
             [self.uploadingWorkoutSpinner stopAnimating];
         });
 
         NSLog(@"Total Energy Burned: %0.f", totalBurned);
     }];
-    
-    [self.store getAllSources:^(NSMutableArray *sources, NSError *err) {
-        if (err) {
-        
-        } else {
-            self.sources = sources;
-        }
-    }];
 }
 
 - (IBAction)syncWorkouts:(id)sender {
     
-    if (self.slackUsernameTextField.text.length > 3) {
+    if (self.slackUsernameTextField.text.length > 1) {
         
-        NSMutableArray *workoutsSinceLastUploadedDate = [NSMutableArray new];
+        [self hideControlsForUpload];
+        [self uploadActiveEnergy];
         
-        //  get all workouts not uploaded last time
+    } else {
         
-        if (self.lastSyncDate == nil || ![self.slackUsernameTextField.text isEqualToString:self.slackUsername]) {
-            
-            for (HKWorkout *workout in self.workouts) {
-                [workoutsSinceLastUploadedDate addObject:[self buildDictionaryForWorkout:workout]];
-            }
-            
-            if ([workoutsSinceLastUploadedDate count] > 0) {
-                [self uploadWorkouts:workoutsSinceLastUploadedDate];
-                [self hideControlsForUpload];
-            }
-            
-        } else {
-            
-            NSMutableArray *filteredWorkouts = [self filterWorkouts:self.workouts];
-            
-            if ([filteredWorkouts count] > 0) {
-                [self uploadWorkouts:filteredWorkouts];
-                [self hideControlsForUpload];
-            }
-        }
+        [self showAddUsernameAlert];
     }
 }
 
@@ -251,37 +260,24 @@
     [self.slackUsernameTextField setEnabled:NO];
 }
 
--(NSMutableArray *)filterWorkouts:(NSMutableArray *)workouts {
+-(NSNumber *)getActiveEnergySinceLastSyncDate {
     
-    NSMutableArray *workoutsSinceLastUploadedDate = [NSMutableArray new];
+    double afterLastSyncEnergy = 0.0;
     
-    //  get all workouts not uploaded last time
-    
-    for (HKWorkout *workout in self.workouts) {
-        //  if workout dates are not asending, date is after sync or equal to it
-        if ([workout.startDate compare:self.lastSyncDate] != NSOrderedAscending) {
-            [workoutsSinceLastUploadedDate addObject:[self buildDictionaryForWorkout:workout]];
+    for (HKQuantitySample *energy in self.energy) {
+        if ([energy.startDate compare:self.lastSyncDate] == NSOrderedDescending) {
+            afterLastSyncEnergy += [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
         }
     }
     
-    return workoutsSinceLastUploadedDate;
+    NSLog(@"Energy Since Last Sync: %@, Last Sync: %@, Now: %@", [@(afterLastSyncEnergy) stringValue], [self.lastSyncDate description], [[NSDate date] description]);
+    
+    return @(afterLastSyncEnergy);
 }
 
--(NSDictionary * )buildDictionaryForWorkout:(HKWorkout *)workout {
-    return @{
-             @"duration": @([@(workout.duration) integerValue]),
-             @"workoutType": (workout.workoutActivityType == HKWorkoutActivityTypeRunning) ? @"Running" : @"Other",
-             @"end": @([@([workout.endDate timeIntervalSince1970]) integerValue]),
-             @"energyBurned": @([@([workout.totalEnergyBurned doubleValueForUnit:[HKUnit kilocalorieUnit]]) integerValue]),
-             @"distance": @([workout.totalDistance doubleValueForUnit:[HKUnit mileUnit]]),
-             @"start": @([@([workout.startDate timeIntervalSince1970]) integerValue])
-           };
-}
-
--(void)uploadWorkouts:(NSMutableArray *)workouts {
+-(void)uploadActiveEnergy {
     
     NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
-    
     NSURLSession* session = [NSURLSession sessionWithConfiguration:sessionConfig delegate:self delegateQueue:nil];
     
     NSURL* URL = [NSURL URLWithString:@"http://adamr5.sg-host.com/adamrz/myfirstbot/api/workouts/index.php"];
@@ -292,12 +288,22 @@
     
     [request addValue:@"application/json; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
     
-    // JSON Body
+    NSNumber *activeEnergy;
+    
+    //  first sync
+//    if (self.lastSyncDate == nil) {
+//        activeEnergy = self.totalEnergyBurnedForTheWeek;
+//        self.lastSyncDate = [NSDate date];
+//    } else {
+        activeEnergy = [self getActiveEnergySinceLastSyncDate];
+//    }
+    
+    NSLog(@"Active Energy being Synced: %@", [activeEnergy stringValue]);
     
     NSDictionary* bodyObject = @{
                                  @"timeStamp": @([@([[NSDate date] timeIntervalSince1970]) integerValue]),
                                  @"lastSync": @([@([self.lastSyncDate timeIntervalSince1970]) integerValue]),
-                                 @"activeEnergy": self.totalEnergyBurnedForTheWeek,
+                                 @"activeEnergy": activeEnergy,
                                  @"slackUsername": [self.slackUsernameTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
                                  };
     
@@ -309,10 +315,28 @@
         if (error == nil) {
             // Success
             NSLog(@"URL Session Task Succeeded: HTTP %ld", (long)((NSHTTPURLResponse*)response).statusCode);
-            self.lastSyncDate = [NSDate dateWithTimeIntervalSinceNow:0];
-            [[NSUserDefaults standardUserDefaults] setObject:self.lastSyncDate forKey:@"lastSyncDate"];
-            [[NSUserDefaults standardUserDefaults] setObject:self.slackUsernameTextField.text forKey:@"slackUsername"];
-            [[NSUserDefaults standardUserDefaults] synchronize];
+            
+            if (((NSHTTPURLResponse*)response).statusCode == [@(200) integerValue]) {
+                //  upload worked, last sync data & username accurate
+                dispatch_async(dispatch_get_main_queue(), ^{
+
+                    self.lastSyncDate = [NSDate dateWithTimeIntervalSinceNow:0];
+                    [[NSUserDefaults standardUserDefaults] setObject:self.lastSyncDate forKey:@"lastSyncDate"];
+                    [[NSUserDefaults standardUserDefaults] setObject:self.slackUsernameTextField.text forKey:@"slackUsername"];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
+                    
+                    if (![activeEnergy isEqualToNumber:@(0)]) {
+                        [self showSuccessfulUpload];
+                    } else {
+                        [self showNoEnergySinceLastSyncAlert];
+                    }
+                });
+            } else if (((NSHTTPURLResponse*)response).statusCode == [@(400) integerValue]) {
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self showIncorrectSlackUsernameAlert];
+                });
+            }
         }
         else {
             // Failure
@@ -326,7 +350,6 @@
             [self.dataTableView setUserInteractionEnabled:YES];
             [self.slackUsernameTextField setEnabled:YES];
             
-            //[self showNotificationForWorkout];
         });
     }];
     [task resume];
@@ -337,6 +360,30 @@
     [self.slackUsernameTextField resignFirstResponder];
 }
 
+-(void)showIncorrectSlackUsernameAlert {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Incorrect Slack Username"
+                                                                   message:@"Remove @ or email suffixes from your username and try again. ex: \"adamrz\""
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"Dope" style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * action) {}];
+    
+    [alert addAction:defaultAction];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+-(void)showNoEnergySinceLastSyncAlert {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Nothing to Sync"
+                                                                   message:@"There was no active energy change since last FitBot sync"
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"Nice, I'll go move!" style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * action) {}];
+    
+    [alert addAction:defaultAction];
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 -(void)showNotificationForWorkout {
     
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
@@ -344,6 +391,50 @@
     UNMutableNotificationContent *content = [UNMutableNotificationContent new];
     content.title = @"New Active Energy Logged!";
     content.body = @"Uploading to FitBot now.. here come those Move Points!";
+    content.sound = [UNNotificationSound defaultSound];
+    
+    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
+                                                                                                    repeats:NO];
+    NSString *identifier = @"NewWorkoutLocalNotification";
+    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
+                                                                          content:content trigger:trigger];
+    
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            NSLog(@"Something went wrong scheduling a notification: %@",error);
+        }
+    }];
+}
+
+-(void)showSuccessfulUpload {
+    
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    
+    UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+    content.title = @"Energy Successfully Uploaded!";
+    content.body = @"Check Slack for Fitbot updates";
+    content.sound = [UNNotificationSound defaultSound];
+    
+    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
+                                                                                                    repeats:NO];
+    NSString *identifier = @"NewWorkoutLocalNotification";
+    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
+                                                                          content:content trigger:trigger];
+    
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            NSLog(@"Something went wrong scheduling a notification: %@",error);
+        }
+    }];
+}
+
+-(void)showFailedUpload {
+    
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    
+    UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+    content.title = @"Energy Uploaded Failed!";
+    content.body = @"Re-Enter your Slack username and try again.";
     content.sound = [UNNotificationSound defaultSound];
     
     UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
@@ -393,7 +484,10 @@
             source = @"Other";
         }
         
-        [cell.detailTextLabel setText:source];
+        NSDateFormatter *formatter = [NSDateFormatter new];
+        formatter.dateStyle = NSDateFormatterShortStyle;
+        
+        [cell.detailTextLabel setText:[[source mutableCopy] stringByAppendingString:[NSString stringWithFormat:@" - %@", [formatter stringFromDate:energy.startDate]]]];
     }
 
     return cell;
@@ -401,12 +495,6 @@
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-}
-
-#pragma mark - NSURLSession Delegate
-
--(void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session {
-    
 }
 
 @end

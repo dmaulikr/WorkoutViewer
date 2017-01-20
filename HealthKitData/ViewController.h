@@ -13,6 +13,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *firstMetricLabel;
 @property (weak, nonatomic) IBOutlet UILabel *secondDetailMetricLabel;
 @property (weak, nonatomic) IBOutlet UITableView *dataTableView;
+@property (weak, nonatomic) IBOutlet UILabel *totalWeeklyEnergyBurnedLabel;
 
 @end
 

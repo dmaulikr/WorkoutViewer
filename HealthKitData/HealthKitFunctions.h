@@ -20,6 +20,8 @@
 + (NSPredicate *)predicateForSamplesToday;
 + (NSPredicate *)predicateForSamplesWeek;
 
+- (void)getAllEnergyBurnedForever:(void (^)(NSMutableArray *, NSError *))completion;
+
 - (void)getAllWorkouts:(void (^)(NSMutableArray *, NSError *))completion;
 - (void)getAllEnergyBurned:(void (^)(NSMutableArray *, NSError *))completion;
 - (void)getAllSources:(void (^)(NSMutableArray *, NSError *))completion;

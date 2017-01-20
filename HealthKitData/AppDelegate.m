@@ -33,40 +33,24 @@
         }
     }];
 
-    
     self.healthStore = [HKHealthStore new];
     
-    //HKSampleType *workout = [HKObjectType quantityTypeForIdentifier:HKWorkoutTypeIdentifier];
     HKSampleType *energy = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
     
     HKObserverQuery *energyQuery = [[HKObserverQuery alloc] initWithSampleType:energy predicate:[HealthKitFunctions predicateForSamplesToday] updateHandler:^(HKObserverQuery * _Nonnull query, HKObserverQueryCompletionHandler  _Nonnull completionHandler, NSError * _Nullable error) {
         
-        [self updateEnergy:^(BOOL *success, NSError *error) {
-            completionHandler();
-        }];
-        
+        if ([[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"] != nil && [[NSUserDefaults standardUserDefaults] objectForKey:@"lastSyncDate"] != nil) {
+            [self updateEnergy:^(BOOL *success, NSError *error) {
+                completionHandler();
+            }];
+        }
     }];
-    
-//    HKObserverQuery *workoutQuery = [[HKObserverQuery alloc] initWithSampleType:workout predicate:nil updateHandler:^(HKObserverQuery * _Nonnull query, HKObserverQueryCompletionHandler  _Nonnull completionHandler, NSError * _Nullable error) {
-//        
-//        [self updateWorkout:^(BOOL *success, NSError *error) {
-//            completionHandler();
-//        }];
-//        
-//    }];
-    
     
     [self.healthStore executeQuery:energyQuery];
-    //[self.healthStore executeQuery:workoutQuery];
     
-    
-    [self.healthStore enableBackgroundDeliveryForType:energy frequency:HKUpdateFrequencyImmediate withCompletion:^(BOOL success, NSError * _Nullable error) {
+    [self.healthStore enableBackgroundDeliveryForType:energy frequency:HKUpdateFrequencyHourly withCompletion:^(BOOL success, NSError * _Nullable error) {
         
     }];
-    
-//    [self.healthStore enableBackgroundDeliveryForType:workout frequency:HKUpdateFrequencyImmediate withCompletion:^(BOOL success, NSError * _Nullable error) {
-//        
-//    }];
 
     return YES;
 }
@@ -76,27 +60,25 @@
 
     HKAnchoredObjectQuery *anchoredQuery = [[HKAnchoredObjectQuery alloc] initWithType:energy predicate:[HealthKitFunctions predicateForSamplesToday] anchor:self.anchor limit:HKObjectQueryNoLimit resultsHandler:^(HKAnchoredObjectQuery * _Nonnull query, NSArray<__kindof HKSample *> * _Nullable sampleObjects, NSArray<HKDeletedObject *> * _Nullable deletedObjects, HKQueryAnchor * _Nullable newAnchor, NSError * _Nullable error) {
         
-        double totalEnergy = 0.0;
-        for (HKQuantitySample *sample in sampleObjects) {
-            totalEnergy += [sample.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
-            NSLog(@"Energy: %@", [@([sample.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]]) stringValue]);
-        }
+        double afterLastSyncEnergy = 0.0;
         
+        for (HKQuantitySample *energy in sampleObjects) {
+            if ([energy.startDate compare:[[NSUserDefaults standardUserDefaults] objectForKey:@"lastSyncDate"]] == NSOrderedDescending) {
+                afterLastSyncEnergy += [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
+            }
+        }
+
         self.anchor = newAnchor;
     
-        if ([sampleObjects count] > 0) {
+        if (afterLastSyncEnergy > 0.0) {
             NSString *username = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
             if (username) {
-                [self uploadEnergy:@(totalEnergy)];
+                [self uploadEnergy:@(afterLastSyncEnergy)];
             }
         }
     }];
     
     [self.healthStore executeQuery:anchoredQuery];
-}
-
--(void)updateWorkout:(void(^)(BOOL *success, NSError *error))completion {
-    
 }
 
 -(void)showNotificationForWorkout {
@@ -155,12 +137,13 @@
             // Success
             NSLog(@"URL Session Task Succeeded: HTTP %ld", (long)((NSHTTPURLResponse*)response).statusCode);
             
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self showNotificationForWorkout];
-            });
-            
-            [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:0] forKey:@"lastSyncDate"];
-            [[NSUserDefaults standardUserDefaults] synchronize];
+            if (((NSHTTPURLResponse*)response).statusCode == [@(200) integerValue]) {
+                //  upload worked, last sync data & username accurate
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:0] forKey:@"lastSyncDate"];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
+                });
+            }
         }
         else {
             // Failure
@@ -181,10 +164,8 @@
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
-    // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-    // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
-}
 
+}
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
