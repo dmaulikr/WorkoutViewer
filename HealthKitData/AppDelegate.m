@@ -48,7 +48,7 @@
     
     [self.healthStore executeQuery:energyQuery];
     
-    [self.healthStore enableBackgroundDeliveryForType:energy frequency:HKUpdateFrequencyHourly withCompletion:^(BOOL success, NSError * _Nullable error) {
+    [self.healthStore enableBackgroundDeliveryForType:energy frequency:HKUpdateFrequencyImmediate withCompletion:^(BOOL success, NSError * _Nullable error) {
         
     }];
 

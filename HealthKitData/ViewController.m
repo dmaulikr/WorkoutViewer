@@ -300,6 +300,10 @@
     
     NSLog(@"Active Energy being Synced: %@", [activeEnergy stringValue]);
     
+    if (self.lastSyncDate == nil) {
+        self.lastSyncDate = [NSDate date];
+    }
+    
     NSDictionary* bodyObject = @{
                                  @"timeStamp": @([@([[NSDate date] timeIntervalSince1970]) integerValue]),
                                  @"lastSync": @([@([self.lastSyncDate timeIntervalSince1970]) integerValue]),
