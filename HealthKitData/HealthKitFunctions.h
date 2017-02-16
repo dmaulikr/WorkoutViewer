@@ -15,8 +15,6 @@
 
 -(void)requestPermission:(void (^)(BOOL success, NSError *err))completion;
 
-- (void)mostRecentQuantitySampleOfType:(HKQuantityType *)quantityType predicate:(NSPredicate *)predicate completion:(void (^)(HKQuantity *mostRecentQuantity, NSError *error))completion;
-
 + (NSPredicate *)predicateForSamplesToday;
 + (NSPredicate *)predicateForSamplesWeek;
 

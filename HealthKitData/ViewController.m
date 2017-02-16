@@ -14,6 +14,7 @@
 @interface ViewController ()
 
 @property (strong, nonatomic) NSDate *lastSyncDate;
+
 @property (strong, nonatomic) NSString *slackUsername;
 @property (strong, nonatomic) NSNumber *totalEnergyBurnedForTheWeek;
 @property (strong, nonatomic) NSMutableArray *sources;
