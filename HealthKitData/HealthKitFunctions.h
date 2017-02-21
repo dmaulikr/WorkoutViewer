@@ -17,11 +17,14 @@
 
 + (NSPredicate *)predicateForSamplesToday;
 + (NSPredicate *)predicateForSamplesWeek;
++ (NSPredicate *)predicateForSamplesFromNowToDate:(NSDate *)date;
 
-- (void)getAllEnergyBurnedForever:(void (^)(NSMutableArray *, NSError *))completion;
-
-- (void)getAllWorkouts:(void (^)(NSMutableArray *, NSError *))completion;
 - (void)getAllEnergyBurned:(void (^)(NSMutableArray *, NSError *))completion;
 - (void)getAllSources:(void (^)(NSMutableArray *, NSError *))completion;
+    
++ (void)getAllEnergyBurnedFromAppleWatch:(void (^)(NSNumber *, NSError *))completion;
++ (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion;
++ (void)getAllEnergyBurnedFromSteps:(void (^)(double, NSError *))completionHandler;
+
 
 @end

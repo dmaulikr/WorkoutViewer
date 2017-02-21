@@ -22,6 +22,7 @@
 		C2E526B01E36E575000FF99A /* ExtensionDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C2E526AF1E36E575000FF99A /* ExtensionDelegate.m */; };
 		C2E526B31E36E575000FF99A /* NotificationController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2E526B21E36E575000FF99A /* NotificationController.m */; };
 		C2E526B51E36E575000FF99A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2E526B41E36E575000FF99A /* Assets.xcassets */; };
+		C2EC19711E578B7F0076FA0B /* StatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2EC19701E578B7F0076FA0B /* StatViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -78,6 +79,8 @@
 		C2E526B21E36E575000FF99A /* NotificationController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationController.m; sourceTree = "<group>"; };
 		C2E526B41E36E575000FF99A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C2E526B61E36E575000FF99A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C2EC196F1E578B7F0076FA0B /* StatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StatViewController.h; path = ../StatViewController.h; sourceTree = "<group>"; };
+		C2EC19701E578B7F0076FA0B /* StatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StatViewController.m; path = ../StatViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +126,8 @@
 		A88BBEFB1E1656910078649D /* HealthKitData */ = {
 			isa = PBXGroup;
 			children = (
+				C2EC196F1E578B7F0076FA0B /* StatViewController.h */,
+				C2EC19701E578B7F0076FA0B /* StatViewController.m */,
 				A88BBF161E165E540078649D /* HealthKitData.entitlements */,
 				A88BBEFF1E1656910078649D /* AppDelegate.h */,
 				A88BBF001E1656910078649D /* AppDelegate.m */,
@@ -334,6 +339,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2EC19711E578B7F0076FA0B /* StatViewController.m in Sources */,
 				C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */,
 				A88BBF041E1656910078649D /* ViewController.m in Sources */,
 				A88BBF011E1656910078649D /* AppDelegate.m in Sources */,
