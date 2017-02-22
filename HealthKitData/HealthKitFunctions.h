@@ -25,6 +25,7 @@
 + (void)getAllEnergyBurnedFromAppleWatch:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedFromSteps:(void (^)(double, NSError *))completionHandler;
++ (void)getStepsPerMileFromHeight:(void (^)(double, NSError *))completionHandler;
 
 
 @end

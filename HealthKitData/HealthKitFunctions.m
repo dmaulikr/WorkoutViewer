@@ -19,9 +19,10 @@
         HKObjectType *walkingRunningDistance = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceWalkingRunning];
         HKObjectType *steps = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
         HKObjectType *mass = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
+        HKObjectType *height = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
 
         
-        NSSet *readDataTypes = [NSSet setWithObjects:workoutType, mass, energyBurned, exerciseTime, walkingRunningDistance, steps, nil];
+        NSSet *readDataTypes = [NSSet setWithObjects:workoutType, mass, energyBurned, height, exerciseTime, walkingRunningDistance, steps, nil];
         
         [self.healthStore requestAuthorizationToShareTypes:nil readTypes:readDataTypes completion:^(BOOL success, NSError *error) {
             if (success) {
@@ -178,7 +179,6 @@
         NSDate *endDate = [NSDate date];
         NSDate *startDate = [[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"];
         
-        // Plot the weekly step counts over the past 3 months
         [results
          enumerateStatisticsFromDate:startDate
          toDate:endDate
@@ -205,10 +205,12 @@
                                                    }
                                                    
                                                    double calsPerMile = pounds * 0.57;
-                                                   double stepsPerMile = 2125.0; //someone 6 feet
-                                                   double calsPerStep = calsPerMile / stepsPerMile;
-                                                   double calsForSteps = calsPerStep * value;
-                                                   completionHandler(calsForSteps, nil);
+                                                   
+                                                   [HealthKitFunctions getStepsPerMileFromHeight:^(double stepsPerMile, NSError *err) {
+                                                       double calsPerStep = calsPerMile / stepsPerMile;
+                                                       double calsForSteps = calsPerStep * value;
+                                                       completionHandler(calsForSteps, nil);
+                                                   }];
                                                    
                                                }];
                  
@@ -223,6 +225,34 @@
     };
     
     [[HKHealthStore new] executeQuery:query];
+}
+    
++(void)getStepsPerMileFromHeight:(void (^)(double, NSError *))completionHandler {
+    HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight]
+                                                                 predicate:nil
+                                                                     limit:1
+                                                           sortDescriptors:nil
+                                                            resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
+                                  {
+                                      NSNumber *inches;
+                                      
+                                      NSDictionary *inchToCals = @{@(66):@(2286),@(67):@(2252),@(68):@(2218),@(69):@(2186),@(70):@(2155),@(71):@(2125),@(72):@(2095),@(73):@(2067),@(74):@(2039),@(75):@(2011),@(76):@(1985)};
+                                      
+                                      if (results.count == 1) {
+                                          HKQuantitySample *height = results[0];
+                                          inches = @([height.quantity doubleValueForUnit:[HKUnit inchUnit]]);
+                                          NSLog(@"Your height: %.0f inches", [inches doubleValue]);
+                                      } else {
+                                          inches = @(70);
+                                      }
+
+                                      NSNumber *calsForSteps = (inchToCals[inches] != 0) ? inchToCals[inches] : @(2000);
+                                      completionHandler([calsForSteps doubleValue], nil);
+                                      
+                                  }];
+    
+    // Execute the query
+    [[HKHealthStore new] executeQuery:sampleQuery];
 }
 
 - (void)getAllSources:(void (^)(NSMutableArray *, NSError *))completion {

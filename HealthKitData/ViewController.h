@@ -14,6 +14,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *secondDetailMetricLabel;
 @property (weak, nonatomic) IBOutlet UITableView *dataTableView;
 @property (weak, nonatomic) IBOutlet UILabel *totalWeeklyEnergyBurnedLabel;
+@property (weak, nonatomic) IBOutlet UILabel *burnedEnergyLabel;
 
 @end
 

@@ -24,6 +24,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *currentGoalLabel;
 @property (weak, nonatomic) IBOutlet UILabel *remainingGoalLabel;
 @property (weak, nonatomic) IBOutlet UILabel *timeLeftLabel;
+@property (weak, nonatomic) IBOutlet UIButton *sourcesButton;
     
 
 @property (weak, nonatomic) IBOutlet InsetTextField *slackUsernameTextField;
@@ -43,6 +44,10 @@
     self.dataTableView.delegate = self;
     self.dataTableView.dataSource = self;
     self.slackUsernameTextField.delegate = self;
+    self.sourcesButton.layer.borderColor = [UIColor whiteColor].CGColor;
+    self.dataTableView.layer.borderColor = [UIColor whiteColor].CGColor;
+    
+    self.slackUsernameTextField.layer.borderColor = [UIColor whiteColor].CGColor;
     
     self.lastSyncDate = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastSyncDate"];
     self.slackUsername = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
@@ -281,6 +286,8 @@
                         
                         int goalDiff = [goal intValue] - [self.totalEnergyBurnedForTheWeek intValue];
                         
+                        [self.burnedEnergyLabel setText:[NSString stringWithFormat:@"%@ kCal", self.totalEnergyBurnedForTheWeek]];
+                        
                         if (goalDiff > 0) {
                             [self.remainingGoalLabel setText:[NSString stringWithFormat:@"%@ kCal", @(goalDiff)]];
                         } else {
@@ -310,6 +317,7 @@
                         [[NSUserDefaults standardUserDefaults] synchronize];
                         
                         //[self uploadActiveEnergy];
+                        [self.dataTableView reloadData];
                     });
                 }
             }
@@ -421,8 +429,12 @@
         
         NSDateFormatter *formatter = [NSDateFormatter new];
         formatter.dateStyle = NSDateFormatterShortStyle;
+        NSDateFormatter *formatter2 = [NSDateFormatter new];
+        [formatter2 setDateFormat:@"hh:mm"];
         
-        [cell.detailTextLabel setText:[[source mutableCopy] stringByAppendingString:[NSString stringWithFormat:@" - %@", [formatter stringFromDate:energy.startDate]]]];
+        NSString *dateString = [formatter stringFromDate:energy.startDate];
+        
+        [cell.detailTextLabel setText:[[source mutableCopy] stringByAppendingString:[NSString stringWithFormat:@"     %@   ", [dateString substringToIndex:dateString.length - 3]]]];
     }
 
     return cell;
