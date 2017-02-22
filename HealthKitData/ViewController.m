@@ -73,12 +73,17 @@
         }
     }];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fetchEnergySamples) name:@"refreshEnergy" object:nil];
     
     if (self.slackUsername == nil) {
         [self showAddUsernameAlert];
     } else {
 //        [self checkProgressAndGoals];
     }
+}
+
+-(void)viewDidDisappear:(BOOL)animated {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(void)showAddUsernameAlert {
@@ -150,7 +155,7 @@
         
         dispatch_async(dispatch_get_main_queue(), ^{
             
-            [self.totalWeeklyEnergyBurnedLabel setText:[NSString stringWithFormat:@"%0.f kCal", totalBurned]];
+            [self.totalWeeklyEnergyBurnedLabel setText:[NSString stringWithFormat:@"%0.f Cal", totalBurned]];
             [self.dataTableView setUserInteractionEnabled:NO];
             [self.dataTableView reloadData];
             self.dataTableView.userInteractionEnabled = YES;
@@ -282,17 +287,17 @@
                     
                     dispatch_async(dispatch_get_main_queue(), ^{
                         
-                        [self.currentGoalLabel setText:[NSString stringWithFormat:@"%@ kCal", goal]];
+                        [self.currentGoalLabel setText:[NSString stringWithFormat:@"%@ Cal", goal]];
                         
                         int goalDiff = [goal intValue] - [self.totalEnergyBurnedForTheWeek intValue];
                         
-                        [self.burnedEnergyLabel setText:[NSString stringWithFormat:@"%@ kCal", self.totalEnergyBurnedForTheWeek]];
+                        [self.burnedEnergyLabel setText:[NSString stringWithFormat:@"%@ Cal", self.totalEnergyBurnedForTheWeek]];
                         
                         if (goalDiff > 0) {
-                            [self.remainingGoalLabel setText:[NSString stringWithFormat:@"%@ kCal", @(goalDiff)]];
+                            [self.remainingGoalLabel setText:[NSString stringWithFormat:@"%@ Cal", @(goalDiff)]];
                         } else {
                             int positive = abs(goalDiff);
-                            [self.remainingGoalLabel setText:[NSString stringWithFormat:@"+%@ kCal", @(positive)]];
+                            [self.remainingGoalLabel setText:[NSString stringWithFormat:@"+%@ Cal", @(positive)]];
                         }
                         
                         NSDateFormatter *formatter = [NSDateFormatter new];
@@ -412,7 +417,7 @@
         
         NSString *energyString = [NSString stringWithFormat:@"%.2f", [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]]];
         
-        [cell.textLabel setText:[energyString stringByAppendingString:@" kCal"]];
+        [cell.textLabel setText:[energyString stringByAppendingString:@" Cal"]];
         
         NSString *source;
         if ([[energy description] rangeOfString:@"Watch"].location != NSNotFound) {

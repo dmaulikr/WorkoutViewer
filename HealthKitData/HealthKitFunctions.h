@@ -26,6 +26,8 @@
 + (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedFromSteps:(void (^)(double, NSError *))completionHandler;
 + (void)getStepsPerMileFromHeight:(void (^)(double, NSError *))completionHandler;
++ (void)getAllEnergyBurnedAndSort:(void (^)(NSNumber *, NSError *))completion;
+
 
 
 @end

@@ -102,7 +102,68 @@
         // Execute the query
         [[HKHealthStore new] executeQuery:sampleQuery];
 }
+
++ (void)getAllEnergyBurnedAndSort:(void (^)(NSNumber *, NSError *))completion {
     
+    // 2. Order the workouts by date
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
+    
+    // 3. Create the query
+    HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned]
+                                                                 predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]]
+                                                                     limit:HKObjectQueryNoLimit
+                                                           sortDescriptors:@[sortDescriptor]
+                                                            resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
+                                  {
+                                      
+                                      if(!error && results){
+                                          NSMutableArray *watchSamples = [NSMutableArray new];
+                                          NSMutableArray *otherWorkouts = [NSMutableArray new];
+                                          
+                                          for(HKQuantitySample *samples in results)
+                                          {
+                                              HKQuantitySample *burned = (HKQuantitySample *)samples;
+                                              if ([burned.description containsString:@"Watch"]) {
+                                                  [watchSamples addObject:burned];
+                                              } else {
+                                                  [otherWorkouts addObject:burned];
+                                              }
+                                          }
+                                          
+                                          NSMutableArray *overlappingWorkouts = [NSMutableArray new];
+
+                                          for(HKQuantitySample *other in otherWorkouts) {
+                                              for(HKQuantitySample *watch in watchSamples) {
+                                                  if ([HealthKitFunctions date:watch.startDate isBetweenDate:other.startDate andDate:other.endDate] && ![overlappingWorkouts containsObject:other]) {
+                                                      [overlappingWorkouts addObject:other];
+                                                  }
+                                              }
+                                          }
+                                          
+                                          [otherWorkouts removeObjectsInArray:overlappingWorkouts];
+                                          
+                                          double watchEnergy = 0.0;
+                                          for (HKQuantitySample *watch in watchSamples) {
+                                              watchEnergy += [watch.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
+                                          }
+                                          
+                                          double otherEnergy = 0.0;
+                                          for (HKQuantitySample *other in otherWorkouts) {
+                                              otherEnergy += [other.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
+                                          }
+                                          
+                                          
+                                          completion(@(otherEnergy + watchEnergy), nil);
+                                      }else{
+                                          NSLog(@"Error retrieving energy %@",error);
+                                          completion(nil, error);
+                                      }
+                                  }];
+    
+    // Execute the query
+    [[HKHealthStore new] executeQuery:sampleQuery];
+}
+
 + (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion {
     
     // 2. Order the workouts by date
