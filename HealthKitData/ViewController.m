@@ -294,10 +294,10 @@
                         [self.burnedEnergyLabel setText:[NSString stringWithFormat:@"%@ Cal", self.totalEnergyBurnedForTheWeek]];
                         
                         if (goalDiff > 0) {
-                            [self.remainingGoalLabel setText:[NSString stringWithFormat:@"%@ Cal", @(goalDiff)]];
+                            [self.remainingGoalLabel setText:[NSString stringWithFormat:@"%d Cal", goalDiff]];
                         } else {
                             int positive = abs(goalDiff);
-                            [self.remainingGoalLabel setText:[NSString stringWithFormat:@"+%@ Cal", @(positive)]];
+                            [self.remainingGoalLabel setText:[NSString stringWithFormat:@"+%d Cal", positive]];
                         }
                         
                         NSDateFormatter *formatter = [NSDateFormatter new];
