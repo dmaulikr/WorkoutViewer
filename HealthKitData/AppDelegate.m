@@ -28,9 +28,9 @@
     HKObserverQuery *energyQuery = [[HKObserverQuery alloc] initWithSampleType:energy predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]] updateHandler:^(HKObserverQuery * _Nonnull query, HKObserverQueryCompletionHandler  _Nonnull completionHandler, NSError * _Nullable error) {
         
         if ([[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"] != nil) {
-            [self updateEnergy:^(BOOL *success, NSError *error) {
+            //[self updateEnergy:^(BOOL *success, NSError *error) {
                 completionHandler();
-            }];
+            //}];
         }
     }];
     
@@ -49,7 +49,6 @@
     HKAnchoredObjectQuery *anchoredQuery = [[HKAnchoredObjectQuery alloc] initWithType:energy predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]] anchor:self.anchor limit:HKObjectQueryNoLimit resultsHandler:^(HKAnchoredObjectQuery * _Nonnull query, NSArray<__kindof HKSample *> * _Nullable sampleObjects, NSArray<HKDeletedObject *> * _Nullable deletedObjects, HKQueryAnchor * _Nullable newAnchor, NSError * _Nullable error) {
         
         double afterLastSyncEnergy = 0.0;
-        //NSDate *lastSyncDate = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastSyncDate"];
         
         for (HKQuantitySample *energy in sampleObjects) {
             if ([[energy description] rangeOfString:@"Watch"].location == NSNotFound) {

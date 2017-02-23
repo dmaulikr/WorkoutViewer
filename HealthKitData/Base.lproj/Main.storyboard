@@ -124,7 +124,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="750" verticalHuggingPriority="750" horizontalCompressionResistancePriority="500" verticalCompressionResistancePriority="500" text="Remaining" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="m6O-p7-1z5">
-                                <rect key="frame" x="96" y="665" width="80" height="21"/>
+                                <rect key="frame" x="96.666666666666657" y="665" width="79.999999999999972" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
@@ -136,19 +136,19 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="755" verticalCompressionResistancePriority="755" text="---- Cal" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KIB-ws-QjN">
-                                <rect key="frame" x="96" y="692" width="80" height="29"/>
+                                <rect key="frame" x="96.666666666666657" y="692" width="79.999999999999972" height="29"/>
                                 <fontDescription key="fontDescription" type="system" weight="thin" pointSize="24"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="249" verticalHuggingPriority="249" horizontalCompressionResistancePriority="755" verticalCompressionResistancePriority="755" text="Completed" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Hx1-d1-DHI">
-                                <rect key="frame" x="243" y="665" width="85" height="21"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="750" verticalHuggingPriority="750" horizontalCompressionResistancePriority="500" verticalCompressionResistancePriority="500" text="Completed" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Hx1-d1-DHI">
+                                <rect key="frame" x="244.33333333333331" y="665" width="84.999999999999943" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="755" verticalCompressionResistancePriority="755" text="---- Cal" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WHu-T5-e4i">
-                                <rect key="frame" x="246" y="692" width="80" height="29"/>
+                                <rect key="frame" x="247.33333333333331" y="692" width="79.999999999999943" height="29"/>
                                 <fontDescription key="fontDescription" type="system" weight="thin" pointSize="24"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
@@ -188,7 +188,7 @@
                                 </connections>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" horizontalCompressionResistancePriority="999" verticalCompressionResistancePriority="999" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZRC-Mk-AnC">
-                                <rect key="frame" x="154.66666666666669" y="600.66666666666663" width="103.66666666666669" height="42"/>
+                                <rect key="frame" x="156" y="600.66666666666663" width="103.66666666666669" height="42"/>
                                 <color key="backgroundColor" white="1" alpha="0.080000000000000002" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="height" priority="900" constant="42" id="AbB-Eq-eHZ"/>
@@ -271,6 +271,7 @@
                             <constraint firstItem="UBh-xr-dak" firstAttribute="top" secondItem="hjF-uP-ZHW" secondAttribute="top" id="vHX-6q-7py"/>
                             <constraint firstItem="ZRC-Mk-AnC" firstAttribute="centerX" secondItem="OHE-MR-OQX" secondAttribute="centerX" id="ver-1r-nOp"/>
                             <constraint firstItem="VkF-cK-15G" firstAttribute="trailing" secondItem="6cL-OX-Vti" secondAttribute="trailing" constant="-4" id="xHu-yu-GHh"/>
+                            <constraint firstItem="WHu-T5-e4i" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="KIB-ws-QjN" secondAttribute="trailing" constant="8" id="y9W-hy-Fxz"/>
                         </constraints>
                         <connections>
                             <outletCollection property="gestureRecognizers" destination="bux-7i-Dvk" appends="YES" id="haR-y8-mgr"/>
