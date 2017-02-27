@@ -16,5 +16,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *totalWeeklyEnergyBurnedLabel;
 @property (weak, nonatomic) IBOutlet UILabel *burnedEnergyLabel;
 
++ (NSInteger)daysBetweenDate:(NSDate*)fromDateTime andDate:(NSDate*)toDateTime;
+
 @end
 

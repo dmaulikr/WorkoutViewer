@@ -69,9 +69,11 @@
     [self.store requestPermission:^(BOOL success, NSError *err) {
         if (success) {
             NSLog(@"Health Kit Ready to Query");
-            [self getDataForSegment];
         }
     }];
+    
+    [self getDataForSegment];
+
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fetchEnergySamples) name:@"refreshEnergy" object:nil];
     
@@ -135,9 +137,6 @@
 -(void)getDataForSegment {
     
     [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
-
-        //  Include watch data
-        //[self.energy addObjectsFromArray:energy];
         
         //  Excludes watch data
         for (HKQuantitySample *sample in energy) {
@@ -172,19 +171,6 @@
     }];
 }
 
-- (IBAction)syncWorkouts:(id)sender {
-    
-    if (self.slackUsernameTextField.text.length > 1) {
-        
-        [self hideControlsForUpload];
-        [self uploadActiveEnergy];
-        
-    } else {
-        
-        [self showAddUsernameAlert];
-    }
-}
-
 -(void)hideControlsForUpload {
     //  show overlay, spinner, disable sync button and tableView, slackTextField
     [self.uploadingWorkoutOverlayView setHidden:NO];
@@ -192,63 +178,7 @@
     [self.dataTableView setUserInteractionEnabled:NO];
     [self.slackUsernameTextField setEnabled:NO];
 }
-    
-- (void)uploadActiveEnergy
-    {
 
-        NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
-        NSURLSession* session = [NSURLSession sessionWithConfiguration:sessionConfig delegate:nil delegateQueue:nil];
-        
-        NSURL* URL = [NSURL URLWithString:@"http://adamr5.sg-host.com/adamrz/myfirstbot/api/active_goal/"];
-        NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:URL];
-        request.HTTPMethod = @"POST";
-
-        [request addValue:@"application/json; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
-        
-        NSDictionary* bodyObject = @{
-                                     @"currentPoints": self.totalEnergyBurnedForTheWeek,
-                                     @"slackUsername": [self.slackUsernameTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]],
-                                     @"timeStamp": @([@([[NSDate date] timeIntervalSince1970]) integerValue])
-                                     };
-        request.HTTPBody = [NSJSONSerialization dataWithJSONObject:bodyObject options:kNilOptions error:NULL];
-        
-        /* Start a new Task */
-        NSURLSessionDataTask* task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-            if (error == nil) {
-                // Success
-                if (((NSHTTPURLResponse*)response).statusCode == [@(200) integerValue]) {
-                    [[NSUserDefaults standardUserDefaults] setObject:self.slackUsernameTextField.text forKey:@"slackUsername"];
-                    [[NSUserDefaults standardUserDefaults] synchronize];
-                } else if (((NSHTTPURLResponse*)response).statusCode == [@(400) integerValue]) {
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self showIncorrectSlackUsernameAlert];
-                    });
-                }
-                NSLog(@"Energy Sync Succeeded: HTTP %ld", ((NSHTTPURLResponse*)response).statusCode);
-            }
-            else {
-                // Failure
-                NSLog(@"URL Session Task Failed: %@", [error localizedDescription]);
-            }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                //  show overlay, spinner, disable sync button and tableView, slackTextField
-                [self.uploadingWorkoutOverlayView setHidden:YES];
-                [self.uploadingWorkoutSpinner stopAnimating];
-                [self.dataTableView setUserInteractionEnabled:YES];
-                [self.slackUsernameTextField setEnabled:YES];
-                
-            });
-        }];
-        [task resume];
-        [session finishTasksAndInvalidate];
-    }
-    
-    
-    
-
-
-    
 - (void)checkProgressAndGoals
     {
         NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
@@ -270,7 +200,6 @@
         NSURLSessionDataTask* task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
             if (error == nil) {
                 // Success
-                NSLog(@"URL Session Task Succeeded: HTTP %ld", ((NSHTTPURLResponse*)response).statusCode);
                 NSError *err;
                 NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:&err];
                 
@@ -351,54 +280,6 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
--(void)showNotificationForWorkout {
-    
-    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    
-    UNMutableNotificationContent *content = [UNMutableNotificationContent new];
-    content.title = @"New Active Energy Logged!";
-    content.body = @"Uploading to FitBot now.. here come those Move Points!";
-    content.sound = [UNNotificationSound defaultSound];
-    
-    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
-                                                                                                    repeats:NO];
-    NSString *identifier = @"NewWorkoutLocalNotification";
-    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
-                                                                          content:content trigger:trigger];
-    
-    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-        if (error != nil) {
-            NSLog(@"Something went wrong scheduling a notification: %@",error);
-        }
-    }];
-}
-
--(void)showSuccessfulUpload {
-    
-    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    
-    UNMutableNotificationContent *content = [UNMutableNotificationContent new];
-    content.title = @"Energy Successfully Uploaded!";
-    content.body = @"Check Slack for Fitbot updates";
-    content.sound = [UNNotificationSound defaultSound];
-    
-    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
-                                                                                                    repeats:NO];
-    NSString *identifier = @"NewWorkoutLocalNotification";
-    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
-                                                                          content:content trigger:trigger];
-    
-    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-        if (error != nil) {
-            NSLog(@"Something went wrong scheduling a notification: %@",error);
-        }
-    }];
-}
-    
--(IBAction)unwindToHome:(UIStoryboardSegue *)segue {
-        
-}
-
 #pragma mark - TableView Delegate & Data Source
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -467,45 +348,43 @@
         return [difference day];
 }
     
-    /*
-     * Utils: Add this section before your class implementation
-     */
-    
-    /**
-     This creates a new query parameters string from the given NSDictionary. For
-     example, if the input is @{@"day":@"Tuesday", @"month":@"January"}, the output
-     string will be @"day=Tuesday&month=January".
-     @param queryParameters The input dictionary.
-     @return The created parameters string.
-     */
-    static NSString* NSStringFromQueryParameters(NSDictionary* queryParameters)
-    {
-        NSMutableArray* parts = [NSMutableArray array];
-        [queryParameters enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
-            NSString *part = [NSString stringWithFormat: @"%@=%@",
-                              [key stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding],
-                              [value stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding]
-                              ];
-            [parts addObject:part];
-        }];
-        return [parts componentsJoinedByString: @"&"];
-    }
-    
-    /**
-     Creates a new URL by adding the given query parameters.
-     @param URL The input URL.
-     @param queryParameters The query parameter dictionary to add.
-     @return A new NSURL.
-     */
-    static NSURL* NSURLByAppendingQueryParameters(NSURL* URL, NSDictionary* queryParameters)
-    {
-        NSString* URLString = [NSString stringWithFormat:@"%@?%@",
-                               [URL absoluteString],
-                               NSStringFromQueryParameters(queryParameters)
-                               ];
-        return [NSURL URLWithString:URLString];
-    }
-    
+/*
+ * Utils: Add this section before your class implementation
+ */
 
+/**
+ This creates a new query parameters string from the given NSDictionary. For
+ example, if the input is @{@"day":@"Tuesday", @"month":@"January"}, the output
+ string will be @"day=Tuesday&month=January".
+ @param queryParameters The input dictionary.
+ @return The created parameters string.
+ */
+static NSString* NSStringFromQueryParameters(NSDictionary* queryParameters)
+{
+    NSMutableArray* parts = [NSMutableArray array];
+    [queryParameters enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
+        NSString *part = [NSString stringWithFormat: @"%@=%@",
+                          [key stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding],
+                          [value stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding]
+                          ];
+        [parts addObject:part];
+    }];
+    return [parts componentsJoinedByString: @"&"];
+}
+
+/**
+ Creates a new URL by adding the given query parameters.
+ @param URL The input URL.
+ @param queryParameters The query parameter dictionary to add.
+ @return A new NSURL.
+ */
+static NSURL* NSURLByAppendingQueryParameters(NSURL* URL, NSDictionary* queryParameters)
+{
+    NSString* URLString = [NSString stringWithFormat:@"%@?%@",
+                           [URL absoluteString],
+                           NSStringFromQueryParameters(queryParameters)
+                           ];
+    return [NSURL URLWithString:URLString];
+}
 
 @end
