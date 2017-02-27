@@ -67,6 +67,10 @@
     
     [self.healthStore executeQuery:anchoredQuery];
 }
+
+-(IBAction)unwindToHome:(UIStoryboardSegue*)sender {
+    
+}
     
 -(void)uploadEnergy:(NSNumber *)totalEnergy {
     {
