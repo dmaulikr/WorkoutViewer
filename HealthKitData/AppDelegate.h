@@ -9,12 +9,15 @@
 #import <UIKit/UIKit.h>
 #import <HealthKit/HealthKit.h>
 @import UserNotifications;
+@import WatchConnectivity;
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate, WCSessionDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
 @property (strong, nonatomic) HKHealthStore *healthStore;
+
+-(void)logBackgroundDataToFileWithStats:(NSDictionary *)stats message:(NSString *)reason time:(NSDate *)timestamp;
 
 @end
 

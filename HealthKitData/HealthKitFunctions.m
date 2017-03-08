@@ -164,8 +164,103 @@
     [[HKHealthStore new] executeQuery:sampleQuery];
 }
 
-+ (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion {
++ (void)getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:(NSMutableArray *)steps withCompletion:(void (^)(NSNumber *, NSError *))completion {
     
+    // 2. Order the workouts by date
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
+    
+    // 3. Create the query
+    HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned]
+                                                                 predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]]
+                                                                     limit:HKObjectQueryNoLimit
+                                                           sortDescriptors:@[sortDescriptor]
+                                                            resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
+                                  {
+                                      
+                                      if(!error && results) {
+
+                                          NSMutableArray *otherWorkouts = [NSMutableArray new];
+                                          
+                                          //    filters to only non watch or human samples
+                                          //
+                                          for(HKQuantitySample *sample in results)
+                                          {
+                                              
+                                              if (![sample.description containsString:@"Watch"] && ![sample.description containsString:@"Human"]) {
+                                                  [otherWorkouts addObject:sample];
+                                              }
+                                          }
+                                          
+                                          NSMutableArray *overlappingSamples = [NSMutableArray new];
+                                          
+                                          //    gather all step samples that touch other workouts
+                                          //
+                                          for(HKQuantitySample *other in otherWorkouts) {
+                                              for(HKQuantitySample *step in steps) {
+                                                  if ([HealthKitFunctions date:step.startDate isBetweenDate:other.startDate andDate:other.endDate] && ![overlappingSamples containsObject:step]) {
+                                                      [overlappingSamples addObject:step];
+                                                  }
+                                              }
+                                          }
+                                          
+                                          //    remove overlapping samples from step array
+                                          //
+                                          [steps removeObjectsInArray:overlappingSamples];
+                                          
+                                          //    filter step samples for just one device (watch, if present, or phone)
+                                          //
+                                          NSMutableArray *watchStepSamples = [NSMutableArray new];
+                                          NSMutableArray *phoneStepSamples = [NSMutableArray new];
+
+                                          for (HKQuantitySample *step in steps) {
+                                              if ([step.description containsString:@"Watch"]) {
+                                                  [watchStepSamples addObject:step];
+                                              } else if ([step.description containsString:@"iPhone"]) {
+                                                  [phoneStepSamples addObject:step];
+                                              }
+                                          }
+
+                                          //    total workout apps energy
+                                          //
+                                          double otherEnergy = 0.0;
+                                          for (HKQuantitySample *other in otherWorkouts) {
+                                              otherEnergy += [other.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
+                                          }
+                                          
+                                          //    total steps that dont touch workout times
+                                          //
+                                          double nonoverlappingSteps = 0.0;
+                                          
+                                          //    add up samles from watch or phone
+                                          //
+                                          if (watchStepSamples.count > 0) {
+                                              for (HKQuantitySample *step in watchStepSamples) {
+                                                  nonoverlappingSteps += [step.quantity doubleValueForUnit:[HKUnit countUnit]];
+                                              }
+                                          } else {
+                                              for (HKQuantitySample *step in phoneStepSamples) {
+                                                  nonoverlappingSteps += [step.quantity doubleValueForUnit:[HKUnit countUnit]];
+                                              }
+                                          }
+                                          
+                                          [self convertStepsToCalories:@(nonoverlappingSteps) withCompletion:^(double cals, NSError *err) {
+                                              if (!err) {
+                                                  completion(@(otherEnergy + cals), nil);
+                                              }
+                                          }];
+                                          
+                                      } else{
+                                          NSLog(@"Error retrieving energy %@",error);
+                                          completion(nil, error);
+                                      }
+                                  }];
+    
+    // Execute the query
+    [[HKHealthStore new] executeQuery:sampleQuery];
+}
+
++ (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion {
+//    
     // 2. Order the workouts by date
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
     
@@ -199,95 +294,110 @@
     // Execute the query
     [[HKHealthStore new] executeQuery:sampleQuery];
 }
+
++ (void)getAllStepSamples:(void (^)(NSArray* stepSamples, NSError *err))completionHandler {
+    // 2. Order the workouts by date
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
     
+    NSLog(@"Getting Step Samples from %@ to Now", [[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]);
+    
+    // 3. Create the query
+    HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount]
+                                                                 predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]]
+                                                                     limit:HKObjectQueryNoLimit
+                                                           sortDescriptors:@[sortDescriptor]
+                                                            resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
+                                  {
+                                      
+                                      if(!error && results){
+                                          completionHandler(results, nil);
+                                      }else{
+                                          NSLog(@"Error retrieving energy %@",error);
+                                          completionHandler(nil, error);
+                                      }
+                                  }];
+    
+    // Execute the query
+    [[HKHealthStore new] executeQuery:sampleQuery];
+}
+
++ (void)totalSteps:(void (^)(int steps, NSError *err))completionHandler {
+    HKQuantityType *steps = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+    
+    HKStatisticsQuery *stepsStats = [[HKStatisticsQuery alloc] initWithQuantityType:steps quantitySamplePredicate:[HKQuery predicateForSamplesWithStartDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"] endDate:[NSDate date] options:HKQueryOptionStrictStartDate] options:HKStatisticsOptionCumulativeSum completionHandler:^(HKStatisticsQuery * _Nonnull query, HKStatistics * _Nullable result, NSError * _Nullable error) {
+        
+        if (result) {
+            
+            //  all steps
+            int totalSteps = [result.sumQuantity doubleValueForUnit:[HKUnit countUnit]];
+            completionHandler(totalSteps, nil);
+
+        } else {
+            completionHandler(0.0, error);
+        }
+    }];
+    
+    [[HKHealthStore new] executeQuery:stepsStats];
+}
+
 + (void)getAllEnergyBurnedFromSteps:(void (^)(double, NSError *))completionHandler {
     
-    NSCalendar *calendar = [NSCalendar currentCalendar];
-    NSDateComponents *interval = [[NSDateComponents alloc] init];
-    interval.day = 7;
-    
-    // Set the anchor date to Monday at 3:00 a.m.
-    NSDateComponents *anchorComponents =
-    [calendar components:NSCalendarUnitDay | NSCalendarUnitMonth |
-     NSCalendarUnitYear | NSCalendarUnitWeekday fromDate:[NSDate date]];
-    
-    
-    NSDate *anchorDate = [[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"];
-    
-    HKQuantityType *quantityType =
-    [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
-    
-    // Create the query
-    HKStatisticsCollectionQuery *query =
-    [[HKStatisticsCollectionQuery alloc]
-     initWithQuantityType:quantityType
-     quantitySamplePredicate:nil
-     options:HKStatisticsOptionCumulativeSum
-     anchorDate:anchorDate
-     intervalComponents:interval];
-    
-    // Set the results handler
-    query.initialResultsHandler =
-    ^(HKStatisticsCollectionQuery *query, HKStatisticsCollection *results, NSError *error) {
+    [self totalSteps:^(int steps, NSError *err) {
         
-        if (error) {
-            // Perform proper error handling here
-            NSLog(@"*** An error occurred while calculating the statistics: %@ ***",
-                  error.localizedDescription);
-            abort();
-        }
-        
-        NSDate *endDate = [NSDate date];
-        NSDate *startDate = [[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"];
-        
-        [results
-         enumerateStatisticsFromDate:startDate
-         toDate:endDate
-         withBlock:^(HKStatistics *result, BOOL *stop) {
-             
-             HKQuantity *quantity = result.sumQuantity;
-             if (quantity) {
-                 double value = [quantity doubleValueForUnit:[HKUnit countUnit]];
-                 
-                 HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass]
-                                                                              predicate:nil
-                                                                                  limit:1
-                                                                        sortDescriptors:nil
-                                                                         resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
-                                               {
-                                                   double pounds;
-                                                   
-                                                   if (results.count > 0) {
-                                                       HKQuantitySample *weight = results[0];
-                                                       pounds = [weight.quantity doubleValueForUnit:[HKUnit poundUnit]];
-                                                       NSLog(@"Your weight: %.0f", pounds);
-                                                   } else {
-                                                       pounds = 185;
-                                                   }
-                                                   
-                                                   double calsPerMile = pounds * 0.57;
-                                                   
-                                                   [HealthKitFunctions getStepsPerMileFromHeight:^(double stepsPerMile, NSError *err) {
-                                                       double calsPerStep = calsPerMile / stepsPerMile;
-                                                       double calsForSteps = calsPerStep * value;
-                                                       completionHandler(calsForSteps, nil);
-                                                   }];
-                                                   
-                                               }];
-                 
-                 // Execute the query
-                 [[HKHealthStore new] executeQuery:sampleQuery];
-                 
-                 
-                 completionHandler(value, nil);
-             }
-             
-         }];
-    };
-    
-    [[HKHealthStore new] executeQuery:query];
+        [self getBodyMass:^(double mass, NSError *err) {
+            
+            double calsPerMile = mass * 0.57;
+            
+            [self getStepsPerMileFromHeight:^(double stepsPerMile, NSError *err) {
+                double calsPerStep = calsPerMile / stepsPerMile;
+                double calsForSteps = calsPerStep * steps;
+                completionHandler(calsForSteps, nil);
+            }];
+            
+        }];
+    }];
 }
+
++ (void)getBodyMass:(void (^)(double mass, NSError *err))completionHandler {
+    HKSampleQuery *bodyMassQuery =
+    [[HKSampleQuery alloc] initWithSampleType:
+     [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass]
+                                    predicate:nil
+                                        limit:1
+                              sortDescriptors:nil
+                               resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
+     {
+         double pounds;
+         
+         if (results.count > 0) {
+             HKQuantitySample *weight = results[0];
+             pounds = [weight.quantity doubleValueForUnit:[HKUnit poundUnit]];
+             NSLog(@"Your weight: %.0f", pounds);
+         } else {
+             pounds = 185;
+         }
+         
+         completionHandler(pounds, nil);
+     }];
     
+    [[HKHealthStore new] executeQuery:bodyMassQuery];
+}
+
++ (void)convertStepsToCalories:(NSNumber *)steps withCompletion:(void (^)(double, NSError *))completionHandler {
+
+    [self getBodyMass:^(double mass, NSError *err) {
+        
+        double calsPerMile = mass * 0.57;
+        
+        [HealthKitFunctions getStepsPerMileFromHeight:^(double stepsPerMile, NSError *err) {
+            double calsPerStep = calsPerMile / stepsPerMile;
+            double calsForSteps = calsPerStep * [steps doubleValue];
+            completionHandler(calsForSteps, nil);
+        }];
+
+    }];
+}
+
 +(void)getStepsPerMileFromHeight:(void (^)(double, NSError *))completionHandler {
     HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight]
                                                                  predicate:nil

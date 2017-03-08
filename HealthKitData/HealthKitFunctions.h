@@ -21,13 +21,15 @@
 
 - (void)getAllEnergyBurned:(void (^)(NSMutableArray *, NSError *))completion;
 - (void)getAllSources:(void (^)(NSMutableArray *, NSError *))completion;
-    
+
++ (void)getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:(NSMutableArray *)steps withCompletion:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedFromAppleWatch:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedFromSteps:(void (^)(double, NSError *))completionHandler;
 + (void)getStepsPerMileFromHeight:(void (^)(double, NSError *))completionHandler;
 + (void)getAllEnergyBurnedAndSort:(void (^)(NSNumber *, NSError *))completion;
-
-
++ (void)convertStepsToCalories:(NSNumber *)steps withCompletion:(void (^)(double, NSError *))completionHandler;
++ (void)getAllStepSamples:(void (^)(NSArray* stepSamples, NSError *err))completionHandler;
++(void)getBodyMass:(void (^)(double mass, NSError *err))completionHandler;
 
 @end

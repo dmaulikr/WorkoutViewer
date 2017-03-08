@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="AgC-eL-Hgc">
+    <device id="watch42" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="watchOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="11508"/>
+    </dependencies>
+    <scenes>
+        <!--Sync-->
+        <scene sceneID="aou-V4-d1y">
+            <objects>
+                <controller identifier="main" title="Sync" animationDuration="2" id="AgC-eL-Hgc" customClass="InterfaceController">
+                    <items>
+                        <label alignment="center" text="- - - kCal" textAlignment="center" id="NpR-eK-gvN">
+                            <fontDescription key="font" type="system" weight="thin" pointSize="30"/>
+                        </label>
+                        <activity height="0.75" alignment="center" verticalAlignment="bottom" id="EiI-DJ-5Av"/>
+                    </items>
+                    <connections>
+                        <outlet property="rings" destination="EiI-DJ-5Av" id="mmt-iT-bWr"/>
+                        <outlet property="totalBurnedLabel" destination="NpR-eK-gvN" id="A4a-8s-xB0"/>
+                    </connections>
+                </controller>
+            </objects>
+        </scene>
+    </scenes>
+</document>

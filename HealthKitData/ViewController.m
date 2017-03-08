@@ -10,10 +10,9 @@
 #import "HealthKitFunctions.h"
 #import "InsetTextField.h"
 @import UserNotifications;
+@import WatchConnectivity;
 
 @interface ViewController ()
-
-@property (strong, nonatomic) NSDate *lastSyncDate;
 
 @property (strong, nonatomic) NSString *slackUsername;
 @property (strong, nonatomic) NSNumber *totalEnergyBurnedForTheWeek;
@@ -25,11 +24,10 @@
 @property (weak, nonatomic) IBOutlet UILabel *remainingGoalLabel;
 @property (weak, nonatomic) IBOutlet UILabel *timeLeftLabel;
 @property (weak, nonatomic) IBOutlet UIButton *sourcesButton;
-    
+
+@property (strong, nonatomic) dispatch_semaphore_t sem;
 
 @property (weak, nonatomic) IBOutlet InsetTextField *slackUsernameTextField;
-@property (weak, nonatomic) IBOutlet UIView *uploadingWorkoutOverlayView;
-@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *uploadingWorkoutSpinner;
 
 @end
 
@@ -47,20 +45,11 @@
     self.sourcesButton.layer.borderColor = [UIColor whiteColor].CGColor;
     self.dataTableView.layer.borderColor = [UIColor whiteColor].CGColor;
     
-    self.slackUsernameTextField.layer.borderColor = [UIColor whiteColor].CGColor;
-    
-    self.lastSyncDate = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastSyncDate"];
     self.slackUsername = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
-    
-    if (self.slackUsername != nil) {
-        [self.slackUsernameTextField setText:self.slackUsername];
-    }
     
     self.energy = [NSMutableArray new];
     
-    [self.uploadingWorkoutOverlayView setHidden:NO];
     self.dataTableView.userInteractionEnabled = NO;
-    [self.uploadingWorkoutSpinner startAnimating];
 }
 
 -(void)viewDidAppear:(BOOL)animated {
@@ -68,7 +57,6 @@
 
     [self.store requestPermission:^(BOOL success, NSError *err) {
         if (success) {
-            NSLog(@"Health Kit Ready to Query");
             [self getDataForSegment];
         }
     }];
@@ -77,8 +65,6 @@
     
     if (self.slackUsername == nil) {
         [self showAddUsernameAlert];
-    } else {
-//        [self checkProgressAndGoals];
     }
 }
 
@@ -321,7 +307,11 @@
                         [[NSUserDefaults standardUserDefaults] setObject:endDate forKey:@"goalEnd"];
                         [[NSUserDefaults standardUserDefaults] synchronize];
                         
-                        //[self uploadActiveEnergy];
+                        if (self.sem != nil) {
+                            dispatch_semaphore_signal(self.sem);
+
+                        }
+                        
                         [self.dataTableView reloadData];
                     });
                 }
@@ -371,6 +361,28 @@
             NSLog(@"Something went wrong scheduling a notification: %@",error);
         }
     }];
+}
+
+-(void)sessionDidBecomeInactive:(WCSession *)session {
+    
+}
+
+-(void)sessionDidDeactivate:(WCSession *)session {
+    
+}
+
+-(void)session:(WCSession *)session activationDidCompleteWithState:(WCSessionActivationState)activationState error:(NSError *)error {
+    
+}
+
+-(void)session:(WCSession *)session didReceiveMessage:(NSDictionary<NSString *,id> *)message replyHandler:(void (^)(NSDictionary<NSString *,id> * _Nonnull))replyHandler {
+    
+    if ([[message valueForKey:@"getEnergy"] isEqualToString:@"yes"]) {
+        self.sem = dispatch_semaphore_create(0);
+        [self checkProgressAndGoals];
+        dispatch_semaphore_wait(self.sem, DISPATCH_TIME_FOREVER);
+        replyHandler(@{@"goal":[[NSUserDefaults standardUserDefaults] objectForKey:@"goalPoints"], @"burned":self.totalEnergyBurnedForTheWeek});
+    }
 }
 
 -(void)showSuccessfulUpload {
@@ -439,7 +451,7 @@
         
         NSString *dateString = [formatter stringFromDate:energy.startDate];
         
-        [cell.detailTextLabel setText:[[source mutableCopy] stringByAppendingString:[NSString stringWithFormat:@"     %@   ", [dateString substringToIndex:dateString.length - 3]]]];
+        [cell.detailTextLabel setText:[[source mutableCopy] stringByAppendingString:[NSString stringWithFormat:@"%@", [dateString substringToIndex:dateString.length - 3]]]];
     }
 
     return cell;

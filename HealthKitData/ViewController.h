@@ -7,8 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+@import WatchConnectivity;
 
-@interface ViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, NSURLSessionDelegate, UITextFieldDelegate>
+@interface ViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, NSURLSessionDelegate, UITextFieldDelegate, WCSessionDelegate>
 
 @property (weak, nonatomic) IBOutlet UILabel *firstMetricLabel;
 @property (weak, nonatomic) IBOutlet UILabel *secondDetailMetricLabel;
