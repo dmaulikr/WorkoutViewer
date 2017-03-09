@@ -8,9 +8,11 @@
 
 #import <UIKit/UIKit.h>
 @import WatchConnectivity;
-#import <MessageUI/MessageUI.h>
 
-@interface ViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, NSURLSessionDelegate, UITextFieldDelegate, WCSessionDelegate, MFMailComposeViewControllerDelegate>
+@interface ViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, NSURLSessionDelegate, UITextFieldDelegate, WCSessionDelegate>
+
++(void)updateAllDataWithCompletion:(void(^)(BOOL success, NSMutableDictionary *stats, NSError *error))completion;
+
 
 @end
 

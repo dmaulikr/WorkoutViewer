@@ -44,7 +44,7 @@
             //
             if ([[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"] != nil) {
                 
-                [self checkStatus:^(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error) {
+                [AppDelegate checkStatus:^(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error) {
                 
                     NSMutableDictionary *stats = [@{@"start":start, @"end":end, @"current":points, @"goal":goal} mutableCopy];
                     
@@ -53,19 +53,19 @@
                         //  query for new steps
                         //
                         [HealthKitFunctions getAllStepSamples:^(NSArray *stepSamples, NSError *err) {
-                            [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSError *err) {
+                            [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber *other, NSError *err) {
                                 
                                 //  setting new calculated Calories
                                 //
-                                [stats setValue:cals forKey:@"current"];
+                                [stats setValue:@([cals integerValue] + [other integerValue]) forKey:@"current"];
                                 
-                                [self uploadEnergyWithStats:stats withCompletion:^(BOOL success, NSError *err) {
+                                [AppDelegate uploadEnergyWithStats:stats withCompletion:^(BOOL success, NSError *err) {
                                     if (success) {
-                                        [self logBackgroundDataToFileWithStats:stats message:@"Sync Succeeded" time:[NSDate date]];
+                                        [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Sync Succeeded" time:[NSDate date]];
                                         completionHandler();
                                         
                                     } else {
-                                        [self logBackgroundDataToFileWithStats:stats message:@"Upload Energy Failed" time:[NSDate date]];
+                                        [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Upload Energy Failed" time:[NSDate date]];
                                         completionHandler();
                                     }
                                 }];
@@ -73,13 +73,13 @@
                         }];
                                 
                         } else {
-                            [self logBackgroundDataToFileWithStats:stats message:@"Error - Calculating Steps For Week" time:[NSDate new]];
+                            [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Error - Calculating Steps For Week" time:[NSDate new]];
                             completionHandler();
                         }
                 }];
     
                 } else {
-                    [self logBackgroundDataToFileWithStats:nil message:@"AppDelegate Error - Username not provided" time:[NSDate new]];
+                    [AppDelegate logBackgroundDataToFileWithStats:nil message:@"AppDelegate Error - Username not provided" time:[NSDate new]];
                     completionHandler();    //  so you don't lose background updates
                 }
             }];
@@ -92,39 +92,70 @@
             }
         }];
     } else {
-        [self logBackgroundDataToFileWithStats:nil message:@"AppDelegate Error - No Goal Start Date, Background Query Not Registered" time:[NSDate new]];
+        [AppDelegate logBackgroundDataToFileWithStats:nil message:@"AppDelegate Error - No Goal Start Date, Background Query Not Registered" time:[NSDate new]];
     }
 
     return YES;
 }
 
--(void)logBackgroundDataToFileWithStats:(NSDictionary *)stats message:(NSString *)reason time:(NSDate *)timestamp {
++(void)logBackgroundDataToFileWithStats:(NSDictionary *)stats message:(NSString *)reason time:(NSDate *)timestamp {
+    
     NSDateFormatter *formatter = [NSDateFormatter new];
-    [formatter setDateStyle:NSDateFormatterLongStyle];
+    [formatter setDateFormat:@"MMM dd, YYYY @ HH:mm:ss"];
     
-    NSString *logEntry = [NSString stringWithFormat:@"%@: %@ - Data: %@", [formatter stringFromDate:timestamp], reason, stats.description];
-    NSLog(@"Log Entry: %@", logEntry);
+    NSMutableDictionary *mutableStats = [stats mutableCopy];
     
-    NSError *err;
-    NSString *logPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/ActivityLog.txt"];
-    NSString *log = [NSString stringWithContentsOfFile:logPath
-                                               usedEncoding:NSUTF8StringEncoding
-                                                      error:&err];
+    [mutableStats setObject:[formatter stringFromDate:[NSDate date]] forKey:@"logDate"];
+    [mutableStats setObject:[formatter stringFromDate:stats[@"start"]] forKey:@"start"];
+    [mutableStats setObject:[formatter stringFromDate:stats[@"end"]] forKey:@"end"];
     
-    if (err == nil) {
-        NSMutableString *mutableLog = [log mutableCopy];
-        [mutableLog stringByAppendingString:logEntry];
-        NSLog(@"Current Log: %@", mutableLog);
+    NSMutableString *formattedOutput = [NSMutableString new];
     
-        [mutableLog writeToFile:logPath
-               atomically:YES
-                 encoding:NSUTF8StringEncoding
-                    error:&err];
+    for (NSString *key in mutableStats.allKeys) {
+        [formattedOutput appendString:[NSString stringWithFormat:@"%@ = %@\n", key, [mutableStats[key] description]]];
+    }
+    
+    NSString *logEntry = [NSString stringWithFormat:@"\n%@ - %@\n%@-----\n", reason, [formatter stringFromDate:timestamp], formattedOutput];
+    
+    NSLog(@"%@", logEntry);
+    
+    NSError *error;
+    
+    NSURL *logUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask][0] URLByAppendingPathComponent:@"/activity.txt"];
+    
+    BOOL fileMade = NO;
+    
+    BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:logUrl.relativePath];
+    
+    if(!exists) {
+        fileMade = [[NSFileManager defaultManager] createFileAtPath:logUrl.relativePath contents:[logEntry dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
+        
+        exists = [[NSFileManager defaultManager] fileExistsAtPath:logUrl.relativePath];
+    }
+    
+    NSData *data = [NSData dataWithContentsOfURL:logUrl];
+    
+    NSString *logs = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+
+    NSLog(@"Log File Made? %zd, Exists? %d", fileMade, exists);
+    
+    if (error == nil) {
+        NSString *updatedLog = [NSString stringWithFormat:@"%@\n-----%@", logs, logEntry];
+        
+        NSLog(@"Updated Log: %@", updatedLog);
+    
+        BOOL writeResult = [updatedLog writeToURL:logUrl atomically:YES encoding:NSUTF8StringEncoding error:&error];
+        
+        if (error) {
+            NSLog(@"Error Writing Log to File: %@", [error description]);
+        } else {
+            NSLog(@"Log Successfully Written to File");
+        }
     }
     
 }
 
--(void)checkStatus:(void(^)(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error))completion {
++(void)checkStatus:(void(^)(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error))completion {
     
     NSURL* URL = [NSURL URLWithString:@"http://adamr5.sg-host.com/adamrz/myfirstbot/api/active_goal/"];
     NSDictionary* URLParams = @{
@@ -152,7 +183,7 @@
             } else {
                 
                 NSNumber *goal = [json valueForKey:@"goal_points"];
-                NSNumber *current = [json valueForKey:@"current_points"];
+                NSNumber *current = @([[json valueForKey:@"current_points"] integerValue]);
                 NSString *start = [json valueForKey:@"start_date"];
                 NSString *end = [json valueForKey:@"end_date"];
                 
@@ -188,7 +219,7 @@
     }
 }
     
--(void)uploadEnergyWithStats:(NSDictionary *)stats withCompletion:(void(^)(BOOL success, NSError *err))completion {
++(void)uploadEnergyWithStats:(NSDictionary *)stats withCompletion:(void(^)(BOOL success, NSError *err))completion {
 //    
         NSURL* URL = [NSURL URLWithString:@"http://adamr5.sg-host.com/adamrz/myfirstbot/api/active_goal/"];
         NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:URL];
@@ -230,7 +261,7 @@
 -(void)session:(WCSession *)session activationDidCompleteWithState:(WCSessionActivationState)activationState error:(NSError *)error {
     
     if (activationState == WCSessionActivationStateActivated) {
-        [self updateWatchComplication:@(300)];
+        
     }
 }
 
@@ -241,6 +272,20 @@
 -(void)sessionDidBecomeInactive:(WCSession *)session {
     
 }
+
+-(void)session:(WCSession *)session didReceiveMessage:(NSDictionary<NSString *,id> *)message replyHandler:(void (^)(NSDictionary<NSString *,id> * _Nonnull))replyHandler {
+    
+    if ([[message valueForKey:@"getEnergy"] isEqualToString:@"yes"]) {
+        [HealthKitFunctions getAllStepSamples:^(NSArray *stepSamples, NSError *err) {
+           [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber *other, NSError *err) {
+               [AppDelegate checkStatus:^(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error) {
+                   replyHandler(@{@"goal":@([goal integerValue]), @"burned":@([cals integerValue] + [other integerValue])});
+               }];
+           }];
+        }];
+    }
+}
+
 
 /*
  * Utils: Add this section before your class implementation

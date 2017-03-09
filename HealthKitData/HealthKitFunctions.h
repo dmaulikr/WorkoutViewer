@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <HealthKit/HealthKit.h>
+#import "AppDelegate.h"
 
 @interface HealthKitFunctions : NSObject
 
@@ -22,7 +23,7 @@
 - (void)getAllEnergyBurned:(void (^)(NSMutableArray *, NSError *))completion;
 - (void)getAllSources:(void (^)(NSMutableArray *, NSError *))completion;
 
-+ (void)getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:(NSMutableArray *)steps withCompletion:(void (^)(NSNumber *, NSError *))completion;
++ (void)getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:(NSMutableArray *)steps withCompletion:(void (^)(NSNumber *stepEnergy, NSNumber *otherEnergy, NSError *))completion;
 + (void)getAllEnergyBurnedFromAppleWatch:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedFromSteps:(void (^)(double, NSError *))completionHandler;

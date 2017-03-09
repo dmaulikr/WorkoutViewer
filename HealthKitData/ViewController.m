@@ -9,6 +9,7 @@
 #import "ViewController.h"
 #import "HealthKitFunctions.h"
 #import "InsetTextField.h"
+#import "AppDelegate.h"
 @import UserNotifications;
 @import WatchConnectivity;
 
@@ -16,9 +17,6 @@
 
 @property (strong, nonatomic) IBOutlet UIView *collectionViewContainer;
 @property (strong, nonatomic) NSString *slackUsername;
-@property (strong, nonatomic) NSNumber *totalEnergyBurnedForTheWeek;
-@property (strong, nonatomic) NSMutableArray *sources;
-@property (strong, nonatomic) NSMutableArray *energy;
 @property (strong, nonatomic) HealthKitFunctions *store;
     
 @property (weak, nonatomic) IBOutlet UILabel *remainingGoalLabel;
@@ -27,6 +25,7 @@
 @property (strong, nonatomic) IBOutlet UIButton *showLogButton;
 @property (strong, nonatomic) IBOutlet UIPageControl *pageControl;
 @property (strong, nonatomic) IBOutlet UILabel *daysLabel;
+@property (strong, nonatomic) UIActivityIndicatorView *spinner;
 
 
 @property (strong, nonatomic) dispatch_semaphore_t sem;
@@ -46,7 +45,7 @@
     
     self.slackUsername = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
     
-    self.energy = [NSMutableArray new];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changePage:) name:@"changePage" object:nil];
     
 }
 
@@ -55,19 +54,45 @@
 
     [self.store requestPermission:^(BOOL success, NSError *err) {
         if (success) {
-            [self getDataForSegment];
+            [self refreshFeed:nil];
+            [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
+                if (success) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+
+                       //  update UI
+                        NSInteger days = [ViewController daysBetweenDate:[NSDate date] andDate:stats[@"end"]];
+                        int goalPercentage = [@(([stats[@"current"] doubleValue] / [stats[@"goal"] doubleValue]) * 100.0) intValue];
+                        
+                        [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
+                        
+                        [self.timeLeftLabel setText:[@(days) stringValue]];
+                        [self.remainingGoalLabel setText:[NSString stringWithFormat:@"%@%%", [@(goalPercentage) stringValue]]];
+                        
+                        CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
+                        // 200 is example side of the big view, but you can apply any formula to it. For example relative to superview, or screen bounds
+                        CGFloat multiplier = 200 / MAX(self.remainingGoalLabel.frame.size.height, self.remainingGoalLabel.frame.size.width);
+                        bounceAnimation.values =
+                          @[@(1 - 0.1 * multiplier),
+                            @(1 + 0.3 * multiplier),
+                            @(1 + 0.1 * multiplier),
+                            @1.0];
+                            bounceAnimation.duration = 0.25;
+                            bounceAnimation.removedOnCompletion = YES;
+                            bounceAnimation.fillMode = kCAFillModeForwards;
+                            [self.remainingGoalLabel.layer addAnimation:bounceAnimation forKey:@"bounceAnimation"];
+                            [self.timeLeftLabel.layer addAnimation:bounceAnimation forKey:@"bounceAnimation"];
+                        
+                        [self.spinner stopAnimating];
+                        
+                    });
+                }
+            }];
         }
     }];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fetchEnergySamples) name:@"refreshEnergy" object:nil];
     
     if (self.slackUsername == nil) {
         [self showAddUsernameAlert];
     }
-}
-
--(void)viewDidDisappear:(BOOL)animated {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 -(void)showAddUsernameAlert {
@@ -84,218 +109,80 @@
 
 - (IBAction)showLogPage:(id)sender {
     [[NSNotificationCenter defaultCenter] postNotificationName:@"scrollToLog" object:nil];
-    [self.pageControl setCurrentPage:3];
+    [self.pageControl setCurrentPage:2];
 }
 
--(void)fetchEnergySamples {
-    
-    [self.energy removeAllObjects];
-    
-    [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
-        
-        for (HKQuantitySample *sample in energy) {
-            if ([[sample description] rangeOfString:@"Watch"].location == NSNotFound) {
-                [self.energy addObject:sample];
-            }
-        }
-        
-        NSMutableArray *energies = energy;
-        
-        double totalBurned = 0.0;
-        for (HKQuantitySample *energy in energies) {
-            totalBurned += [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
-        }
-        
-        self.totalEnergyBurnedForTheWeek = @(totalBurned);
+-(void)changePage:(NSNotification *)notification {
+    [self.pageControl setCurrentPage:[notification.object integerValue]];
+}
 
++(void)updateAllDataWithCompletion:(void(^)(BOOL success, NSMutableDictionary *stats, NSError *error))completion {
+    [HealthKitFunctions getAllStepSamples:^(NSArray *stepSamples, NSError *err) {
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-        });
-        
-        NSLog(@"Total Energy Burned: %0.f", totalBurned);
+        [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber* other, NSError *err) {
+            
+            [AppDelegate checkStatus:^(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error) {
+                NSMutableDictionary *stats = [@{@"start":start, @"end":end, @"current":points, @"other": other,@"goal":goal} mutableCopy];
+
+                if (success) {
+                    [AppDelegate uploadEnergyWithStats:stats withCompletion:^(BOOL success, NSError *err) {
+                        if (success) {
+                            completion(YES, stats, nil);
+                        } else {
+                            completion(NO, nil, err);
+                        }
+                    }];
+                }
+            }];
+        }];
     }];
+}
+
+- (IBAction)refreshFeed:(id)sender {
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+        self.spinner.center = CGPointMake(self.view.center.x, self.view.center.y);
+        
+        [self.view addSubview:self.spinner];
+        
+        [self.spinner startAnimating];
+    });
+}
+
+-(void)viewDidDisappear:(BOOL)animated {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark - Register Health Kit
-
--(void)getDataForSegment {
-    
-    [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
-
-        for (HKQuantitySample *sample in energy) {
-            if ([[sample description] rangeOfString:@"Watch"].location == NSNotFound) {
-                [self.energy addObject:sample];
-            }
-        }
-        
-        double totalBurned = 0.0;
-        for (HKQuantitySample *energy in self.energy) {
-            totalBurned += [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
-        }
-        
-        self.totalEnergyBurnedForTheWeek = @(totalBurned);
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            
-            
-            if (self.slackUsername != nil) {
-                [self checkProgressAndGoals];
-            }
-
-        });
-
-        NSLog(@"Total Energy Burned: %0.f", totalBurned);
-    }];
-}
 
 - (IBAction)syncWorkouts:(id)sender {
     
     if ([[NSUserDefaults standardUserDefaults] valueForKey:@"slackUsername"]) {
         
-        [self uploadActiveEnergy];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.syncButton setAlpha:0.5];
+            [self.syncButton setEnabled:NO];
+            [self refreshFeed:nil];
+        });
+        
+        [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
+            if (success) {
+                NSLog(@"Updated and loaded new data");
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
+            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.spinner stopAnimating];
+                [self.syncButton setAlpha:1.0];
+                [self.syncButton setEnabled:YES];
+            });
+        }];
         
     } else {
         [self showAddUsernameAlert];
     }
 }
-    
-- (void)uploadActiveEnergy
-    {
 
-        NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
-        NSURLSession* session = [NSURLSession sessionWithConfiguration:sessionConfig delegate:nil delegateQueue:nil];
-        
-        NSURL* URL = [NSURL URLWithString:@"http://adamr5.sg-host.com/adamrz/myfirstbot/api/active_goal/"];
-        NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:URL];
-        request.HTTPMethod = @"POST";
-
-        [request addValue:@"application/json; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
-        
-        NSDictionary* bodyObject = @{
-                                     @"currentPoints": self.totalEnergyBurnedForTheWeek,
-                                     @"slackUsername": [[NSUserDefaults standardUserDefaults] valueForKey:@"slackUsername"],
-                                     @"timeStamp": @([@([[NSDate date] timeIntervalSince1970]) integerValue])
-                                     };
-        request.HTTPBody = [NSJSONSerialization dataWithJSONObject:bodyObject options:kNilOptions error:NULL];
-        
-        /* Start a new Task */
-        NSURLSessionDataTask* task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-            if (error == nil) {
-                // Success
-                if (((NSHTTPURLResponse*)response).statusCode == [@(200) integerValue]) {
-                    //[[NSUserDefaults standardUserDefaults] setObject:self.slackUsernameTextField.text forKey:@"slackUsername"];
-                    //[[NSUserDefaults standardUserDefaults] synchronize];
-                } else if (((NSHTTPURLResponse*)response).statusCode == [@(400) integerValue]) {
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self showIncorrectSlackUsernameAlert];
-                    });
-                }
-                NSLog(@"Energy Sync Succeeded: HTTP %ld", ((NSHTTPURLResponse*)response).statusCode);
-            }
-            else {
-                // Failure
-                NSLog(@"URL Session Task Failed: %@", [error localizedDescription]);
-            }
-            dispatch_async(dispatch_get_main_queue(), ^{
-                //  show overlay, spinner, disable sync button and tableView, slackTextField
-
-                
-            });
-        }];
-        [task resume];
-        [session finishTasksAndInvalidate];
-    }
-    
-    
-    
-
-
-    
-- (void)checkProgressAndGoals
-    {
-        NSURLSessionConfiguration* sessionConfig = [NSURLSessionConfiguration defaultSessionConfiguration];
-        
-        /* Create session, and optionally set a NSURLSessionDelegate. */
-        NSURLSession* session = [NSURLSession sessionWithConfiguration:sessionConfig delegate:nil delegateQueue:nil];
-        
-        
-        NSURL* URL = [NSURL URLWithString:@"http://adamr5.sg-host.com/adamrz/myfirstbot/api/active_goal/"];
-        NSDictionary* URLParams = @{
-                                    @"slack_username": [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"],
-                                    };
-        
-        URL = NSURLByAppendingQueryParameters(URL, URLParams);
-        NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:URL];
-        request.HTTPMethod = @"GET";
-        
-        /* Start a new Task */
-        NSURLSessionDataTask* task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-            if (error == nil) {
-                // Success
-                NSLog(@"URL Session Task Succeeded: HTTP %ld", ((NSHTTPURLResponse*)response).statusCode);
-                NSError *err;
-                NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:&err];
-                
-                if (err) {
-                    NSLog(@"Error parsing json: %@", [err description]);
-                } else {
-                    
-                    NSNumber *goal = [json valueForKey:@"goal_points"];
-                    NSNumber *current = [json valueForKey:@"current_points"];
-                    NSString *start = [json valueForKey:@"start_date"];
-                    NSString *end = [json valueForKey:@"end_date"];
-                    
-                    NSLog(@"Goal: %@, Current: %@, Start: %@, End: %@", goal.description, current.description, start, end);
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        
-                        
-                        double goalDiff = [self.totalEnergyBurnedForTheWeek doubleValue] / [goal doubleValue];
-                        
-                        [self.remainingGoalLabel setText:[NSString stringWithFormat:@"%.0f%%", goalDiff * 100.0]];
-                        
-                        
-                        NSDateFormatter *formatter = [NSDateFormatter new];
-                        [formatter setDateFormat:@"YYYY-MM-d k:m:s"];
-                        
-                        NSDate *startDate = [formatter dateFromString:start];
-                        NSDate *endDate = [formatter dateFromString:end];
-                        
-                        
-                        NSInteger daysLeft = [ViewController daysBetweenDate:[NSDate date] andDate:endDate];
-                        
-                        [self.timeLeftLabel setText:[NSString stringWithFormat:@"%zd", daysLeft]];
-                        
-                        if (daysLeft == 1) {
-                            [self.daysLabel setText:@"Day"];
-                        } else {
-                            [self.daysLabel setText:@"Days"];
-
-                        }
-                        
-                        [[NSUserDefaults standardUserDefaults] setObject:goal forKey:@"goalPoints"];
-                        [[NSUserDefaults standardUserDefaults] setObject:current forKey:@"currentPoints"];
-                        [[NSUserDefaults standardUserDefaults] setObject:startDate forKey:@"goalStart"];
-                        [[NSUserDefaults standardUserDefaults] setObject:endDate forKey:@"goalEnd"];
-                        [[NSUserDefaults standardUserDefaults] synchronize];
-                        
-                        if (self.sem != nil) {
-                            dispatch_semaphore_signal(self.sem);
-
-                        }
-                        
-                    });
-                }
-            }
-            else {
-                // Failure
-                NSLog(@"URL Session Task Failed: %@", [error localizedDescription]);
-            }
-        }];
-        [task resume];
-        [session finishTasksAndInvalidate];
-    }
     
 - (IBAction)dismissKeyboard:(id)sender {
     [self resignFirstResponder];
@@ -313,126 +200,7 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
--(void)showNotificationForWorkout {
-    
-    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    
-    UNMutableNotificationContent *content = [UNMutableNotificationContent new];
-    content.title = @"New Active Energy Logged!";
-    content.body = @"Uploading to FitBot now.. here come those Move Points!";
-    content.sound = [UNNotificationSound defaultSound];
-    
-    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
-                                                                                                    repeats:NO];
-    NSString *identifier = @"NewWorkoutLocalNotification";
-    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
-                                                                          content:content trigger:trigger];
-    
-    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-        if (error != nil) {
-            NSLog(@"Something went wrong scheduling a notification: %@",error);
-        }
-    }];
-}
 
--(void)sessionDidBecomeInactive:(WCSession *)session {
-    
-}
-
--(void)sessionDidDeactivate:(WCSession *)session {
-    
-}
-
--(void)session:(WCSession *)session activationDidCompleteWithState:(WCSessionActivationState)activationState error:(NSError *)error {
-    
-}
-
--(void)session:(WCSession *)session didReceiveMessage:(NSDictionary<NSString *,id> *)message replyHandler:(void (^)(NSDictionary<NSString *,id> * _Nonnull))replyHandler {
-    
-    if ([[message valueForKey:@"getEnergy"] isEqualToString:@"yes"]) {
-        self.sem = dispatch_semaphore_create(0);
-        [self checkProgressAndGoals];
-        dispatch_semaphore_wait(self.sem, DISPATCH_TIME_FOREVER);
-        replyHandler(@{@"goal":[[NSUserDefaults standardUserDefaults] objectForKey:@"goalPoints"], @"burned":self.totalEnergyBurnedForTheWeek});
-    }
-}
-
--(void)showSuccessfulUpload {
-    
-    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    
-    UNMutableNotificationContent *content = [UNMutableNotificationContent new];
-    content.title = @"Energy Successfully Uploaded!";
-    content.body = @"Check Slack for Fitbot updates";
-    content.sound = [UNNotificationSound defaultSound];
-    
-    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
-                                                                                                    repeats:NO];
-    NSString *identifier = @"NewWorkoutLocalNotification";
-    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
-                                                                          content:content trigger:trigger];
-    
-    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-        if (error != nil) {
-            NSLog(@"Something went wrong scheduling a notification: %@",error);
-        }
-    }];
-}
-    
--(IBAction)unwindToHome:(UIStoryboardSegue *)segue {
-        
-}
-
-#pragma mark - TableView Delegate & Data Source
-
--(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.energy.count;
-}
-
--(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
-}
-
--(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"healthCell"];
-    if ([self.energy count] > 1) {
-        
-        HKQuantitySample *energy = [self.energy objectAtIndex:indexPath.row];
-        
-        NSString *energyString = [NSString stringWithFormat:@"%.2f", [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]]];
-        
-        [cell.textLabel setText:[energyString stringByAppendingString:@" Cal"]];
-        
-        NSString *source;
-        if ([[energy description] rangeOfString:@"Watch"].location != NSNotFound) {
-            source = @"Watch";
-        } else if ([[energy description] rangeOfString:@"iPhone"].location != NSNotFound) {
-            source = @"iPhone";
-        } else if ([[energy description] rangeOfString:@"Human"].location != NSNotFound) {
-            source = @"Human";
-        } else if ([[energy description] rangeOfString:@"Endomondo"].location != NSNotFound) {
-            source = @"Endomondo";
-        } else {
-            source = @"Other";
-        }
-        
-        NSDateFormatter *formatter = [NSDateFormatter new];
-        formatter.dateStyle = NSDateFormatterShortStyle;
-        NSDateFormatter *formatter2 = [NSDateFormatter new];
-        [formatter2 setDateFormat:@"hh:mm"];
-        
-        NSString *dateString = [formatter stringFromDate:energy.startDate];
-        
-        [cell.detailTextLabel setText:[[source mutableCopy] stringByAppendingString:[NSString stringWithFormat:@"%@", [dateString substringToIndex:dateString.length - 3]]]];
-    }
-
-    return cell;
-}
-
--(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
-}
-    
 + (NSInteger)daysBetweenDate:(NSDate*)fromDateTime andDate:(NSDate*)toDateTime {
     
         NSDate *fromDate;
@@ -450,94 +218,5 @@
         
         return [difference day];
 }
-
--(IBAction)sendEmail {
-    // Email Subject
-    NSString *emailTitle = @"FitBot Sync: Error Logs";
-    
-    NSError *err;
-    NSString *logPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/ActivityLog.txt"];
-    
-    NSString *messageBody = [NSString stringWithContentsOfFile:logPath
-                                          usedEncoding:NSUTF8StringEncoding
-                                                 error:&err];
-    // To address
-    NSArray *toRecipents = [NSArray arrayWithObject:@"bryan@rockmyworldmedia.com"];
-    
-    MFMailComposeViewController *mc = [[MFMailComposeViewController alloc] init];
-    mc.mailComposeDelegate = self;
-    [mc setSubject:emailTitle];
-    [mc setMessageBody:messageBody isHTML:NO];
-    [mc setToRecipients:toRecipents];
-    
-    // Present mail view controller on screen
-    [self presentViewController:mc animated:YES completion:nil];
-    
-}
-
-- (void) mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
-{
-    switch (result)
-    {
-        case MFMailComposeResultCancelled:
-            NSLog(@"Mail cancelled");
-            break;
-        case MFMailComposeResultSaved:
-            NSLog(@"Mail saved");
-            break;
-        case MFMailComposeResultSent:
-            NSLog(@"Mail sent");
-            break;
-        case MFMailComposeResultFailed:
-            NSLog(@"Mail sent failure: %@", [error localizedDescription]);
-            break;
-        default:
-            break;
-    }
-    
-    // Close the Mail Interface
-    [self dismissViewControllerAnimated:YES completion:NULL];
-}
-    
-    /*
-     * Utils: Add this section before your class implementation
-     */
-    
-    /**
-     This creates a new query parameters string from the given NSDictionary. For
-     example, if the input is @{@"day":@"Tuesday", @"month":@"January"}, the output
-     string will be @"day=Tuesday&month=January".
-     @param queryParameters The input dictionary.
-     @return The created parameters string.
-     */
-    static NSString* NSStringFromQueryParameters(NSDictionary* queryParameters)
-    {
-        NSMutableArray* parts = [NSMutableArray array];
-        [queryParameters enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
-            NSString *part = [NSString stringWithFormat: @"%@=%@",
-                              [key stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding],
-                              [value stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding]
-                              ];
-            [parts addObject:part];
-        }];
-        return [parts componentsJoinedByString: @"&"];
-    }
-    
-    /**
-     Creates a new URL by adding the given query parameters.
-     @param URL The input URL.
-     @param queryParameters The query parameter dictionary to add.
-     @return A new NSURL.
-     */
-    static NSURL* NSURLByAppendingQueryParameters(NSURL* URL, NSDictionary* queryParameters)
-    {
-        NSString* URLString = [NSString stringWithFormat:@"%@?%@",
-                               [URL absoluteString],
-                               NSStringFromQueryParameters(queryParameters)
-                               ];
-        return [NSURL URLWithString:URLString];
-    }
-    
-
 
 @end

@@ -11,7 +11,6 @@
 @interface SourcesCollectionViewCell : UICollectionViewCell
 
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
-
 @property (strong, nonatomic) IBOutlet UILabel *totalCalLabel;
 @property (strong, nonatomic) IBOutlet UILabel *stepsCalLabel;
 @property (strong, nonatomic) IBOutlet UILabel *otherCalLabel;

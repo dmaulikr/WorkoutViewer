@@ -164,8 +164,9 @@
     [[HKHealthStore new] executeQuery:sampleQuery];
 }
 
-+ (void)getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:(NSMutableArray *)steps withCompletion:(void (^)(NSNumber *, NSError *))completion {
++ (void)getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:(NSMutableArray *)steps withCompletion:(void (^)(NSNumber *stepEnergy, NSNumber *otherEnergy, NSError *))completion {
     
+    //[AppDelegate logBackgroundDataToFileWithStats:nil message:@"Beginning Main Calorie Calculating Function" time:[NSDate date]];
     // 2. Order the workouts by date
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
     
@@ -245,13 +246,19 @@
                                           
                                           [self convertStepsToCalories:@(nonoverlappingSteps) withCompletion:^(double cals, NSError *err) {
                                               if (!err) {
-                                                  completion(@(otherEnergy + cals), nil);
+                                                  //[AppDelegate logBackgroundDataToFileWithStats:nil message:@"Successfully Completed Step to Cal Conversion" time:[NSDate date]];
+
+                                                  completion(@(cals), @(otherEnergy), nil);
+                                              } else {
+                                                  [AppDelegate logBackgroundDataToFileWithStats:@{@"Error": err} message:@"Failed Calorie Calculating Function with Steps" time:[NSDate date]];
+                                                  completion(nil, nil, err);
                                               }
                                           }];
                                           
                                       } else{
                                           NSLog(@"Error retrieving energy %@",error);
-                                          completion(nil, error);
+                                          [AppDelegate logBackgroundDataToFileWithStats:@{@"Error": error} message:@"Failed Calorie Calculating Function with Steps" time:[NSDate date]];
+                                          completion(nil, nil, error);
                                       }
                                   }];
     
@@ -296,6 +303,8 @@
 }
 
 + (void)getAllStepSamples:(void (^)(NSArray* stepSamples, NSError *err))completionHandler {
+    
+    
     // 2. Order the workouts by date
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
     
@@ -310,9 +319,11 @@
                                   {
                                       
                                       if(!error && results){
+                                          //[AppDelegate logBackgroundDataToFileWithStats:nil message:@"Successfully Completed Step Sample Retreival" time:[NSDate date]];
                                           completionHandler(results, nil);
                                       }else{
                                           NSLog(@"Error retrieving energy %@",error);
+                                          [AppDelegate logBackgroundDataToFileWithStats:@{@"Error":error} message:@"Error Getting Step Samples" time:[NSDate date]];
                                           completionHandler(nil, error);
                                       }
                                   }];
