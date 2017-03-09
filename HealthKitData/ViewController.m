@@ -14,20 +14,22 @@
 
 @interface ViewController ()
 
+@property (strong, nonatomic) IBOutlet UIView *collectionViewContainer;
 @property (strong, nonatomic) NSString *slackUsername;
 @property (strong, nonatomic) NSNumber *totalEnergyBurnedForTheWeek;
 @property (strong, nonatomic) NSMutableArray *sources;
 @property (strong, nonatomic) NSMutableArray *energy;
 @property (strong, nonatomic) HealthKitFunctions *store;
     
-@property (weak, nonatomic) IBOutlet UILabel *currentGoalLabel;
 @property (weak, nonatomic) IBOutlet UILabel *remainingGoalLabel;
 @property (weak, nonatomic) IBOutlet UILabel *timeLeftLabel;
-@property (weak, nonatomic) IBOutlet UIButton *sourcesButton;
+@property (strong, nonatomic) IBOutlet UIButton *syncButton;
+@property (strong, nonatomic) IBOutlet UIButton *showLogButton;
+@property (strong, nonatomic) IBOutlet UIPageControl *pageControl;
+@property (strong, nonatomic) IBOutlet UILabel *daysLabel;
+
 
 @property (strong, nonatomic) dispatch_semaphore_t sem;
-
-@property (weak, nonatomic) IBOutlet InsetTextField *slackUsernameTextField;
 
 @end
 
@@ -39,17 +41,13 @@
     self.store = [[HealthKitFunctions alloc] init];
     self.store.healthStore = [HKHealthStore new];
 
-    self.dataTableView.delegate = self;
-    self.dataTableView.dataSource = self;
-    self.slackUsernameTextField.delegate = self;
-    self.sourcesButton.layer.borderColor = [UIColor whiteColor].CGColor;
-    self.dataTableView.layer.borderColor = [UIColor whiteColor].CGColor;
+    self.syncButton.layer.borderColor = [UIColor whiteColor].CGColor;
+    self.showLogButton.layer.borderColor = [UIColor whiteColor].CGColor;
     
     self.slackUsername = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
     
     self.energy = [NSMutableArray new];
     
-    self.dataTableView.userInteractionEnabled = NO;
 }
 
 -(void)viewDidAppear:(BOOL)animated {
@@ -84,6 +82,11 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
+- (IBAction)showLogPage:(id)sender {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"scrollToLog" object:nil];
+    [self.pageControl setCurrentPage:3];
+}
+
 -(void)fetchEnergySamples {
     
     [self.energy removeAllObjects];
@@ -107,9 +110,6 @@
 
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.dataTableView reloadData];
-            [self.uploadingWorkoutOverlayView setHidden:YES];
-            [self.uploadingWorkoutSpinner stopAnimating];
         });
         
         NSLog(@"Total Energy Burned: %0.f", totalBurned);
@@ -122,10 +122,6 @@
     
     [self.store getAllEnergyBurned:^(NSMutableArray *energy, NSError *err) {
 
-        //  Include watch data
-        //[self.energy addObjectsFromArray:energy];
-        
-        //  Excludes watch data
         for (HKQuantitySample *sample in energy) {
             if ([[sample description] rangeOfString:@"Watch"].location == NSNotFound) {
                 [self.energy addObject:sample];
@@ -141,12 +137,6 @@
         
         dispatch_async(dispatch_get_main_queue(), ^{
             
-            [self.totalWeeklyEnergyBurnedLabel setText:[NSString stringWithFormat:@"%0.f Cal", totalBurned]];
-            [self.dataTableView setUserInteractionEnabled:NO];
-            [self.dataTableView reloadData];
-            self.dataTableView.userInteractionEnabled = YES;
-            [self.uploadingWorkoutOverlayView setHidden:YES];
-            [self.uploadingWorkoutSpinner stopAnimating];
             
             if (self.slackUsername != nil) {
                 [self checkProgressAndGoals];
@@ -160,23 +150,13 @@
 
 - (IBAction)syncWorkouts:(id)sender {
     
-    if (self.slackUsernameTextField.text.length > 1) {
+    if ([[NSUserDefaults standardUserDefaults] valueForKey:@"slackUsername"]) {
         
-        [self hideControlsForUpload];
         [self uploadActiveEnergy];
         
     } else {
-        
         [self showAddUsernameAlert];
     }
-}
-
--(void)hideControlsForUpload {
-    //  show overlay, spinner, disable sync button and tableView, slackTextField
-    [self.uploadingWorkoutOverlayView setHidden:NO];
-    [self.uploadingWorkoutSpinner startAnimating];
-    [self.dataTableView setUserInteractionEnabled:NO];
-    [self.slackUsernameTextField setEnabled:NO];
 }
     
 - (void)uploadActiveEnergy
@@ -193,7 +173,7 @@
         
         NSDictionary* bodyObject = @{
                                      @"currentPoints": self.totalEnergyBurnedForTheWeek,
-                                     @"slackUsername": [self.slackUsernameTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]],
+                                     @"slackUsername": [[NSUserDefaults standardUserDefaults] valueForKey:@"slackUsername"],
                                      @"timeStamp": @([@([[NSDate date] timeIntervalSince1970]) integerValue])
                                      };
         request.HTTPBody = [NSJSONSerialization dataWithJSONObject:bodyObject options:kNilOptions error:NULL];
@@ -203,8 +183,8 @@
             if (error == nil) {
                 // Success
                 if (((NSHTTPURLResponse*)response).statusCode == [@(200) integerValue]) {
-                    [[NSUserDefaults standardUserDefaults] setObject:self.slackUsernameTextField.text forKey:@"slackUsername"];
-                    [[NSUserDefaults standardUserDefaults] synchronize];
+                    //[[NSUserDefaults standardUserDefaults] setObject:self.slackUsernameTextField.text forKey:@"slackUsername"];
+                    //[[NSUserDefaults standardUserDefaults] synchronize];
                 } else if (((NSHTTPURLResponse*)response).statusCode == [@(400) integerValue]) {
                     
                     dispatch_async(dispatch_get_main_queue(), ^{
@@ -219,10 +199,7 @@
             }
             dispatch_async(dispatch_get_main_queue(), ^{
                 //  show overlay, spinner, disable sync button and tableView, slackTextField
-                [self.uploadingWorkoutOverlayView setHidden:YES];
-                [self.uploadingWorkoutSpinner stopAnimating];
-                [self.dataTableView setUserInteractionEnabled:YES];
-                [self.slackUsernameTextField setEnabled:YES];
+
                 
             });
         }];
@@ -273,18 +250,11 @@
                     
                     dispatch_async(dispatch_get_main_queue(), ^{
                         
-                        [self.currentGoalLabel setText:[NSString stringWithFormat:@"%@ Cal", goal]];
                         
-                        int goalDiff = [goal intValue] - [self.totalEnergyBurnedForTheWeek intValue];
+                        double goalDiff = [self.totalEnergyBurnedForTheWeek doubleValue] / [goal doubleValue];
                         
-                        [self.burnedEnergyLabel setText:[NSString stringWithFormat:@"%.0f Cal", [self.totalEnergyBurnedForTheWeek doubleValue]]];
+                        [self.remainingGoalLabel setText:[NSString stringWithFormat:@"%.0f%%", goalDiff * 100.0]];
                         
-                        if (goalDiff > 0) {
-                            [self.remainingGoalLabel setText:[NSString stringWithFormat:@"%.0f Cal", [@(goalDiff) doubleValue]]];
-                        } else {
-                            int positive = abs(goalDiff);
-                            [self.remainingGoalLabel setText:[NSString stringWithFormat:@"+%.0f Cal", [@(positive) doubleValue]]];
-                        }
                         
                         NSDateFormatter *formatter = [NSDateFormatter new];
                         [formatter setDateFormat:@"YYYY-MM-d k:m:s"];
@@ -295,10 +265,13 @@
                         
                         NSInteger daysLeft = [ViewController daysBetweenDate:[NSDate date] andDate:endDate];
                         
+                        [self.timeLeftLabel setText:[NSString stringWithFormat:@"%zd", daysLeft]];
+                        
                         if (daysLeft == 1) {
-                            [self.timeLeftLabel setText:[NSString stringWithFormat:@"%zd day", daysLeft]];
+                            [self.daysLabel setText:@"Day"];
                         } else {
-                            [self.timeLeftLabel setText:[NSString stringWithFormat:@"%zd days", daysLeft]];
+                            [self.daysLabel setText:@"Days"];
+
                         }
                         
                         [[NSUserDefaults standardUserDefaults] setObject:goal forKey:@"goalPoints"];
@@ -312,7 +285,6 @@
 
                         }
                         
-                        [self.dataTableView reloadData];
                     });
                 }
             }
@@ -326,7 +298,7 @@
     }
     
 - (IBAction)dismissKeyboard:(id)sender {
-    [self.slackUsernameTextField resignFirstResponder];
+    [self resignFirstResponder];
 }
 
 -(void)showIncorrectSlackUsernameAlert {
@@ -477,6 +449,54 @@
                                                    fromDate:fromDate toDate:toDate options:0];
         
         return [difference day];
+}
+
+-(IBAction)sendEmail {
+    // Email Subject
+    NSString *emailTitle = @"FitBot Sync: Error Logs";
+    
+    NSError *err;
+    NSString *logPath = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents/ActivityLog.txt"];
+    
+    NSString *messageBody = [NSString stringWithContentsOfFile:logPath
+                                          usedEncoding:NSUTF8StringEncoding
+                                                 error:&err];
+    // To address
+    NSArray *toRecipents = [NSArray arrayWithObject:@"bryan@rockmyworldmedia.com"];
+    
+    MFMailComposeViewController *mc = [[MFMailComposeViewController alloc] init];
+    mc.mailComposeDelegate = self;
+    [mc setSubject:emailTitle];
+    [mc setMessageBody:messageBody isHTML:NO];
+    [mc setToRecipients:toRecipents];
+    
+    // Present mail view controller on screen
+    [self presentViewController:mc animated:YES completion:nil];
+    
+}
+
+- (void) mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
+{
+    switch (result)
+    {
+        case MFMailComposeResultCancelled:
+            NSLog(@"Mail cancelled");
+            break;
+        case MFMailComposeResultSaved:
+            NSLog(@"Mail saved");
+            break;
+        case MFMailComposeResultSent:
+            NSLog(@"Mail sent");
+            break;
+        case MFMailComposeResultFailed:
+            NSLog(@"Mail sent failure: %@", [error localizedDescription]);
+            break;
+        default:
+            break;
+    }
+    
+    // Close the Mail Interface
+    [self dismissViewControllerAnimated:YES completion:NULL];
 }
     
     /*

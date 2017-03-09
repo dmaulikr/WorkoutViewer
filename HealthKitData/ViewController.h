@@ -8,14 +8,9 @@
 
 #import <UIKit/UIKit.h>
 @import WatchConnectivity;
+#import <MessageUI/MessageUI.h>
 
-@interface ViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, NSURLSessionDelegate, UITextFieldDelegate, WCSessionDelegate>
-
-@property (weak, nonatomic) IBOutlet UILabel *firstMetricLabel;
-@property (weak, nonatomic) IBOutlet UILabel *secondDetailMetricLabel;
-@property (weak, nonatomic) IBOutlet UITableView *dataTableView;
-@property (weak, nonatomic) IBOutlet UILabel *totalWeeklyEnergyBurnedLabel;
-@property (weak, nonatomic) IBOutlet UILabel *burnedEnergyLabel;
+@interface ViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, NSURLSessionDelegate, UITextFieldDelegate, WCSessionDelegate, MFMailComposeViewControllerDelegate>
 
 @end
 
