@@ -10,13 +10,17 @@
 #import "SourcesCollectionViewCell.h"
 #import "SourceTableViewCell.h"
 #import "LogsCollectionViewCell.h"
+#import "WorkoutsCollectionViewCell.h"
 #import "HealthKitFunctions.h"
 #import "AppDelegate.h"
 #import <HealthKit/HealthKit.h>
+#import "WorkoutTableViewCell.h"
 
 @interface DataCollectionViewController ()
 
 @property (strong, nonatomic) NSMutableDictionary *stats;
+@property (strong, nonatomic) NSMutableArray *sources;
+@property (strong, nonatomic) NSMutableArray *workouts;
 
 @end
 
@@ -25,12 +29,41 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    
+}
+
+-(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moveToLogPage) name:@"scrollToLog" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setStatsDictionary:) name:@"setStats" object:nil];
+    
+    [HealthKitFunctions getAllSources:^(NSMutableArray *sources, NSError *err) {
+        if (err == nil) {
+            self.sources = [NSMutableArray arrayWithArray:sources];
+            
+            
+            
+            for (UICollectionViewCell *c in self.collectionView.visibleCells) {
+                if ([c isKindOfClass:[SourcesCollectionViewCell class]]) {
+                    SourcesCollectionViewCell *cell = (SourcesCollectionViewCell *)c;
+                    
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [cell.tableView reloadData];
+                    });
+                    
+                }
+            }
+        }
+    }];
+}
+
+-(void)viewDidLayoutSubviews {
+    //[self.collectionView reloadData];
 }
 
 - (void)moveToLogPage {
-    [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:2 inSection:0] atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
+    [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0] atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
 }
 
 -(void)setStatsDictionary:(NSNotification *)notification {
@@ -41,16 +74,14 @@
             SourcesCollectionViewCell *cell = (SourcesCollectionViewCell *)c;
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                [cell.totalCalLabel setText:[[self.stats[@"current"] stringValue] stringByAppendingString:@" cal"]];
-                [cell.stepsCalLabel setText:[NSString stringWithFormat:@"%.0f cal", [self.stats[@"current"] doubleValue] - [self.stats[@"other"] doubleValue]]];
-                [cell.otherCalLabel setText:[NSString stringWithFormat:@"%.0f cal", [self.stats[@"other"] doubleValue]]];
+                [cell.totalCalLabel setText:[NSString stringWithFormat:@"%.0f pts", [self.stats[@"current"] doubleValue]]];
+                [cell.stepsCalLabel setText:[NSString stringWithFormat:@"%.0f pts", [self.stats[@"current"] doubleValue] - [self.stats[@"other"] doubleValue]]];
+
+                [cell.otherCalLabel setText:[NSString stringWithFormat:@"%.0f pts", [self.stats[@"other"] doubleValue]]];
             });
             
         }
     }
-    
-    [[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]] setNeedsDisplay];
-    
 }
 
 #pragma mark <UICollectionViewDataSource>
@@ -61,7 +92,7 @@
 
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return 4;
+    return 5;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
@@ -78,6 +109,12 @@
         return cell;
     } else if (indexPath.row == 1) {
         identifier = @"workouts";
+        WorkoutsCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
+        cell.tableView.tag = 2;
+        cell.tableView.delegate = self;
+        cell.tableView.layer.borderColor = [UIColor whiteColor].CGColor;
+        
+        return cell;
     } else if (indexPath.row == 2) {
         identifier = @"logs";
         LogsCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
@@ -99,9 +136,9 @@
         
         return cell;
         
-//    } else if (indexPath.row == 3) {
-//        identifier = @"week";
     } else if (indexPath.row == 3) {
+        identifier = @"week";
+    } else if (indexPath.row == 4) {
         identifier = @"bot";
         return [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
     }
@@ -133,6 +170,7 @@
     if (indexPath.row == 0 && self.stats != nil) {
         SourcesCollectionViewCell *cell = (SourcesCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
         [cell.totalCalLabel setText:[[self.stats[@"current"] stringValue] stringByAppendingString:@" cal"]];
+
         [HealthKitFunctions getAllStepSamples:^(NSArray *stepSamples, NSError *err) {
             
             NSMutableArray *watchStepSamples = [NSMutableArray new];
@@ -172,12 +210,11 @@
     if (indexPath.row == 2) {
         LogsCollectionViewCell *cell = (LogsCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
 
-//            if( cell.logsTextView.text.length > 0 ) {
-//                dispatch_async(dispatch_get_main_queue(), ^{
-//                    NSRange bottom = NSMakeRange(cell.logsTextView.text.length - 1, 1);
-//                    [cell.logsTextView scrollRangeToVisible:bottom];
-//                });
-//            }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [cell.logsTextView scrollRangeToVisible:NSMakeRange([cell.logsTextView.text length] - 1, 0)];
+            [cell.logsTextView setScrollEnabled:NO];
+            [cell.logsTextView setScrollEnabled:YES];
+        });
         
     }
 }
@@ -187,17 +224,43 @@
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 1;
+    return self.sources.count;
+}
+
+
+-(void)calculateEnergyFromSources:(NSNotification *)notification {
+    [HealthKitFunctions getAllEnergyBurnedWithFilters:notification.object withCompletion:^(NSMutableDictionary *totalSources, NSError *err) {
+        NSLog(@"%@", totalSources.description);
+        
+        SourcesCollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+        
+    }];
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     //    source table view
-    if (tableView.tag == 0) {
+    if (tableView.tag == 1) {
         SourceTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"source"];
-        //cell.
+        
+        HKSource *source = [self.sources objectAtIndex:indexPath.row];
+        
+        [cell.sourceLabel setText:source.name];
+        
+        
+        
+        if ([source.description containsString:@"Human"]) {
+            [cell.includeSwitch setOn:NO];
+        } else {
+            [cell.includeSwitch setOn:YES];
+        }
         
         return cell;
+        
+    } else if (tableView.tag == 2) {
+        
+        WorkoutTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"workouts"];
+        
     }
     //UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"source"];
     
@@ -218,7 +281,7 @@
 //    
     //}
     
-    //return cell;
+    return [tableView dequeueReusableCellWithIdentifier:@"source"];
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {

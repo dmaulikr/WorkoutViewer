@@ -52,7 +52,7 @@
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 
-    [self.store requestPermission:^(BOOL success, NSError *err) {
+    [HealthKitFunctions requestPermission:^(BOOL success, NSError *err) {
         if (success) {
             [self refreshFeed:nil];
             [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
@@ -85,6 +85,10 @@
                         [self.spinner stopAnimating];
                         
                     });
+                } else {
+                     dispatch_async(dispatch_get_main_queue(), ^{
+                         [self.spinner stopAnimating];
+                     });
                 }
             }];
         }
@@ -100,16 +104,32 @@
                                                                    message:@"ex: \"adamrz\""
                                                             preferredStyle:UIAlertControllerStyleAlert];
     
-    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"Neat!" style:UIAlertActionStyleDefault
-                                                          handler:^(UIAlertAction * action) {}];
+    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+        textField.placeholder = @"slack username";
+        textField.textColor = [UIColor blueColor];
+        textField.clearButtonMode = UITextFieldViewModeWhileEditing;
+        textField.borderStyle = UITextBorderStyleRoundedRect;
+    }];
     
-    [alert addAction:defaultAction];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Do it." style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        NSArray * textfields = alert.textFields;
+        UITextField * usernameField = textfields[0];
+        NSLog(@"Slack Username: %@",usernameField.text);
+        
+        if (usernameField.text.length > 1) {
+            [[NSUserDefaults standardUserDefaults] setObject:[usernameField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] forKey:@"slackUsername"];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+            [self syncWorkouts:nil];
+        }
+        
+    }]];
+    
     [self presentViewController:alert animated:YES completion:nil];
 }
 
 - (IBAction)showLogPage:(id)sender {
     [[NSNotificationCenter defaultCenter] postNotificationName:@"scrollToLog" object:nil];
-    [self.pageControl setCurrentPage:2];
+    [self.pageControl setCurrentPage:1];
 }
 
 -(void)changePage:(NSNotification *)notification {
@@ -119,22 +139,23 @@
 +(void)updateAllDataWithCompletion:(void(^)(BOOL success, NSMutableDictionary *stats, NSError *error))completion {
     [HealthKitFunctions getAllStepSamples:^(NSArray *stepSamples, NSError *err) {
         
-        [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber* other, NSError *err) {
-            
             [AppDelegate checkStatus:^(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error) {
-                NSMutableDictionary *stats = [@{@"start":start, @"end":end, @"current":points, @"other": other,@"goal":goal} mutableCopy];
-
-                if (success) {
-                    [AppDelegate uploadEnergyWithStats:stats withCompletion:^(BOOL success, NSError *err) {
-                        if (success) {
-                            completion(YES, stats, nil);
-                        } else {
-                            completion(NO, nil, err);
-                        }
-                    }];
-                }
+                
+                [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber* other, NSError *err) {
+                    
+                    NSMutableDictionary *stats = [@{@"start":start, @"end":end, @"current":@([cals integerValue]), @"other": other,@"goal":goal} mutableCopy];
+                    
+                    if (success) {
+                        [AppDelegate uploadEnergyWithStats:stats withCompletion:^(BOOL success, NSError *err) {
+                            if (success) {
+                                completion(YES, stats, nil);
+                            } else {
+                                completion(NO, nil, err);
+                            }
+                        }];
+                    }
+                }];
             }];
-        }];
     }];
 }
 
@@ -170,6 +191,8 @@
             if (success) {
                 NSLog(@"Updated and loaded new data");
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
+            } else {
+                [self showAddUsernameAlert];
             }
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.spinner stopAnimating];

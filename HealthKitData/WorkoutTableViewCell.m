@@ -1,22 +1,18 @@
 //
-//  SourceTableViewCell.m
+//  WorkoutTableViewCell.m
 //  HealthKitData
 //
 //  Created by Bryan Gula on 3/9/17.
 //  Copyright © 2017 Rock My World, Inc. All rights reserved.
 //
 
-#import "SourceTableViewCell.h"
+#import "WorkoutTableViewCell.h"
 
-@implementation SourceTableViewCell
+@implementation WorkoutTableViewCell
 
 - (void)awakeFromNib {
     [super awakeFromNib];
     // Initialization code
-}
-
-- (IBAction)include:(id)sender {
-    
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

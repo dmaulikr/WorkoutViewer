@@ -15,6 +15,4 @@
 @property (strong, nonatomic) IBOutlet UILabel *stepsCalLabel;
 @property (strong, nonatomic) IBOutlet UILabel *otherCalLabel;
 
-
-
 @end

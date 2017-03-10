@@ -14,16 +14,17 @@
 
 @property (strong, nonatomic) HKHealthStore *healthStore;
 
--(void)requestPermission:(void (^)(BOOL success, NSError *err))completion;
++(void)requestPermission:(void (^)(BOOL success, NSError *err))completion;
 
 + (NSPredicate *)predicateForSamplesToday;
 + (NSPredicate *)predicateForSamplesWeek;
 + (NSPredicate *)predicateForSamplesFromNowToDate:(NSDate *)date;
 
 - (void)getAllEnergyBurned:(void (^)(NSMutableArray *, NSError *))completion;
-- (void)getAllSources:(void (^)(NSMutableArray *, NSError *))completion;
++(void)getAllSources:(void (^)(NSMutableArray *, NSError *))completion;
 
 + (void)getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:(NSMutableArray *)steps withCompletion:(void (^)(NSNumber *stepEnergy, NSNumber *otherEnergy, NSError *))completion;
++ (void)getAllEnergyBurnedWithFilters:(NSMutableDictionary *)filterTags withCompletion:(void (^)(NSMutableDictionary *totalSources, NSError *err))completion;
 + (void)getAllEnergyBurnedFromAppleWatch:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedFromSteps:(void (^)(double, NSError *))completionHandler;

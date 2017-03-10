@@ -26,130 +26,149 @@
         [session activateSession];
     }
     
+    [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"goalStart"];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+//    return YES;
+    
     if (self.healthStore == nil) {
         self.healthStore = [HKHealthStore new];
     }
     
-    HKSampleType *steps = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
-    
-    //  if you have the goal start date, if not it will be set on home page
-    //
-    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]) {
+    [HealthKitFunctions requestPermission:^(BOOL success, NSError *err) {
         
-        //  setup background query for steps (once per hour max)
-        //
-        HKObserverQuery *stepQuery = [[HKObserverQuery alloc] initWithSampleType:steps predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]] updateHandler:^(HKObserverQuery * _Nonnull query, HKObserverQueryCompletionHandler  _Nonnull completionHandler, NSError * _Nullable error) {
+        if (success) {
+        
+            HKSampleType *steps = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
             
-            //  if you have username
+            //  if you have the goal start date, if not it will be set on home page
             //
-            if ([[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"] != nil) {
+            if ([[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]) {
                 
-                [AppDelegate checkStatus:^(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error) {
-                
-                    NSMutableDictionary *stats = [@{@"start":start, @"end":end, @"current":points, @"goal":goal} mutableCopy];
+                //  setup background query for steps (once per hour max)
+                //
+                HKObserverQuery *stepQuery = [[HKObserverQuery alloc] initWithSampleType:steps predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]] updateHandler:^(HKObserverQuery * _Nonnull query, HKObserverQueryCompletionHandler  _Nonnull completionHandler, NSError * _Nullable error) {
                     
-                    if (success) {
+                    //  if you have username
+                    //
+                    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"] != nil) {
                         
-                        //  query for new steps
-                        //
-                        [HealthKitFunctions getAllStepSamples:^(NSArray *stepSamples, NSError *err) {
-                            [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber *other, NSError *err) {
+                        [AppDelegate checkStatus:^(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error) {
+                        
+                            NSMutableDictionary *stats = [@{@"start":start, @"end":end, @"current":points, @"goal":goal} mutableCopy];
+                            
+                            [[NSUserDefaults standardUserDefaults] setObject:start forKey:@"goalStart"];
+                            [[NSUserDefaults standardUserDefaults] synchronize];
+                            NSLog(@"AD - Start Date: %@", start.description);
+                            
+                            if (success) {
                                 
-                                //  setting new calculated Calories
+                                //  query for new steps
                                 //
-                                [stats setValue:@([cals integerValue] + [other integerValue]) forKey:@"current"];
-                                
-                                [AppDelegate uploadEnergyWithStats:stats withCompletion:^(BOOL success, NSError *err) {
-                                    if (success) {
-                                        [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Sync Succeeded" time:[NSDate date]];
-                                        completionHandler();
+                                [HealthKitFunctions getAllStepSamples:^(NSArray *stepSamples, NSError *err) {
+                                    
+                                    [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber *other, NSError *err) {
                                         
-                                    } else {
-                                        [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Upload Energy Failed" time:[NSDate date]];
-                                        completionHandler();
-                                    }
+                                        
+                                        //  setting new calculated Calories
+                                        //
+                                        [stats setValue:@([cals integerValue] + [other integerValue]) forKey:@"current"];
+                                        
+                                        [AppDelegate uploadEnergyWithStats:stats withCompletion:^(BOOL success, NSError *err) {
+                                            if (success) {
+                                                [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Sync Succeeded" time:[NSDate date]];
+                                                completionHandler();
+                                                
+                                            } else {
+                                                [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Upload Energy Failed" time:[NSDate date]];
+                                                completionHandler();
+                                            }
+                                        }];
+                                    }];
                                 }];
-                            }];
+                                        
+                                } else {
+                                    [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Error - Calculating Steps For Week" time:[NSDate new]];
+                                    completionHandler();
+                                }
                         }];
-                                
+            
                         } else {
-                            [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Error - Calculating Steps For Week" time:[NSDate new]];
-                            completionHandler();
+                            [AppDelegate logBackgroundDataToFileWithStats:nil message:@"AppDelegate Error - Username not provided" time:[NSDate new]];
+                            completionHandler();    //  so you don't lose background updates
                         }
+                    }];
+                
+                [self.healthStore executeQuery:stepQuery];
+                
+                [self.healthStore enableBackgroundDeliveryForType:steps frequency:HKUpdateFrequencyImmediate withCompletion:^(BOOL success, NSError * _Nullable error) {
+                    if (success) {
+                        NSLog(@"Background Delivery of Step Count is Enabled.");
+                    }
                 }];
-    
-                } else {
-                    [AppDelegate logBackgroundDataToFileWithStats:nil message:@"AppDelegate Error - Username not provided" time:[NSDate new]];
-                    completionHandler();    //  so you don't lose background updates
-                }
-            }];
-        
-        [self.healthStore executeQuery:stepQuery];
-        
-        [self.healthStore enableBackgroundDeliveryForType:steps frequency:HKUpdateFrequencyImmediate withCompletion:^(BOOL success, NSError * _Nullable error) {
-            if (success) {
-                NSLog(@"Background Delivery of Step Count is Enabled.");
+            } else {
+                [AppDelegate logBackgroundDataToFileWithStats:nil message:@"AppDelegate Error - No Goal Start Date, Background Query Not Registered" time:[NSDate new]];
             }
-        }];
-    } else {
-        [AppDelegate logBackgroundDataToFileWithStats:nil message:@"AppDelegate Error - No Goal Start Date, Background Query Not Registered" time:[NSDate new]];
-    }
+        }
+    }];
 
     return YES;
 }
 
 +(void)logBackgroundDataToFileWithStats:(NSDictionary *)stats message:(NSString *)reason time:(NSDate *)timestamp {
     
-    NSDateFormatter *formatter = [NSDateFormatter new];
-    [formatter setDateFormat:@"MMM dd, YYYY @ HH:mm:ss"];
-    
-    NSMutableDictionary *mutableStats = [stats mutableCopy];
-    
-    [mutableStats setObject:[formatter stringFromDate:[NSDate date]] forKey:@"logDate"];
-    [mutableStats setObject:[formatter stringFromDate:stats[@"start"]] forKey:@"start"];
-    [mutableStats setObject:[formatter stringFromDate:stats[@"end"]] forKey:@"end"];
-    
-    NSMutableString *formattedOutput = [NSMutableString new];
-    
-    for (NSString *key in mutableStats.allKeys) {
-        [formattedOutput appendString:[NSString stringWithFormat:@"%@ = %@\n", key, [mutableStats[key] description]]];
-    }
-    
-    NSString *logEntry = [NSString stringWithFormat:@"\n%@ - %@\n%@-----\n", reason, [formatter stringFromDate:timestamp], formattedOutput];
-    
-    NSLog(@"%@", logEntry);
-    
-    NSError *error;
-    
-    NSURL *logUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask][0] URLByAppendingPathComponent:@"/activity.txt"];
-    
-    BOOL fileMade = NO;
-    
-    BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:logUrl.relativePath];
-    
-    if(!exists) {
-        fileMade = [[NSFileManager defaultManager] createFileAtPath:logUrl.relativePath contents:[logEntry dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"]) {
         
-        exists = [[NSFileManager defaultManager] fileExistsAtPath:logUrl.relativePath];
-    }
-    
-    NSData *data = [NSData dataWithContentsOfURL:logUrl];
-    
-    NSString *logs = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        NSDateFormatter *formatter = [NSDateFormatter new];
+        [formatter setDateFormat:@"MMM dd, YYYY @ HH:mm:ss"];
+        
+        NSMutableDictionary *mutableStats = [stats mutableCopy];
+        
+        [mutableStats setObject:[formatter stringFromDate:[NSDate date]] forKey:@"sent"];
+        //[mutableStats setObject:[formatter stringFromDate:stats[@"start"]] forKey:@"start"];
+        //[mutableStats setObject:[formatter stringFromDate:stats[@"end"]] forKey:@"end"];
+        
+        NSMutableString *formattedOutput = [NSMutableString new];
+        
+        for (NSString *key in mutableStats.allKeys) {
+            [formattedOutput appendString:[NSString stringWithFormat:@"%@ = %@\n", key, [mutableStats[key] description]]];
+        }
+        
+        NSString *logEntry = [NSString stringWithFormat:@"\n%@ - %@\n%@", reason, [formatter stringFromDate:timestamp], formattedOutput];
+        
+        NSLog(@"%@", logEntry);
+        
+        NSError *error;
+        
+        NSURL *logUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask][0] URLByAppendingPathComponent:@"/activity.txt"];
+        
+        BOOL fileMade = NO;
+        
+        BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:logUrl.relativePath];
+        
+        if(!exists) {
+            fileMade = [[NSFileManager defaultManager] createFileAtPath:logUrl.relativePath contents:[logEntry dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
+            
+            exists = [[NSFileManager defaultManager] fileExistsAtPath:logUrl.relativePath];
+        }
+        
+        NSData *data = [NSData dataWithContentsOfURL:logUrl];
+        
+        NSString *logs = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 
-    NSLog(@"Log File Made? %zd, Exists? %d", fileMade, exists);
-    
-    if (error == nil) {
-        NSString *updatedLog = [NSString stringWithFormat:@"%@\n-----%@", logs, logEntry];
+        NSLog(@"Log File Made? %zd, Exists? %d", fileMade, exists);
         
-        NSLog(@"Updated Log: %@", updatedLog);
-    
-        BOOL writeResult = [updatedLog writeToURL:logUrl atomically:YES encoding:NSUTF8StringEncoding error:&error];
+        if (error == nil) {
+            NSString *updatedLog = [NSString stringWithFormat:@"%@\n-----%@", logs, logEntry];
+            
+            NSLog(@"Updated Log: %@", updatedLog);
         
-        if (error) {
-            NSLog(@"Error Writing Log to File: %@", [error description]);
-        } else {
-            NSLog(@"Log Successfully Written to File");
+            BOOL writeResult = [updatedLog writeToURL:logUrl atomically:YES encoding:NSUTF8StringEncoding error:&error];
+            
+            if (error) {
+                NSLog(@"Error Writing Log to File: %@", [error description]);
+            } else {
+                NSLog(@"Log Successfully Written to File");
+            }
         }
     }
     
@@ -158,8 +177,14 @@
 +(void)checkStatus:(void(^)(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error))completion {
     
     NSURL* URL = [NSURL URLWithString:@"http://adamr5.sg-host.com/adamrz/myfirstbot/api/active_goal/"];
+    
+    NSString *username = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
+    if (username == nil) {
+        username = @"";
+    }
+    
     NSDictionary* URLParams = @{
-                                @"slack_username": [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"],
+                                @"slack_username": username,
                                 };
     
     URL = NSURLByAppendingQueryParameters(URL, URLParams);
@@ -196,6 +221,12 @@
                 NSDate *startDate = [formatter dateFromString:start];
                 NSDate *endDate = [formatter dateFromString:end];
                 
+                [[NSUserDefaults standardUserDefaults] setObject:goal forKey:@"goal"];
+                [[NSUserDefaults standardUserDefaults] setObject:current forKey:@"currentPoints"];
+                [[NSUserDefaults standardUserDefaults] setObject:startDate forKey:@"goalStart"];
+                [[NSUserDefaults standardUserDefaults] setObject:endDate forKey:@"end"];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+                
                 completion(YES, startDate, endDate, current, goal, nil);
             }
         }
@@ -206,8 +237,12 @@
         }
     }];
     
-    [task resume];
-    [[NSURLSession sharedSession] finishTasksAndInvalidate];
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"]) {
+        [task resume];
+        [[NSURLSession sharedSession] finishTasksAndInvalidate];
+    } else {
+        [AppDelegate logBackgroundDataToFileWithStats:@{} message:@"Slack Username not set" time:[NSDate date]];
+    }
 }
 
 -(void)updateWatchComplication:(NSNumber *)energyBurned {

@@ -10,6 +10,8 @@
 
 @interface SourceTableViewCell : UITableViewCell
 
+@property (strong, nonatomic) IBOutlet UILabel *sourceLabel;
+@property (strong, nonatomic) IBOutlet UISwitch *includeSwitch;
 
 
 @end

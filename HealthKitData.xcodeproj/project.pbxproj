@@ -16,16 +16,10 @@
 		A88BBF151E165D8A0078649D /* HealthKitFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = A88BBF141E165D8A0078649D /* HealthKitFunctions.m */; };
 		A88BBF191E165E540078649D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A88BBF181E165E540078649D /* HealthKit.framework */; };
 		C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */; };
-		C21F51931E68E26200DDDDC9 /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C21F51911E68E26200DDDDC9 /* Interface.storyboard */; };
-		C21F51951E68E26200DDDDC9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C21F51941E68E26200DDDDC9 /* Assets.xcassets */; };
-		C21F519C1E68E26200DDDDC9 /* SyncWatch Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C21F519B1E68E26200DDDDC9 /* SyncWatch Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		C21F51A21E68E26200DDDDC9 /* InterfaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = C21F51A11E68E26200DDDDC9 /* InterfaceController.m */; };
-		C21F51A51E68E26200DDDDC9 /* ExtensionDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C21F51A41E68E26200DDDDC9 /* ExtensionDelegate.m */; };
-		C21F51A71E68E26200DDDDC9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C21F51A61E68E26200DDDDC9 /* Assets.xcassets */; };
-		C21F51AB1E68E26200DDDDC9 /* SyncWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C21F518F1E68E26200DDDDC9 /* SyncWatch.app */; };
-		C21F51B41E68E37E00DDDDC9 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C21F51B31E68E37E00DDDDC9 /* HealthKit.framework */; };
-		C21F52021E693A7E00DDDDC9 /* Complication.swift in Sources */ = {isa = PBXBuildFile; fileRef = C21F52011E693A7E00DDDDC9 /* Complication.swift */; };
-		C21F52041E6AF87A00DDDDC9 /* ClockKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C21F52031E6AF87A00DDDDC9 /* ClockKit.framework */; };
+		C27CA8F11E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F01E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m */; };
+		C27CA8F41E718C8B0084B9B8 /* WorkoutTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F31E718C8A0084B9B8 /* WorkoutTableViewCell.m */; };
+		C27CA8F91E71F8060084B9B8 /* MBCircularProgressBarLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */; };
+		C27CA8FA1E71F8060084B9B8 /* MBCircularProgressBarView.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */; };
 		C2D302AC1E6F961800147784 /* DataCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302AB1E6F961800147784 /* DataCollectionViewController.m */; };
 		C2D302AF1E71148900147784 /* SourcesCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302AE1E71148900147784 /* SourcesCollectionViewCell.m */; };
 		C2D302B51E712A8000147784 /* LogsCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302B41E712A8000147784 /* LogsCollectionViewCell.m */; };
@@ -33,42 +27,13 @@
 		C2EC19711E578B7F0076FA0B /* StatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2EC19701E578B7F0076FA0B /* StatViewController.m */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		C21F519D1E68E26200DDDDC9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A88BBEF11E1656910078649D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C21F519A1E68E26200DDDDC9;
-			remoteInfo = "SyncWatch Extension";
-		};
-		C21F51A91E68E26200DDDDC9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A88BBEF11E1656910078649D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C21F518E1E68E26200DDDDC9;
-			remoteInfo = SyncWatch;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXCopyFilesBuildPhase section */
-		C21F51AF1E68E26200DDDDC9 /* Embed App Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				C21F519C1E68E26200DDDDC9 /* SyncWatch Extension.appex in Embed App Extensions */,
-			);
-			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		C2E526C11E36E575000FF99A /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				C21F51AB1E68E26200DDDDC9 /* SyncWatch.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -92,11 +57,9 @@
 		A88BBF181E165E540078649D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		C2057EEE1E2EC15800F2FF4F /* InsetTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InsetTextField.h; sourceTree = "<group>"; };
 		C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InsetTextField.m; sourceTree = "<group>"; };
-		C21F518F1E68E26200DDDDC9 /* SyncWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SyncWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C21F51921E68E26200DDDDC9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		C21F51941E68E26200DDDDC9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C21F51961E68E26200DDDDC9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C21F519B1E68E26200DDDDC9 /* SyncWatch Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "SyncWatch Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		C21F51A01E68E26200DDDDC9 /* InterfaceController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InterfaceController.h; sourceTree = "<group>"; };
 		C21F51A11E68E26200DDDDC9 /* InterfaceController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InterfaceController.m; sourceTree = "<group>"; };
 		C21F51A31E68E26200DDDDC9 /* ExtensionDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExtensionDelegate.h; sourceTree = "<group>"; };
@@ -108,6 +71,14 @@
 		C21F52001E693A7E00DDDDC9 /* SyncWatch Extension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SyncWatch Extension-Bridging-Header.h"; sourceTree = "<group>"; };
 		C21F52011E693A7E00DDDDC9 /* Complication.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Complication.swift; sourceTree = "<group>"; };
 		C21F52031E6AF87A00DDDDC9 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS3.1.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
+		C27CA8EF1E718A3F0084B9B8 /* WorkoutsCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorkoutsCollectionViewCell.h; sourceTree = "<group>"; };
+		C27CA8F01E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WorkoutsCollectionViewCell.m; sourceTree = "<group>"; };
+		C27CA8F21E718C8A0084B9B8 /* WorkoutTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorkoutTableViewCell.h; sourceTree = "<group>"; };
+		C27CA8F31E718C8A0084B9B8 /* WorkoutTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WorkoutTableViewCell.m; sourceTree = "<group>"; };
+		C27CA8F51E71F8060084B9B8 /* MBCircularProgressBarLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBCircularProgressBarLayer.h; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarLayer.h"; sourceTree = "<group>"; };
+		C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBCircularProgressBarLayer.m; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarLayer.m"; sourceTree = "<group>"; };
+		C27CA8F71E71F8060084B9B8 /* MBCircularProgressBarView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBCircularProgressBarView.h; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarView.h"; sourceTree = "<group>"; };
+		C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBCircularProgressBarView.m; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarView.m"; sourceTree = "<group>"; };
 		C2D302AA1E6F961800147784 /* DataCollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataCollectionViewController.h; sourceTree = "<group>"; };
 		C2D302AB1E6F961800147784 /* DataCollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataCollectionViewController.m; sourceTree = "<group>"; };
 		C2D302AD1E71148900147784 /* SourcesCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SourcesCollectionViewCell.h; sourceTree = "<group>"; };
@@ -129,15 +100,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C21F51981E68E26200DDDDC9 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C21F52041E6AF87A00DDDDC9 /* ClockKit.framework in Frameworks */,
-				C21F51B41E68E37E00DDDDC9 /* HealthKit.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -156,8 +118,6 @@
 			isa = PBXGroup;
 			children = (
 				A88BBEF91E1656910078649D /* HealthKitData.app */,
-				C21F518F1E68E26200DDDDC9 /* SyncWatch.app */,
-				C21F519B1E68E26200DDDDC9 /* SyncWatch Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -165,6 +125,14 @@
 		A88BBEFB1E1656910078649D /* HealthKitData */ = {
 			isa = PBXGroup;
 			children = (
+				C27CA8F21E718C8A0084B9B8 /* WorkoutTableViewCell.h */,
+				C27CA8F31E718C8A0084B9B8 /* WorkoutTableViewCell.m */,
+				C27CA8EF1E718A3F0084B9B8 /* WorkoutsCollectionViewCell.h */,
+				C27CA8F01E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m */,
+				C27CA8F51E71F8060084B9B8 /* MBCircularProgressBarLayer.h */,
+				C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */,
+				C27CA8F71E71F8060084B9B8 /* MBCircularProgressBarView.h */,
+				C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */,
 				C2D302B61E717C3200147784 /* SourceTableViewCell.h */,
 				C2D302B71E717C3200147784 /* SourceTableViewCell.m */,
 				C2D302B31E712A8000147784 /* LogsCollectionViewCell.h */,
@@ -252,46 +220,11 @@
 			buildRules = (
 			);
 			dependencies = (
-				C21F51AA1E68E26200DDDDC9 /* PBXTargetDependency */,
 			);
 			name = HealthKitData;
 			productName = HealthKitData;
 			productReference = A88BBEF91E1656910078649D /* HealthKitData.app */;
 			productType = "com.apple.product-type.application";
-		};
-		C21F518E1E68E26200DDDDC9 /* SyncWatch */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C21F51B01E68E26200DDDDC9 /* Build configuration list for PBXNativeTarget "SyncWatch" */;
-			buildPhases = (
-				C21F518D1E68E26200DDDDC9 /* Resources */,
-				C21F51AF1E68E26200DDDDC9 /* Embed App Extensions */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				C21F519E1E68E26200DDDDC9 /* PBXTargetDependency */,
-			);
-			name = SyncWatch;
-			productName = SyncWatch;
-			productReference = C21F518F1E68E26200DDDDC9 /* SyncWatch.app */;
-			productType = "com.apple.product-type.application.watchapp2";
-		};
-		C21F519A1E68E26200DDDDC9 /* SyncWatch Extension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C21F51AC1E68E26200DDDDC9 /* Build configuration list for PBXNativeTarget "SyncWatch Extension" */;
-			buildPhases = (
-				C21F51971E68E26200DDDDC9 /* Sources */,
-				C21F51981E68E26200DDDDC9 /* Frameworks */,
-				C21F51991E68E26200DDDDC9 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "SyncWatch Extension";
-			productName = "SyncWatch Extension";
-			productReference = C21F519B1E68E26200DDDDC9 /* SyncWatch Extension.appex */;
-			productType = "com.apple.product-type.watchkit2-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -315,22 +248,6 @@
 							};
 						};
 					};
-					C21F518E1E68E26200DDDDC9 = {
-						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = 42SJVK5ETL;
-						ProvisioningStyle = Automatic;
-					};
-					C21F519A1E68E26200DDDDC9 = {
-						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = 42SJVK5ETL;
-						LastSwiftMigration = 0820;
-						ProvisioningStyle = Automatic;
-						SystemCapabilities = {
-							com.apple.HealthKit.watchos = {
-								enabled = 1;
-							};
-						};
-					};
 				};
 			};
 			buildConfigurationList = A88BBEF41E1656910078649D /* Build configuration list for PBXProject "HealthKitData" */;
@@ -347,8 +264,6 @@
 			projectRoot = "";
 			targets = (
 				A88BBEF81E1656910078649D /* HealthKitData */,
-				C21F518E1E68E26200DDDDC9 /* SyncWatch */,
-				C21F519A1E68E26200DDDDC9 /* SyncWatch Extension */,
 			);
 		};
 /* End PBXProject section */
@@ -361,23 +276,6 @@
 				A88BBF0C1E1656910078649D /* LaunchScreen.storyboard in Resources */,
 				A88BBF091E1656910078649D /* Assets.xcassets in Resources */,
 				A88BBF071E1656910078649D /* Main.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C21F518D1E68E26200DDDDC9 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C21F51951E68E26200DDDDC9 /* Assets.xcassets in Resources */,
-				C21F51931E68E26200DDDDC9 /* Interface.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C21F51991E68E26200DDDDC9 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C21F51A71E68E26200DDDDC9 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -395,36 +293,17 @@
 				C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */,
 				A88BBF041E1656910078649D /* ViewController.m in Sources */,
 				C2D302B51E712A8000147784 /* LogsCollectionViewCell.m in Sources */,
+				C27CA8FA1E71F8060084B9B8 /* MBCircularProgressBarView.m in Sources */,
 				A88BBF011E1656910078649D /* AppDelegate.m in Sources */,
 				A88BBF151E165D8A0078649D /* HealthKitFunctions.m in Sources */,
+				C27CA8F11E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m in Sources */,
+				C27CA8F91E71F8060084B9B8 /* MBCircularProgressBarLayer.m in Sources */,
 				A88BBEFE1E1656910078649D /* main.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C21F51971E68E26200DDDDC9 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C21F51A51E68E26200DDDDC9 /* ExtensionDelegate.m in Sources */,
-				C21F52021E693A7E00DDDDC9 /* Complication.swift in Sources */,
-				C21F51A21E68E26200DDDDC9 /* InterfaceController.m in Sources */,
+				C27CA8F41E718C8B0084B9B8 /* WorkoutTableViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		C21F519E1E68E26200DDDDC9 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C21F519A1E68E26200DDDDC9 /* SyncWatch Extension */;
-			targetProxy = C21F519D1E68E26200DDDDC9 /* PBXContainerItemProxy */;
-		};
-		C21F51AA1E68E26200DDDDC9 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C21F518E1E68E26200DDDDC9 /* SyncWatch */;
-			targetProxy = C21F51A91E68E26200DDDDC9 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		A88BBF051E1656910078649D /* Main.storyboard */ = {
@@ -572,85 +451,6 @@
 			};
 			name = Release;
 		};
-		C21F51AD1E68E26200DDDDC9 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = "SyncWatch Extension/SyncWatch Extension.entitlements";
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 42SJVK5ETL;
-				INFOPLIST_FILE = "SyncWatch Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.rockmymworldmedia.HealthKitData.watchkitapp.watchkitextension;
-				PRODUCT_NAME = "${TARGET_NAME}";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "SyncWatch Extension/SyncWatch Extension-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 3.1;
-			};
-			name = Debug;
-		};
-		C21F51AE1E68E26200DDDDC9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = "SyncWatch Extension/SyncWatch Extension.entitlements";
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 42SJVK5ETL;
-				INFOPLIST_FILE = "SyncWatch Extension/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.rockmymworldmedia.HealthKitData.watchkitapp.watchkitextension;
-				PRODUCT_NAME = "${TARGET_NAME}";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "SyncWatch Extension/SyncWatch Extension-Bridging-Header.h";
-				SWIFT_VERSION = 3.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 3.1;
-			};
-			name = Release;
-		};
-		C21F51B11E68E26200DDDDC9 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 42SJVK5ETL;
-				IBSC_MODULE = SyncWatch_Extension;
-				INFOPLIST_FILE = SyncWatch/Info.plist;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rockmymworldmedia.HealthKitData.watchkitapp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 3.1;
-			};
-			name = Debug;
-		};
-		C21F51B21E68E26200DDDDC9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 42SJVK5ETL;
-				IBSC_MODULE = SyncWatch_Extension;
-				INFOPLIST_FILE = SyncWatch/Info.plist;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rockmymworldmedia.HealthKitData.watchkitapp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 3.1;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -668,24 +468,6 @@
 			buildConfigurations = (
 				A88BBF111E1656910078649D /* Debug */,
 				A88BBF121E1656910078649D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C21F51AC1E68E26200DDDDC9 /* Build configuration list for PBXNativeTarget "SyncWatch Extension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C21F51AD1E68E26200DDDDC9 /* Debug */,
-				C21F51AE1E68E26200DDDDC9 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C21F51B01E68E26200DDDDC9 /* Build configuration list for PBXNativeTarget "SyncWatch" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C21F51B11E68E26200DDDDC9 /* Debug */,
-				C21F51B21E68E26200DDDDC9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

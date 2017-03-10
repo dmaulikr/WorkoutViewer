@@ -10,28 +10,26 @@
 
 @implementation HealthKitFunctions
 
--(void)requestPermission:(void (^)(BOOL success, NSError *err))completion {
-    if( self.healthStore ) {
++(void)requestPermission:(void (^)(BOOL success, NSError *err))completion {
         
-        HKSampleType *workoutType = [HKQuantityType workoutType];
-        HKQuantityType *energyBurned = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
-        HKObjectType *exerciseTime = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierAppleExerciseTime];
-        HKObjectType *walkingRunningDistance = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceWalkingRunning];
-        HKObjectType *steps = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
-        HKObjectType *mass = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
-        HKObjectType *height = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
+    HKSampleType *workoutType = [HKQuantityType workoutType];
+    HKQuantityType *energyBurned = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
+    HKObjectType *exerciseTime = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierAppleExerciseTime];
+    HKObjectType *walkingRunningDistance = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierDistanceWalkingRunning];
+    HKObjectType *steps = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+    HKObjectType *mass = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierBodyMass];
+    HKObjectType *height = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierHeight];
 
-        
-        NSSet *readDataTypes = [NSSet setWithObjects:workoutType, mass, energyBurned, height, exerciseTime, walkingRunningDistance, steps, nil];
-        
-        [self.healthStore requestAuthorizationToShareTypes:nil readTypes:readDataTypes completion:^(BOOL success, NSError *error) {
-            if (success) {
-                completion(YES, nil);
-            } else {
-                completion(NO, error);
-            }
-        }];
-    }
+    
+    NSSet *readDataTypes = [NSSet setWithObjects:workoutType, mass, energyBurned, height, exerciseTime, walkingRunningDistance, steps, nil];
+    
+    [[HKHealthStore new] requestAuthorizationToShareTypes:nil readTypes:readDataTypes completion:^(BOOL success, NSError *error) {
+        if (success) {
+            completion(YES, nil);
+        } else {
+            completion(NO, error);
+        }
+    }];
 }
 
 - (void)getAllEnergyBurned:(void (^)(NSMutableArray *, NSError *))completion {
@@ -93,7 +91,7 @@
                                               }
                                               NSLog(@"Got all active energy for the week.");
                                               completion(@(watchEnergy), nil);
-                                          }else{
+                                          } else{
                                               NSLog(@"Error retrieving energy %@",error);
                                               completion(nil, error);
                                           }
@@ -170,6 +168,8 @@
     // 2. Order the workouts by date
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
     
+    NSLog(@"Start Date - Get All E: %@", [[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]);
+    
     // 3. Create the query
     HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned]
                                                                  predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]]
@@ -187,7 +187,7 @@
                                           for(HKQuantitySample *sample in results)
                                           {
                                               
-                                              if (![sample.description containsString:@"Watch"] && ![sample.description containsString:@"Human"]) {
+                                              if (![sample.description containsString:@"Watch"] && ![sample.description containsString:@"Human"] && ([sample.startDate timeIntervalSinceDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]] > 0)) {
                                                   [otherWorkouts addObject:sample];
                                               }
                                           }
@@ -198,7 +198,7 @@
                                           //
                                           for(HKQuantitySample *other in otherWorkouts) {
                                               for(HKQuantitySample *step in steps) {
-                                                  if ([HealthKitFunctions date:step.startDate isBetweenDate:other.startDate andDate:other.endDate] && ![overlappingSamples containsObject:step]) {
+                                                  if ([HealthKitFunctions date:step.startDate isBetweenDate:other.startDate andDate:other.endDate] && ![overlappingSamples containsObject:step] && ([other.startDate timeIntervalSinceDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]] > 0) && ([step.startDate timeIntervalSinceDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]] > 0)) {
                                                       [overlappingSamples addObject:step];
                                                   }
                                               }
@@ -266,12 +266,49 @@
     [[HKHealthStore new] executeQuery:sampleQuery];
 }
 
-+ (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion {
-//    
-    // 2. Order the workouts by date
++ (void)getAllEnergyBurnedWithFilters:(NSMutableDictionary *)filterTags withCompletion:(void (^)(NSMutableDictionary *totalSources, NSError *err))completion {
     NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
     
-    // 3. Create the query
+    HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned]
+                                                                 predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]]
+                                                                     limit:HKObjectQueryNoLimit
+                                                           sortDescriptors:@[sortDescriptor]
+                                                            resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
+                                  {
+                                      
+                                      if(!error && results){
+                                          
+                                          for(HKQuantitySample *samples in results)
+                                          {
+                                              NSString *sourceKey = samples.sourceRevision.source.name;
+                                              NSNumber *filterEnergy = filterTags[sourceKey];
+                                              
+                                              if (filterEnergy) {   //  filter found
+                                                  
+                                                  NSNumber *increment = @([samples.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]] + [filterEnergy doubleValue]);
+                                                  
+                                                  [filterTags setObject:increment forKey:samples.sourceRevision.source.name];
+                                              }
+                                          }
+
+                                          completion(filterTags, nil);
+                                          
+                                      } else{
+                                          [AppDelegate logBackgroundDataToFileWithStats:filterTags message:@"Error Calculating Filtered Energy" time:[NSDate date]];
+                                          
+                                          NSLog(@"Error Calculating Filtered Energy %@",error);
+                                          completion(nil, error);
+                                      }
+                                  }];
+    
+    // Execute the query
+    [[HKHealthStore new] executeQuery:sampleQuery];
+}
+
++ (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion {
+//    
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
+    
     HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned]
                                                                  predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]]
                                                                      limit:HKObjectQueryNoLimit
@@ -304,32 +341,35 @@
 
 + (void)getAllStepSamples:(void (^)(NSArray* stepSamples, NSError *err))completionHandler {
     
-    
-    // 2. Order the workouts by date
-    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
-    
-    NSLog(@"Getting Step Samples from %@ to Now", [[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]);
-    
-    // 3. Create the query
-    HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount]
-                                                                 predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]]
-                                                                     limit:HKObjectQueryNoLimit
-                                                           sortDescriptors:@[sortDescriptor]
-                                                            resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
-                                  {
-                                      
-                                      if(!error && results){
-                                          //[AppDelegate logBackgroundDataToFileWithStats:nil message:@"Successfully Completed Step Sample Retreival" time:[NSDate date]];
-                                          completionHandler(results, nil);
-                                      }else{
-                                          NSLog(@"Error retrieving energy %@",error);
-                                          [AppDelegate logBackgroundDataToFileWithStats:@{@"Error":error} message:@"Error Getting Step Samples" time:[NSDate date]];
-                                          completionHandler(nil, error);
-                                      }
-                                  }];
-    
-    // Execute the query
-    [[HKHealthStore new] executeQuery:sampleQuery];
+    [AppDelegate checkStatus:^(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error) {
+        
+        [[NSUserDefaults standardUserDefaults] setObject:start forKey:@"goalStart"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc]initWithKey:HKSampleSortIdentifierStartDate ascending:false];
+        
+        NSLog(@"All Steps - Start Date: %@", [[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]);
+        
+        HKSampleQuery *sampleQuery = [[HKSampleQuery alloc] initWithSampleType:[HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount]
+                                                                     predicate:[HealthKitFunctions predicateForSamplesFromNowToDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"]]
+                                                                         limit:HKObjectQueryNoLimit
+                                                               sortDescriptors:@[sortDescriptor]
+                                                                resultsHandler:^(HKSampleQuery *query, NSArray *results, NSError *error)
+                                      {
+                                          
+                                          if(!error && results){
+                                              //[AppDelegate logBackgroundDataToFileWithStats:nil message:@"Successfully Completed Step Sample Retreival" time:[NSDate date]];
+                                              completionHandler(results, nil);
+                                          }else{
+                                              NSLog(@"Error retrieving energy %@",error);
+                                              [AppDelegate logBackgroundDataToFileWithStats:@{@"Error":error} message:@"Error Getting Step Samples" time:[NSDate date]];
+                                              completionHandler(nil, error);
+                                          }
+                                      }];
+        
+        // Execute the query
+        [[HKHealthStore new] executeQuery:sampleQuery];
+    }];
 }
 
 + (void)totalSteps:(void (^)(int steps, NSError *err))completionHandler {
@@ -437,22 +477,23 @@
     [[HKHealthStore new] executeQuery:sampleQuery];
 }
 
-- (void)getAllSources:(void (^)(NSMutableArray *, NSError *))completion {
++(void)getAllSources:(void (^)(NSMutableArray *sources, NSError *err))completion {
     
-    HKSampleType *sampleType = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
+    HKQuantityType *quantityType = [HKQuantityType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
+
     
-    HKSourceQuery *query = [[HKSourceQuery alloc] initWithSampleType:sampleType samplePredicate:nil completionHandler:^(HKSourceQuery *query, NSSet *sources, NSError *error) {
+    HKSourceQuery *query = [[HKSourceQuery alloc] initWithSampleType:quantityType samplePredicate:nil completionHandler:^(HKSourceQuery *query, NSSet *sources, NSError *error) {
         
         
         if (error) {
             NSLog(@"*** An error occured while gathering the sources for step date.%@ ***", error.localizedDescription);
-            abort();
+            completion(nil, nil);
         } else {
             completion([NSMutableArray arrayWithArray:[sources allObjects]], nil);
         }
     }];
     
-    [self.healthStore executeQuery:query];
+    [[HKHealthStore new] executeQuery:query];
 }
 
 #pragma mark - Query Helper Methods
