@@ -16,10 +16,34 @@
 		A88BBF151E165D8A0078649D /* HealthKitFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = A88BBF141E165D8A0078649D /* HealthKitFunctions.m */; };
 		A88BBF191E165E540078649D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A88BBF181E165E540078649D /* HealthKit.framework */; };
 		C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */; };
+		C22D7A981E837F3E00B7272E /* ScrollableGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22D7A971E837F3E00B7272E /* ScrollableGraphView.swift */; };
+		C22D7A9B1E8388C700B7272E /* CollectionViewHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = C22D7A9A1E8388C700B7272E /* CollectionViewHeader.m */; };
+		C22D7AA11E838FDB00B7272E /* GraphCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C22D7AA01E838FDB00B7272E /* GraphCollectionViewCell.m */; };
+		C22D7AA31E83C35600B7272E /* UIColor+colorFromHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22D7AA21E83C35600B7272E /* UIColor+colorFromHex.swift */; };
+		C22D7AA61E8443AE00B7272E /* TKRadarChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22D7AA51E8443AE00B7272E /* TKRadarChart.swift */; };
+		C2584CB31E7CAA6300A803EE /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C2584CB11E7CAA6300A803EE /* Interface.storyboard */; };
+		C2584CB51E7CAA6300A803EE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2584CB41E7CAA6300A803EE /* Assets.xcassets */; };
+		C2584CBC1E7CAA6300A803EE /* Sync Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C2584CBB1E7CAA6300A803EE /* Sync Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C2584CC21E7CAA6300A803EE /* InterfaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2584CC11E7CAA6300A803EE /* InterfaceController.m */; };
+		C2584CC51E7CAA6300A803EE /* ExtensionDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C2584CC41E7CAA6300A803EE /* ExtensionDelegate.m */; };
+		C2584CC81E7CAA6300A803EE /* ComplicationController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2584CC71E7CAA6300A803EE /* ComplicationController.m */; };
+		C2584CCA1E7CAA6300A803EE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2584CC91E7CAA6300A803EE /* Assets.xcassets */; };
+		C2584CCE1E7CAA6300A803EE /* Sync.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C2584CAF1E7CAA6300A803EE /* Sync.app */; };
+		C27AD59E1E8485280021A9AD /* CHIPageControlJaloro.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27AD59A1E8485280021A9AD /* CHIPageControlJaloro.swift */; };
+		C27AD59F1E8485280021A9AD /* CHIBasePageControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27AD59B1E8485280021A9AD /* CHIBasePageControl.swift */; };
+		C27AD5A01E8485280021A9AD /* CHILayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27AD59C1E8485280021A9AD /* CHILayer.swift */; };
+		C27AD5A11E8485280021A9AD /* CHIPageControllable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27AD59D1E8485280021A9AD /* CHIPageControllable.swift */; };
 		C27CA8F11E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F01E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m */; };
 		C27CA8F41E718C8B0084B9B8 /* WorkoutTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F31E718C8A0084B9B8 /* WorkoutTableViewCell.m */; };
 		C27CA8F91E71F8060084B9B8 /* MBCircularProgressBarLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */; };
 		C27CA8FA1E71F8060084B9B8 /* MBCircularProgressBarView.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */; };
+		C27CA9011E7249BE0084B9B8 /* ANDBackgroundChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8FC1E7249BE0084B9B8 /* ANDBackgroundChartView.m */; };
+		C27CA9021E7249BE0084B9B8 /* ANDInternalLineChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8FE1E7249BE0084B9B8 /* ANDInternalLineChartView.m */; };
+		C27CA9031E7249BE0084B9B8 /* ANDLineChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA9001E7249BE0084B9B8 /* ANDLineChartView.m */; };
+		C27CA9061E724B190084B9B8 /* ProgressCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA9051E724B190084B9B8 /* ProgressCollectionViewCell.m */; };
+		C2BB4C241E7E35C4007F9A31 /* Colors in Resources */ = {isa = PBXBuildFile; fileRef = C2BB4C231E7E35C4007F9A31 /* Colors */; };
+		C2BB4C261E7E3638007F9A31 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BB4C251E7E3638007F9A31 /* QuartzCore.framework */; };
+		C2BB4C281E7E3646007F9A31 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BB4C271E7E3646007F9A31 /* CoreGraphics.framework */; };
 		C2D302AC1E6F961800147784 /* DataCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302AB1E6F961800147784 /* DataCollectionViewController.m */; };
 		C2D302AF1E71148900147784 /* SourcesCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302AE1E71148900147784 /* SourcesCollectionViewCell.m */; };
 		C2D302B51E712A8000147784 /* LogsCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302B41E712A8000147784 /* LogsCollectionViewCell.m */; };
@@ -27,13 +51,42 @@
 		C2EC19711E578B7F0076FA0B /* StatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2EC19701E578B7F0076FA0B /* StatViewController.m */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		C2584CBD1E7CAA6300A803EE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A88BBEF11E1656910078649D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C2584CBA1E7CAA6300A803EE;
+			remoteInfo = "Sync Extension";
+		};
+		C2584CCC1E7CAA6300A803EE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A88BBEF11E1656910078649D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C2584CAE1E7CAA6300A803EE;
+			remoteInfo = Sync;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
+		C2584CD41E7CAA6300A803EE /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				C2584CBC1E7CAA6300A803EE /* Sync Extension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C2E526C11E36E575000FF99A /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
+				C2584CCE1E7CAA6300A803EE /* Sync.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -57,20 +110,34 @@
 		A88BBF181E165E540078649D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		C2057EEE1E2EC15800F2FF4F /* InsetTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InsetTextField.h; sourceTree = "<group>"; };
 		C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InsetTextField.m; sourceTree = "<group>"; };
-		C21F51921E68E26200DDDDC9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
-		C21F51941E68E26200DDDDC9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C21F51961E68E26200DDDDC9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C21F51A01E68E26200DDDDC9 /* InterfaceController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InterfaceController.h; sourceTree = "<group>"; };
-		C21F51A11E68E26200DDDDC9 /* InterfaceController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InterfaceController.m; sourceTree = "<group>"; };
-		C21F51A31E68E26200DDDDC9 /* ExtensionDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExtensionDelegate.h; sourceTree = "<group>"; };
-		C21F51A41E68E26200DDDDC9 /* ExtensionDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExtensionDelegate.m; sourceTree = "<group>"; };
-		C21F51A61E68E26200DDDDC9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C21F51A81E68E26200DDDDC9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C21F51B31E68E37E00DDDDC9 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS3.1.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
-		C21F51B51E68E37E00DDDDC9 /* SyncWatch Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "SyncWatch Extension.entitlements"; sourceTree = "<group>"; };
-		C21F52001E693A7E00DDDDC9 /* SyncWatch Extension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SyncWatch Extension-Bridging-Header.h"; sourceTree = "<group>"; };
-		C21F52011E693A7E00DDDDC9 /* Complication.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Complication.swift; sourceTree = "<group>"; };
 		C21F52031E6AF87A00DDDDC9 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS3.1.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
+		C22D7A971E837F3E00B7272E /* ScrollableGraphView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScrollableGraphView.swift; sourceTree = "<group>"; };
+		C22D7A991E8388C700B7272E /* CollectionViewHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollectionViewHeader.h; sourceTree = "<group>"; };
+		C22D7A9A1E8388C700B7272E /* CollectionViewHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CollectionViewHeader.m; sourceTree = "<group>"; };
+		C22D7A9F1E838FDB00B7272E /* GraphCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphCollectionViewCell.h; sourceTree = "<group>"; };
+		C22D7AA01E838FDB00B7272E /* GraphCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GraphCollectionViewCell.m; sourceTree = "<group>"; };
+		C22D7AA21E83C35600B7272E /* UIColor+colorFromHex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+colorFromHex.swift"; sourceTree = "<group>"; };
+		C22D7AA41E8443AE00B7272E /* TKRadarChart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TKRadarChart.h; sourceTree = "<group>"; };
+		C22D7AA51E8443AE00B7272E /* TKRadarChart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TKRadarChart.swift; sourceTree = "<group>"; };
+		C2584CAF1E7CAA6300A803EE /* Sync.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sync.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2584CB21E7CAA6300A803EE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
+		C2584CB41E7CAA6300A803EE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C2584CB61E7CAA6300A803EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C2584CBB1E7CAA6300A803EE /* Sync Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Sync Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2584CC01E7CAA6300A803EE /* InterfaceController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InterfaceController.h; sourceTree = "<group>"; };
+		C2584CC11E7CAA6300A803EE /* InterfaceController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InterfaceController.m; sourceTree = "<group>"; };
+		C2584CC31E7CAA6300A803EE /* ExtensionDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExtensionDelegate.h; sourceTree = "<group>"; };
+		C2584CC41E7CAA6300A803EE /* ExtensionDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExtensionDelegate.m; sourceTree = "<group>"; };
+		C2584CC61E7CAA6300A803EE /* ComplicationController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ComplicationController.h; sourceTree = "<group>"; };
+		C2584CC71E7CAA6300A803EE /* ComplicationController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ComplicationController.m; sourceTree = "<group>"; };
+		C2584CC91E7CAA6300A803EE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C2584CCB1E7CAA6300A803EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C27AD5991E8485280021A9AD /* CHIPageControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHIPageControl.h; sourceTree = "<group>"; };
+		C27AD59A1E8485280021A9AD /* CHIPageControlJaloro.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CHIPageControlJaloro.swift; sourceTree = "<group>"; };
+		C27AD59B1E8485280021A9AD /* CHIBasePageControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CHIBasePageControl.swift; sourceTree = "<group>"; };
+		C27AD59C1E8485280021A9AD /* CHILayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CHILayer.swift; sourceTree = "<group>"; };
+		C27AD59D1E8485280021A9AD /* CHIPageControllable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CHIPageControllable.swift; sourceTree = "<group>"; };
 		C27CA8EF1E718A3F0084B9B8 /* WorkoutsCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorkoutsCollectionViewCell.h; sourceTree = "<group>"; };
 		C27CA8F01E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WorkoutsCollectionViewCell.m; sourceTree = "<group>"; };
 		C27CA8F21E718C8A0084B9B8 /* WorkoutTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorkoutTableViewCell.h; sourceTree = "<group>"; };
@@ -79,6 +146,17 @@
 		C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBCircularProgressBarLayer.m; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarLayer.m"; sourceTree = "<group>"; };
 		C27CA8F71E71F8060084B9B8 /* MBCircularProgressBarView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBCircularProgressBarView.h; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarView.h"; sourceTree = "<group>"; };
 		C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBCircularProgressBarView.m; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarView.m"; sourceTree = "<group>"; };
+		C27CA8FB1E7249BE0084B9B8 /* ANDBackgroundChartView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ANDBackgroundChartView.h; sourceTree = "<group>"; };
+		C27CA8FC1E7249BE0084B9B8 /* ANDBackgroundChartView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ANDBackgroundChartView.m; sourceTree = "<group>"; };
+		C27CA8FD1E7249BE0084B9B8 /* ANDInternalLineChartView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ANDInternalLineChartView.h; sourceTree = "<group>"; };
+		C27CA8FE1E7249BE0084B9B8 /* ANDInternalLineChartView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ANDInternalLineChartView.m; sourceTree = "<group>"; };
+		C27CA8FF1E7249BE0084B9B8 /* ANDLineChartView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ANDLineChartView.h; sourceTree = "<group>"; };
+		C27CA9001E7249BE0084B9B8 /* ANDLineChartView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ANDLineChartView.m; sourceTree = "<group>"; };
+		C27CA9041E724B190084B9B8 /* ProgressCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressCollectionViewCell.h; sourceTree = "<group>"; };
+		C27CA9051E724B190084B9B8 /* ProgressCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressCollectionViewCell.m; sourceTree = "<group>"; };
+		C2BB4C231E7E35C4007F9A31 /* Colors */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Colors; sourceTree = "<group>"; };
+		C2BB4C251E7E3638007F9A31 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		C2BB4C271E7E3646007F9A31 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		C2D302AA1E6F961800147784 /* DataCollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataCollectionViewController.h; sourceTree = "<group>"; };
 		C2D302AB1E6F961800147784 /* DataCollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataCollectionViewController.m; sourceTree = "<group>"; };
 		C2D302AD1E71148900147784 /* SourcesCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SourcesCollectionViewCell.h; sourceTree = "<group>"; };
@@ -96,7 +174,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2BB4C281E7E3646007F9A31 /* CoreGraphics.framework in Frameworks */,
+				C2BB4C261E7E3638007F9A31 /* QuartzCore.framework in Frameworks */,
 				A88BBF191E165E540078649D /* HealthKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C2584CB81E7CAA6300A803EE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -107,8 +194,8 @@
 			isa = PBXGroup;
 			children = (
 				A88BBEFB1E1656910078649D /* HealthKitData */,
-				C21F51901E68E26200DDDDC9 /* SyncWatch */,
-				C21F519F1E68E26200DDDDC9 /* SyncWatch Extension */,
+				C2584CB01E7CAA6300A803EE /* Sync */,
+				C2584CBF1E7CAA6300A803EE /* Sync Extension */,
 				A88BBEFA1E1656910078649D /* Products */,
 				A88BBF171E165E540078649D /* Frameworks */,
 			);
@@ -118,6 +205,8 @@
 			isa = PBXGroup;
 			children = (
 				A88BBEF91E1656910078649D /* HealthKitData.app */,
+				C2584CAF1E7CAA6300A803EE /* Sync.app */,
+				C2584CBB1E7CAA6300A803EE /* Sync Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -125,22 +214,42 @@
 		A88BBEFB1E1656910078649D /* HealthKitData */ = {
 			isa = PBXGroup;
 			children = (
+				C22D7A9F1E838FDB00B7272E /* GraphCollectionViewCell.h */,
+				C22D7AA01E838FDB00B7272E /* GraphCollectionViewCell.m */,
+				C27CA9041E724B190084B9B8 /* ProgressCollectionViewCell.h */,
+				C27CA9051E724B190084B9B8 /* ProgressCollectionViewCell.m */,
+				C22D7AA21E83C35600B7272E /* UIColor+colorFromHex.swift */,
 				C27CA8F21E718C8A0084B9B8 /* WorkoutTableViewCell.h */,
 				C27CA8F31E718C8A0084B9B8 /* WorkoutTableViewCell.m */,
 				C27CA8EF1E718A3F0084B9B8 /* WorkoutsCollectionViewCell.h */,
 				C27CA8F01E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m */,
+				C22D7AA41E8443AE00B7272E /* TKRadarChart.h */,
+				C22D7AA51E8443AE00B7272E /* TKRadarChart.swift */,
 				C27CA8F51E71F8060084B9B8 /* MBCircularProgressBarLayer.h */,
+				C27AD5991E8485280021A9AD /* CHIPageControl.h */,
+				C27AD59A1E8485280021A9AD /* CHIPageControlJaloro.swift */,
+				C27AD59B1E8485280021A9AD /* CHIBasePageControl.swift */,
+				C27AD59C1E8485280021A9AD /* CHILayer.swift */,
+				C27AD59D1E8485280021A9AD /* CHIPageControllable.swift */,
 				C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */,
 				C27CA8F71E71F8060084B9B8 /* MBCircularProgressBarView.h */,
 				C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */,
 				C2D302B61E717C3200147784 /* SourceTableViewCell.h */,
 				C2D302B71E717C3200147784 /* SourceTableViewCell.m */,
+				C27CA8FB1E7249BE0084B9B8 /* ANDBackgroundChartView.h */,
+				C27CA8FC1E7249BE0084B9B8 /* ANDBackgroundChartView.m */,
+				C27CA8FD1E7249BE0084B9B8 /* ANDInternalLineChartView.h */,
+				C27CA8FE1E7249BE0084B9B8 /* ANDInternalLineChartView.m */,
+				C27CA8FF1E7249BE0084B9B8 /* ANDLineChartView.h */,
+				C27CA9001E7249BE0084B9B8 /* ANDLineChartView.m */,
 				C2D302B31E712A8000147784 /* LogsCollectionViewCell.h */,
 				C2D302B41E712A8000147784 /* LogsCollectionViewCell.m */,
 				C2D302AD1E71148900147784 /* SourcesCollectionViewCell.h */,
 				C2D302AE1E71148900147784 /* SourcesCollectionViewCell.m */,
 				C2D302AA1E6F961800147784 /* DataCollectionViewController.h */,
 				C2D302AB1E6F961800147784 /* DataCollectionViewController.m */,
+				C22D7A991E8388C700B7272E /* CollectionViewHeader.h */,
+				C22D7A9A1E8388C700B7272E /* CollectionViewHeader.m */,
 				C2EC196F1E578B7F0076FA0B /* StatViewController.h */,
 				C2EC19701E578B7F0076FA0B /* StatViewController.m */,
 				A88BBF161E165E540078649D /* HealthKitData.entitlements */,
@@ -153,7 +262,9 @@
 				C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */,
 				A88BBF131E165D8A0078649D /* HealthKitFunctions.h */,
 				A88BBF141E165D8A0078649D /* HealthKitFunctions.m */,
+				C22D7A971E837F3E00B7272E /* ScrollableGraphView.swift */,
 				A88BBF081E1656910078649D /* Assets.xcassets */,
+				C2BB4C231E7E35C4007F9A31 /* Colors */,
 				A88BBF0A1E1656910078649D /* LaunchScreen.storyboard */,
 				A88BBF0D1E1656910078649D /* Info.plist */,
 				A88BBEFC1E1656910078649D /* Supporting Files */,
@@ -172,6 +283,8 @@
 		A88BBF171E165E540078649D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C2BB4C271E7E3646007F9A31 /* CoreGraphics.framework */,
+				C2BB4C251E7E3638007F9A31 /* QuartzCore.framework */,
 				C21F52031E6AF87A00DDDDC9 /* ClockKit.framework */,
 				C21F51B31E68E37E00DDDDC9 /* HealthKit.framework */,
 				A88BBF181E165E540078649D /* HealthKit.framework */,
@@ -179,30 +292,29 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		C21F51901E68E26200DDDDC9 /* SyncWatch */ = {
+		C2584CB01E7CAA6300A803EE /* Sync */ = {
 			isa = PBXGroup;
 			children = (
-				C21F51911E68E26200DDDDC9 /* Interface.storyboard */,
-				C21F51941E68E26200DDDDC9 /* Assets.xcassets */,
-				C21F51961E68E26200DDDDC9 /* Info.plist */,
+				C2584CB11E7CAA6300A803EE /* Interface.storyboard */,
+				C2584CB41E7CAA6300A803EE /* Assets.xcassets */,
+				C2584CB61E7CAA6300A803EE /* Info.plist */,
 			);
-			path = SyncWatch;
+			path = Sync;
 			sourceTree = "<group>";
 		};
-		C21F519F1E68E26200DDDDC9 /* SyncWatch Extension */ = {
+		C2584CBF1E7CAA6300A803EE /* Sync Extension */ = {
 			isa = PBXGroup;
 			children = (
-				C21F51B51E68E37E00DDDDC9 /* SyncWatch Extension.entitlements */,
-				C21F51A01E68E26200DDDDC9 /* InterfaceController.h */,
-				C21F51A11E68E26200DDDDC9 /* InterfaceController.m */,
-				C21F51A31E68E26200DDDDC9 /* ExtensionDelegate.h */,
-				C21F51A41E68E26200DDDDC9 /* ExtensionDelegate.m */,
-				C21F51A61E68E26200DDDDC9 /* Assets.xcassets */,
-				C21F51A81E68E26200DDDDC9 /* Info.plist */,
-				C21F52011E693A7E00DDDDC9 /* Complication.swift */,
-				C21F52001E693A7E00DDDDC9 /* SyncWatch Extension-Bridging-Header.h */,
+				C2584CC01E7CAA6300A803EE /* InterfaceController.h */,
+				C2584CC11E7CAA6300A803EE /* InterfaceController.m */,
+				C2584CC31E7CAA6300A803EE /* ExtensionDelegate.h */,
+				C2584CC41E7CAA6300A803EE /* ExtensionDelegate.m */,
+				C2584CC61E7CAA6300A803EE /* ComplicationController.h */,
+				C2584CC71E7CAA6300A803EE /* ComplicationController.m */,
+				C2584CC91E7CAA6300A803EE /* Assets.xcassets */,
+				C2584CCB1E7CAA6300A803EE /* Info.plist */,
 			);
-			path = "SyncWatch Extension";
+			path = "Sync Extension";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -220,11 +332,46 @@
 			buildRules = (
 			);
 			dependencies = (
+				C2584CCD1E7CAA6300A803EE /* PBXTargetDependency */,
 			);
 			name = HealthKitData;
 			productName = HealthKitData;
 			productReference = A88BBEF91E1656910078649D /* HealthKitData.app */;
 			productType = "com.apple.product-type.application";
+		};
+		C2584CAE1E7CAA6300A803EE /* Sync */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C2584CD51E7CAA6300A803EE /* Build configuration list for PBXNativeTarget "Sync" */;
+			buildPhases = (
+				C2584CAD1E7CAA6300A803EE /* Resources */,
+				C2584CD41E7CAA6300A803EE /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C2584CBE1E7CAA6300A803EE /* PBXTargetDependency */,
+			);
+			name = Sync;
+			productName = Sync;
+			productReference = C2584CAF1E7CAA6300A803EE /* Sync.app */;
+			productType = "com.apple.product-type.application.watchapp2";
+		};
+		C2584CBA1E7CAA6300A803EE /* Sync Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C2584CD31E7CAA6300A803EE /* Build configuration list for PBXNativeTarget "Sync Extension" */;
+			buildPhases = (
+				C2584CB71E7CAA6300A803EE /* Sources */,
+				C2584CB81E7CAA6300A803EE /* Frameworks */,
+				C2584CB91E7CAA6300A803EE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Sync Extension";
+			productName = "Sync Extension";
+			productReference = C2584CBB1E7CAA6300A803EE /* Sync Extension.appex */;
+			productType = "com.apple.product-type.watchkit2-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -238,6 +385,7 @@
 					A88BBEF81E1656910078649D = {
 						CreatedOnToolsVersion = 8.2;
 						DevelopmentTeam = 42SJVK5ETL;
+						LastSwiftMigration = 0820;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
@@ -247,6 +395,16 @@
 								enabled = 1;
 							};
 						};
+					};
+					C2584CAE1E7CAA6300A803EE = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = 42SJVK5ETL;
+						ProvisioningStyle = Automatic;
+					};
+					C2584CBA1E7CAA6300A803EE = {
+						CreatedOnToolsVersion = 8.2.1;
+						DevelopmentTeam = 42SJVK5ETL;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -264,6 +422,8 @@
 			projectRoot = "";
 			targets = (
 				A88BBEF81E1656910078649D /* HealthKitData */,
+				C2584CAE1E7CAA6300A803EE /* Sync */,
+				C2584CBA1E7CAA6300A803EE /* Sync Extension */,
 			);
 		};
 /* End PBXProject section */
@@ -275,7 +435,25 @@
 			files = (
 				A88BBF0C1E1656910078649D /* LaunchScreen.storyboard in Resources */,
 				A88BBF091E1656910078649D /* Assets.xcassets in Resources */,
+				C2BB4C241E7E35C4007F9A31 /* Colors in Resources */,
 				A88BBF071E1656910078649D /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C2584CAD1E7CAA6300A803EE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2584CB51E7CAA6300A803EE /* Assets.xcassets in Resources */,
+				C2584CB31E7CAA6300A803EE /* Interface.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C2584CB91E7CAA6300A803EE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2584CCA1E7CAA6300A803EE /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,21 +467,57 @@
 				C2D302B81E717C3200147784 /* SourceTableViewCell.m in Sources */,
 				C2EC19711E578B7F0076FA0B /* StatViewController.m in Sources */,
 				C2D302AF1E71148900147784 /* SourcesCollectionViewCell.m in Sources */,
+				C27AD59F1E8485280021A9AD /* CHIBasePageControl.swift in Sources */,
+				C27AD5A01E8485280021A9AD /* CHILayer.swift in Sources */,
 				C2D302AC1E6F961800147784 /* DataCollectionViewController.m in Sources */,
 				C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */,
+				C22D7AA11E838FDB00B7272E /* GraphCollectionViewCell.m in Sources */,
 				A88BBF041E1656910078649D /* ViewController.m in Sources */,
 				C2D302B51E712A8000147784 /* LogsCollectionViewCell.m in Sources */,
+				C22D7AA61E8443AE00B7272E /* TKRadarChart.swift in Sources */,
 				C27CA8FA1E71F8060084B9B8 /* MBCircularProgressBarView.m in Sources */,
 				A88BBF011E1656910078649D /* AppDelegate.m in Sources */,
+				C22D7A9B1E8388C700B7272E /* CollectionViewHeader.m in Sources */,
+				C22D7AA31E83C35600B7272E /* UIColor+colorFromHex.swift in Sources */,
 				A88BBF151E165D8A0078649D /* HealthKitFunctions.m in Sources */,
+				C27CA9021E7249BE0084B9B8 /* ANDInternalLineChartView.m in Sources */,
 				C27CA8F11E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m in Sources */,
 				C27CA8F91E71F8060084B9B8 /* MBCircularProgressBarLayer.m in Sources */,
+				C27AD5A11E8485280021A9AD /* CHIPageControllable.swift in Sources */,
 				A88BBEFE1E1656910078649D /* main.m in Sources */,
+				C27CA9031E7249BE0084B9B8 /* ANDLineChartView.m in Sources */,
 				C27CA8F41E718C8B0084B9B8 /* WorkoutTableViewCell.m in Sources */,
+				C27CA9011E7249BE0084B9B8 /* ANDBackgroundChartView.m in Sources */,
+				C22D7A981E837F3E00B7272E /* ScrollableGraphView.swift in Sources */,
+				C27AD59E1E8485280021A9AD /* CHIPageControlJaloro.swift in Sources */,
+				C27CA9061E724B190084B9B8 /* ProgressCollectionViewCell.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C2584CB71E7CAA6300A803EE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2584CC81E7CAA6300A803EE /* ComplicationController.m in Sources */,
+				C2584CC51E7CAA6300A803EE /* ExtensionDelegate.m in Sources */,
+				C2584CC21E7CAA6300A803EE /* InterfaceController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C2584CBE1E7CAA6300A803EE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C2584CBA1E7CAA6300A803EE /* Sync Extension */;
+			targetProxy = C2584CBD1E7CAA6300A803EE /* PBXContainerItemProxy */;
+		};
+		C2584CCD1E7CAA6300A803EE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C2584CAE1E7CAA6300A803EE /* Sync */;
+			targetProxy = C2584CCC1E7CAA6300A803EE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		A88BBF051E1656910078649D /* Main.storyboard */ = {
@@ -322,10 +536,10 @@
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
-		C21F51911E68E26200DDDDC9 /* Interface.storyboard */ = {
+		C2584CB11E7CAA6300A803EE /* Interface.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				C21F51921E68E26200DDDDC9 /* Base */,
+				C2584CB21E7CAA6300A803EE /* Base */,
 			);
 			name = Interface.storyboard;
 			sourceTree = "<group>";
@@ -433,6 +647,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.rockmymworldmedia.HealthKitData;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -448,6 +663,71 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.rockmymworldmedia.HealthKitData;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+		C2584CCF1E7CAA6300A803EE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 42SJVK5ETL;
+				IBSC_MODULE = Sync_Extension;
+				INFOPLIST_FILE = Sync/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rockmymworldmedia.HealthKitData.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 3.1;
+			};
+			name = Debug;
+		};
+		C2584CD01E7CAA6300A803EE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 42SJVK5ETL;
+				IBSC_MODULE = Sync_Extension;
+				INFOPLIST_FILE = Sync/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.rockmymworldmedia.HealthKitData.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 3.1;
+			};
+			name = Release;
+		};
+		C2584CD11E7CAA6300A803EE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
+				DEVELOPMENT_TEAM = 42SJVK5ETL;
+				INFOPLIST_FILE = "Sync Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.rockmymworldmedia.HealthKitData.watchkitapp.watchkitextension;
+				PRODUCT_NAME = "${TARGET_NAME}";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 3.1;
+			};
+			name = Debug;
+		};
+		C2584CD21E7CAA6300A803EE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
+				DEVELOPMENT_TEAM = 42SJVK5ETL;
+				INFOPLIST_FILE = "Sync Extension/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.rockmymworldmedia.HealthKitData.watchkitapp.watchkitextension;
+				PRODUCT_NAME = "${TARGET_NAME}";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 3.1;
 			};
 			name = Release;
 		};
@@ -468,6 +748,24 @@
 			buildConfigurations = (
 				A88BBF111E1656910078649D /* Debug */,
 				A88BBF121E1656910078649D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C2584CD31E7CAA6300A803EE /* Build configuration list for PBXNativeTarget "Sync Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C2584CD11E7CAA6300A803EE /* Debug */,
+				C2584CD21E7CAA6300A803EE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C2584CD51E7CAA6300A803EE /* Build configuration list for PBXNativeTarget "Sync" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C2584CCF1E7CAA6300A803EE /* Debug */,
+				C2584CD01E7CAA6300A803EE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

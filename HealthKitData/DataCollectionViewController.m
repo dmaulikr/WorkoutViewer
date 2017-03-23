@@ -15,11 +15,17 @@
 #import "AppDelegate.h"
 #import <HealthKit/HealthKit.h>
 #import "WorkoutTableViewCell.h"
+#import "ViewController.h"
+#import "HealthKitData-Swift.h"
+#import "CollectionViewHeader.h"
+#import "GraphCollectionViewCell.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface DataCollectionViewController ()
 
 @property (strong, nonatomic) NSMutableDictionary *stats;
 @property (strong, nonatomic) NSMutableArray *sources;
+@property (strong, nonatomic) NSMutableDictionary *filteredSources;
 @property (strong, nonatomic) NSMutableArray *workouts;
 
 @end
@@ -29,11 +35,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(calculateEnergyFromSources:) name:@"filterSources" object:nil];
     
 }
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    [self.collectionView setBackgroundColor:[DataCollectionViewController colorFromHexString:@"#333333"]];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moveToLogPage) name:@"scrollToLog" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setStatsDictionary:) name:@"setStats" object:nil];
@@ -56,10 +65,10 @@
             }
         }
     }];
-}
-
--(void)viewDidLayoutSubviews {
-    //[self.collectionView reloadData];
+    
+    [HealthKitFunctions getAllEnergySeperatedBySource:^(HKStatistics *result, NSError *err) {
+        NSLog(@"%@", result);
+    }];
 }
 
 - (void)moveToLogPage {
@@ -70,19 +79,26 @@
     self.stats = notification.object;
     
     for (UICollectionViewCell *c in self.collectionView.visibleCells) {
+        
         if ([c isKindOfClass:[SourcesCollectionViewCell class]]) {
-            SourcesCollectionViewCell *cell = (SourcesCollectionViewCell *)c;
+            SourcesCollectionViewCell *sourceCell = (SourcesCollectionViewCell *)c;
+            UICollectionView *overviewCollectionView = sourceCell.overviewCollectionView;
             
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [cell.totalCalLabel setText:[NSString stringWithFormat:@"%.0f pts", [self.stats[@"current"] doubleValue]]];
-                [cell.stepsCalLabel setText:[NSString stringWithFormat:@"%.0f pts", [self.stats[@"current"] doubleValue] - [self.stats[@"other"] doubleValue]]];
+            CollectionViewHeader *headerCell = (CollectionViewHeader*)[overviewCollectionView supplementaryViewForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
 
-                [cell.otherCalLabel setText:[NSString stringWithFormat:@"%.0f pts", [self.stats[@"other"] doubleValue]]];
+            dispatch_async(dispatch_get_main_queue(), ^{
+
+                [headerCell.currentPointsLabel setText:[NSString stringWithFormat:@"%.0f pts", ([self.stats[@"current"] doubleValue] + [self.stats[@"other"] doubleValue])]];
+                
+                if (self.stats[@"goalPercentage"]) {
+                    
+                }
             });
             
         }
     }
 }
+
 
 #pragma mark <UICollectionViewDataSource>
 
@@ -99,12 +115,70 @@
     
     NSString *identifier = @"";
     
+    if (collectionView.tag == 2) {
+        
+        ((UICollectionViewFlowLayout*)collectionView.collectionViewLayout).sectionHeadersPinToVisibleBounds = YES;
+
+        GraphCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"graph" forIndexPath:indexPath];
+        
+        if (indexPath.row == 0) {
+            cell.alpha = 1.0;
+            
+            ScrollableGraphView *graphView = [[ScrollableGraphView alloc] initWithFrame:cell.contentView.bounds];
+            graphView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            graphView.dataPointType = ScrollableGraphViewDataPointTypeCircle;
+            graphView.shouldDrawBarLayer = YES;
+            graphView.shouldDrawDataPoint = NO;
+            graphView.dataPointSpacing = (cell.frame.size.width / 7) - 5;
+            graphView.leftmostPointPadding = 60;
+            
+            graphView.lineColor = [UIColor clearColor];
+            graphView.barWidth = 30;
+            graphView.barLineWidth = 0.5;
+            graphView.barLineColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
+            graphView.barColor =  [[UIColor whiteColor] colorWithAlphaComponent:0.2];
+            
+            graphView.topMargin = 20;
+            graphView.clipsToBounds = NO;
+            cell.clipsToBounds = YES;
+            cell.layer.cornerRadius = 8;
+            graphView.backgroundFillColor = [DataCollectionViewController colorFromHexString:@"#27916F"];
+
+            graphView.referenceLineLabelFont = [UIFont systemFontOfSize:10];
+          graphView.referenceLineColor = [[UIColor whiteColor] colorWithAlphaComponent:0.2];
+            graphView.referenceLineLabelColor = [UIColor whiteColor];
+          graphView.numberOfIntermediateReferenceLines = 3;
+            graphView.shouldShowLabels = YES;
+            graphView.dataPointLabelFont = [UIFont systemFontOfSize:10];
+            graphView.dataPointLabelColor = [UIColor whiteColor];
+            graphView.rightmostPointPadding = 20;
+            graphView.dataPointLabelBottomMargin = 0;//50;
+            graphView.referenceLineUnits = @"pts";
+            graphView.shouldAutomaticallyDetectRange = YES;
+          graphView.shouldAnimateOnStartup = YES;
+          graphView.shouldAdaptRange = YES;
+          graphView.adaptAnimationType = ScrollableGraphViewAnimationTypeElastic;
+          graphView.animationDuration = 1.5;
+          graphView.shouldRangeAlwaysStartAtZero = YES;
+            [graphView set:@[@(100),@(130),@(200),@(80),@(124),@(155),@(50)] withLabels:@[@"Mon",@"Tue",@"Wed",@"Thurs",@"Fri",@"Sat",@"Sun"]];
+            
+            [cell.contentView addSubview:graphView];
+            graphView.frame = cell.contentView.bounds;
+            
+            return cell;
+        }
+
+        cell.alpha = 0.0;
+        
+        return cell;
+    }
+        
     if (indexPath.row == 0) {
         identifier = @"sources";
         SourcesCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
-        cell.tableView.tag = 1;
-        cell.tableView.delegate = self;
-        cell.tableView.layer.borderColor = [UIColor whiteColor].CGColor;
+        cell.overviewCollectionView.tag = 2;
+        cell.overviewCollectionView.delegate = self;
+        cell.overviewCollectionView.dataSource = self;
         
         return cell;
     } else if (indexPath.row == 1) {
@@ -143,11 +217,29 @@
         return [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
     }
 
-
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
     cell.layer.borderColor = [UIColor whiteColor].CGColor;
     
     return cell;
+    
+}
+
+-(UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
+    
+    if (kind == UICollectionElementKindSectionHeader) {
+        CollectionViewHeader *header = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header" forIndexPath:indexPath];
+        
+        [header.currentPointsLabel setText:[NSString stringWithFormat:@"%.0f pts", ([self.stats[@"current"] doubleValue])]];
+        //[header.currentPointsLabel setTextColor:[DataCollectionViewController colorFromHexString:@"#333333"]];
+        
+        header.currentPointsLabel.layer.shadowOpacity = 1.0;
+        header.currentPointsLabel.layer.shadowRadius = 0.0;
+        header.currentPointsLabel.layer.shadowColor = [UIColor darkGrayColor].CGColor;
+        header.currentPointsLabel.layer.shadowOffset = CGSizeMake(1.0, 1.0);
+        return header;
+    }
+    
+    return nil;
 }
 
 -(void)viewDidDisappear:(BOOL)animated {
@@ -160,61 +252,65 @@
                   layout:(UICollectionViewLayout*)collectionViewLayout
   sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
     
-    return CGSizeMake(self.collectionView.frame.size.width, self.collectionView.frame.size.height);
+    if (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation)) {
+        if (collectionView.tag == 2) {
+            return CGSizeMake(self.collectionView.frame.size.width - 20 , self.collectionView.frame.size.height / 4);
+        } else {
+            return CGSizeMake(self.collectionView.frame.size.width /2 , self.collectionView.frame.size.height / 2);
+
+        }
+    } else {
+        if (collectionView.tag == 2) {
+            return CGSizeMake(self.collectionView.frame.size.width - 20, self.collectionView.frame.size.height / 3.5);
+        } else {
+            return CGSizeMake(self.collectionView.frame.size.width, self.collectionView.frame.size.height);
+        }
+    }
+}
+
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
+   [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    [self updateCollectionViewLayoutWithSize:size];
+}
+
+- (void)updateCollectionViewLayoutWithSize:(CGSize)size {
+    UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionView.collectionViewLayout;
+    layout.itemSize = (size.width < size.height) ? CGSizeMake(self.collectionView.frame.size.width , self.collectionView.frame.size.height) : CGSizeMake(self.collectionView.frame.size.width /2 , self.collectionView.frame.size.height);
+    [layout invalidateLayout];
 }
 
 -(void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"changePage" object:@(indexPath.row)];
+//    [[NSNotificationCenter defaultCenter] postNotificationName:@"changePage" object:@(indexPath.row)];
     
     if (indexPath.row == 0 && self.stats != nil) {
         SourcesCollectionViewCell *cell = (SourcesCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-        [cell.totalCalLabel setText:[[self.stats[@"current"] stringValue] stringByAppendingString:@" cal"]];
-
-        [HealthKitFunctions getAllStepSamples:^(NSArray *stepSamples, NSError *err) {
-            
-            NSMutableArray *watchStepSamples = [NSMutableArray new];
-            NSMutableArray *phoneStepSamples = [NSMutableArray new];
-            
-            for (HKQuantitySample *step in stepSamples) {
-                if ([step.description containsString:@"Watch"]) {
-                    [watchStepSamples addObject:step];
-                } else if ([step.description containsString:@"iPhone"]) {
-                    [phoneStepSamples addObject:step];
-                }
+        
+        [HealthKitFunctions requestPermission:^(BOOL success, NSError *err) {
+            if (success) {
+                [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
+                    if (success && (stats[@"current"] != nil)) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            
+                            [cell.totalCalLabel setText:[NSString stringWithFormat:@"%.0f pts", [stats[@"current"] doubleValue] + [stats[@"other"] doubleValue]]];
+                            [cell.stepsCalLabel setText:[NSString stringWithFormat:@"%.0f pts", [stats[@"current"] doubleValue]]];
+                            [cell.otherCalLabel setText:[NSString stringWithFormat:@"%.0f pts", [stats[@"other"] doubleValue]]];
+                            
+                        });
+                    }
+                }];
             }
-            
-            int steps = 0;
-
-            if (watchStepSamples.count > 0) {
-                for (HKQuantitySample *step in stepSamples) {
-                    steps += [step.quantity doubleValueForUnit:[HKUnit countUnit]];
-                }
-            } else {
-                for (HKQuantitySample *step in stepSamples) {
-                    steps += [step.quantity doubleValueForUnit:[HKUnit countUnit]];
-                }
-            }
-            
-            [HealthKitFunctions convertStepsToCalories:@(steps) withCompletion:^(double cals, NSError *err) {
-                if (err == nil) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [cell.stepsCalLabel setText:[NSString stringWithFormat:@"%.0f cal", cals]];
-                        [cell.otherCalLabel setText:[NSString stringWithFormat:@"%.0f cal", [self.stats[@"current"] doubleValue]- cals]];
-                    });
-                }
-            }];
         }];
     }
     
     if (indexPath.row == 2) {
-        LogsCollectionViewCell *cell = (LogsCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+        //LogsCollectionViewCell *cell = (LogsCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
 
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [cell.logsTextView scrollRangeToVisible:NSMakeRange([cell.logsTextView.text length] - 1, 0)];
-            [cell.logsTextView setScrollEnabled:NO];
-            [cell.logsTextView setScrollEnabled:YES];
-        });
+        //dispatch_async(dispatch_get_main_queue(), ^{
+        //    [cell.logsTextView scrollRangeToVisible:NSMakeRange([cell.logsTextView.text length] - 1, 0)];
+        //    [cell.logsTextView setScrollEnabled:NO];
+         //   [cell.logsTextView setScrollEnabled:YES];
+        //});
         
     }
 }
@@ -229,11 +325,38 @@
 
 
 -(void)calculateEnergyFromSources:(NSNotification *)notification {
-    [HealthKitFunctions getAllEnergyBurnedWithFilters:notification.object withCompletion:^(NSMutableDictionary *totalSources, NSError *err) {
+    
+    UISwitch *toggle = (UISwitch *)notification.object;
+    
+    SourcesCollectionViewCell *cell = (SourcesCollectionViewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+    
+    CGPoint hitPoint = [toggle convertPoint:CGPointZero toView:cell.tableView];
+    NSIndexPath *index = [cell.tableView indexPathForRowAtPoint:hitPoint];
+        
+    if (!self.filteredSources) {
+        self.filteredSources = [NSMutableDictionary new];
+    }
+    
+    NSLog(@"%@", ((HKSource *)[self.sources objectAtIndex:index.row]).bundleIdentifier);
+    
+    if (toggle.on) {
+        [self.filteredSources setObject:@(0) forKey:((HKSource *)[self.sources objectAtIndex:index.row]).bundleIdentifier];
+    } else {
+        [self.filteredSources removeObjectForKey:((HKSource *)[self.sources objectAtIndex:index.row]).bundleIdentifier];
+    }
+    
+    
+    [HealthKitFunctions getAllEnergyBurnedWithFilters:self.filteredSources withCompletion:^(NSMutableDictionary *totalSources, NSError *err) {
         NSLog(@"%@", totalSources.description);
         
-        SourcesCollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
+        double allPoints = 0.0;
+        for (NSString *key in totalSources.allKeys) {
+            allPoints += [totalSources[key] doubleValue];
+        }
         
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [cell.sourcePointsLabel setText:[NSString stringWithFormat:@"%.0f pts", allPoints]];
+        });
     }];
 }
 
@@ -246,14 +369,7 @@
         HKSource *source = [self.sources objectAtIndex:indexPath.row];
         
         [cell.sourceLabel setText:source.name];
-        
-        
-        
-        if ([source.description containsString:@"Human"]) {
-            [cell.includeSwitch setOn:NO];
-        } else {
-            [cell.includeSwitch setOn:YES];
-        }
+        [cell.includeSwitch setOn:NO];
         
         return cell;
         
@@ -262,60 +378,24 @@
         WorkoutTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"workouts"];
         
     }
-    //UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"source"];
-    
-//        NSString *energyString = [NSString stringWithFormat:@"%.2f", [energy.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]]];
-//        
-//        NSString *source;
-//        if ([[energy description] rangeOfString:@"Watch"].location != NSNotFound) {
-//            source = @"Watch";
-//        } else if ([[energy description] rangeOfString:@"iPhone"].location != NSNotFound) {
-//            source = @"iPhone";
-//        } else if ([[energy description] rangeOfString:@"Human"].location != NSNotFound) {
-//            source = @"Human";
-//        } else if ([[energy description] rangeOfString:@"Endomondo"].location != NSNotFound) {
-//            source = @"Endomondo";
-//        } else {
-//            source = @"Other";
-//        }
-//    
-    //}
     
     return [tableView dequeueReusableCellWithIdentifier:@"source"];
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (tableView.tag == 1) {
+        SourceTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+        [cell include:nil];
+    }
 }
 
-
-/*
-// Uncomment this method to specify if the specified item should be highlighted during tracking
-- (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
-	return YES;
++ (UIColor *)colorFromHexString:(NSString *)hexString {
+    unsigned rgbValue = 0;
+    NSScanner *scanner = [NSScanner scannerWithString:hexString];
+    [scanner setScanLocation:1]; // bypass '#' character
+    [scanner scanHexInt:&rgbValue];
+    return [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:1.0];
 }
-*/
-
-/*
-// Uncomment this method to specify if the specified item should be selected
-- (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    return YES;
-}
-*/
-
-/*
-// Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-- (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
-	return NO;
-}
-
-- (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
-	return NO;
-}
-
-- (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
-	
-}
-*/
 
 @end

@@ -7,11 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
-@import WatchConnectivity;
+#import "HealthKitData-Swift.h"
 
-@interface ViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, NSURLSessionDelegate, UITextFieldDelegate, WCSessionDelegate>
+@interface ViewController : UIViewController <NSURLSessionDelegate, UITextFieldDelegate>
 
 +(void)updateAllDataWithCompletion:(void(^)(BOOL success, NSMutableDictionary *stats, NSError *error))completion;
++ (NSInteger)daysBetweenDate:(NSDate*)fromDateTime andDate:(NSDate*)toDateTime;
+
 
 
 @end

@@ -13,5 +13,7 @@
 @property (strong, nonatomic) IBOutlet UILabel *sourceLabel;
 @property (strong, nonatomic) IBOutlet UISwitch *includeSwitch;
 
+- (IBAction)include:(UISwitch *)sender;
+
 
 @end

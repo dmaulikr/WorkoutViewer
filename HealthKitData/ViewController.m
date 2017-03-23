@@ -12,20 +12,21 @@
 #import "AppDelegate.h"
 @import UserNotifications;
 @import WatchConnectivity;
+#import "HealthKitData-Swift.h"
 
 @interface ViewController ()
 
 @property (strong, nonatomic) IBOutlet UIView *collectionViewContainer;
 @property (strong, nonatomic) NSString *slackUsername;
 @property (strong, nonatomic) HealthKitFunctions *store;
-    
-@property (weak, nonatomic) IBOutlet UILabel *remainingGoalLabel;
-@property (weak, nonatomic) IBOutlet UILabel *timeLeftLabel;
+
+@property (strong, nonatomic) IBOutlet CHIPageControlJaloro *pageControl;
+
+
 @property (strong, nonatomic) IBOutlet UIButton *syncButton;
 @property (strong, nonatomic) IBOutlet UIButton *showLogButton;
-@property (strong, nonatomic) IBOutlet UIPageControl *pageControl;
-@property (strong, nonatomic) IBOutlet UILabel *daysLabel;
 @property (strong, nonatomic) UIActivityIndicatorView *spinner;
+
 
 
 @property (strong, nonatomic) dispatch_semaphore_t sem;
@@ -39,13 +40,11 @@
     
     self.store = [[HealthKitFunctions alloc] init];
     self.store.healthStore = [HKHealthStore new];
-
-    self.syncButton.layer.borderColor = [UIColor whiteColor].CGColor;
-    self.showLogButton.layer.borderColor = [UIColor whiteColor].CGColor;
     
     self.slackUsername = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changePage:) name:@"changePage" object:nil];
+    
     
 }
 
@@ -56,40 +55,28 @@
         if (success) {
             [self refreshFeed:nil];
             [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
-                if (success) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
+                
+if (success && (stats[@"current"] != nil)) {
+    dispatch_async(dispatch_get_main_queue(), ^{
 
-                       //  update UI
-                        NSInteger days = [ViewController daysBetweenDate:[NSDate date] andDate:stats[@"end"]];
-                        int goalPercentage = [@(([stats[@"current"] doubleValue] / [stats[@"goal"] doubleValue]) * 100.0) intValue];
-                        
-                        [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
-                        
-                        [self.timeLeftLabel setText:[@(days) stringValue]];
-                        [self.remainingGoalLabel setText:[NSString stringWithFormat:@"%@%%", [@(goalPercentage) stringValue]]];
-                        
-                        CAKeyframeAnimation *bounceAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
-                        // 200 is example side of the big view, but you can apply any formula to it. For example relative to superview, or screen bounds
-                        CGFloat multiplier = 200 / MAX(self.remainingGoalLabel.frame.size.height, self.remainingGoalLabel.frame.size.width);
-                        bounceAnimation.values =
-                          @[@(1 - 0.1 * multiplier),
-                            @(1 + 0.3 * multiplier),
-                            @(1 + 0.1 * multiplier),
-                            @1.0];
-                            bounceAnimation.duration = 0.25;
-                            bounceAnimation.removedOnCompletion = YES;
-                            bounceAnimation.fillMode = kCAFillModeForwards;
-                            [self.remainingGoalLabel.layer addAnimation:bounceAnimation forKey:@"bounceAnimation"];
-                            [self.timeLeftLabel.layer addAnimation:bounceAnimation forKey:@"bounceAnimation"];
-                        
-                        [self.spinner stopAnimating];
-                        
-                    });
-                } else {
-                     dispatch_async(dispatch_get_main_queue(), ^{
-                         [self.spinner stopAnimating];
-                     });
-                }
+       //  update UI
+        NSInteger days = [ViewController daysBetweenDate:[NSDate date] andDate:stats[@"end"]];
+        int goalPercentage = [@(([stats[@"current"] doubleValue] / [stats[@"goal"] doubleValue]) * 100.0) intValue];
+        
+        [stats setObject:@(days) forKey:@"daysLeft"];
+        [stats setObject:@(goalPercentage) forKey:@"goalPercentage"];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
+        
+        [self.spinner stopAnimating];
+        
+    });
+} else {
+     dispatch_async(dispatch_get_main_queue(), ^{
+         [self.spinner stopAnimating];
+     });
+}
+                
             }];
         }
     }];
@@ -129,11 +116,10 @@
 
 - (IBAction)showLogPage:(id)sender {
     [[NSNotificationCenter defaultCenter] postNotificationName:@"scrollToLog" object:nil];
-    [self.pageControl setCurrentPage:1];
 }
 
 -(void)changePage:(NSNotification *)notification {
-    [self.pageControl setCurrentPage:[notification.object integerValue]];
+    [self.pageControl setProgress:[notification.object doubleValue]];
 }
 
 +(void)updateAllDataWithCompletion:(void(^)(BOOL success, NSMutableDictionary *stats, NSError *error))completion {
@@ -141,20 +127,37 @@
         
             [AppDelegate checkStatus:^(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error) {
                 
-                [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber* other, NSError *err) {
+                if (success) {
+                
+                [[NSUserDefaults standardUserDefaults] setObject:points forKey:@"currentPoints"];
+                [[NSUserDefaults standardUserDefaults] setObject:goal forKey:@"goal"];
+                [[NSUserDefaults standardUserDefaults] setObject:end forKey:@"end"];
+                [[NSUserDefaults standardUserDefaults] setObject:start forKey:@"goalStart"];
+                
+                [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber* other, NSNumber* today, NSError *err) {
                     
-                    NSMutableDictionary *stats = [@{@"start":start, @"end":end, @"current":@([cals integerValue]), @"other": other,@"goal":goal} mutableCopy];
+                    [[NSUserDefaults standardUserDefaults] setObject:today forKey:@"today"];
+                    [[NSUserDefaults standardUserDefaults] synchronize];
                     
-                    if (success) {
+                    NSMutableDictionary *stats = [@{@"start":start, @"end":end, @"current":@([cals integerValue]), @"other": other,@"goal":goal, @"today": @([today integerValue])} mutableCopy];
+                    
+                    if (success && ([cals doubleValue] > [points doubleValue])) {
                         [AppDelegate uploadEnergyWithStats:stats withCompletion:^(BOOL success, NSError *err) {
                             if (success) {
+                                [AppDelegate updateWatchComplication:@{@"currentPoints":@([cals integerValue]), @"goalPoints":goal, @"today": @([today integerValue])}];
                                 completion(YES, stats, nil);
                             } else {
                                 completion(NO, nil, err);
                             }
                         }];
+                    } else {
+                        [AppDelegate logBackgroundDataToFileWithStats:@{} message:@"Query was run but the calculated and existing calories were the same. No Sync was sent." time:[NSDate date]];
+                        completion(YES, stats, err);
                     }
                 }];
+                } else {
+                    completion(NO, nil, err);
+                }
             }];
     }];
 }
@@ -180,15 +183,10 @@
 - (IBAction)syncWorkouts:(id)sender {
     
     if ([[NSUserDefaults standardUserDefaults] valueForKey:@"slackUsername"]) {
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.syncButton setAlpha:0.5];
-            [self.syncButton setEnabled:NO];
-            [self refreshFeed:nil];
-        });
+
         
         [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
-            if (success) {
+            if (success && (stats[@"current"] != nil)) {
                 NSLog(@"Updated and loaded new data");
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
             } else {
@@ -196,8 +194,7 @@
             }
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.spinner stopAnimating];
-                [self.syncButton setAlpha:1.0];
-                [self.syncButton setEnabled:YES];
+
             });
         }];
         

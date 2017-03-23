@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="cPu-HV-pXM">
+    <device id="watch42" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="watchOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="11508"/>
+    </dependencies>
+    <scenes>
+        <!--This Week-->
+        <scene sceneID="Hdg-1h-1rz">
+            <objects>
+                <controller identifier="main" title="This Week" animationDuration="2" spacing="0.0" id="cPu-HV-pXM" customClass="InterfaceController">
+                    <items>
+                        <group width="1" height="5" alignment="left" id="aV3-cA-wsr"/>
+                        <group width="0.94999999999999996" alignment="center" layout="vertical" spacing="0.0" id="sJZ-ri-GeO">
+                            <items>
+                                <group width="1" height="33" alignment="left" spacing="4" id="fTd-Aa-n5q">
+                                    <items>
+                                        <label alignment="left" verticalAlignment="center" text="Total" textAlignment="center" id="yiT-lj-wsQ">
+                                            <fontDescription key="font" type="system" weight="light" pointSize="20"/>
+                                        </label>
+                                        <label alignment="right" verticalAlignment="center" text="0" textAlignment="center" id="lTX-hn-RpW">
+                                            <fontDescription key="font" type="system" weight="medium" pointSize="20"/>
+                                        </label>
+                                        <label alignment="right" verticalAlignment="center" text="mp" textAlignment="center" id="bgf-ST-eBF">
+                                            <fontDescription key="font" type="system" weight="light" pointSize="15"/>
+                                        </label>
+                                    </items>
+                                    <color key="backgroundColor" red="0.67455112934112549" green="0.15692374110221863" blue="0.10914970934391022" alpha="1" colorSpace="calibratedRGB"/>
+                                    <edgeInsets key="margins" left="5" right="5" top="0.0" bottom="0.0"/>
+                                </group>
+                                <group width="1" height="33" alignment="left" spacing="4" id="xI5-wu-yFf">
+                                    <items>
+                                        <label alignment="left" verticalAlignment="center" text="Daily" textAlignment="center" id="OaB-hq-ndl">
+                                            <color key="textColor" red="0.25807130340000001" green="0.2729742825" blue="0.3517768979" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                            <fontDescription key="font" type="system" weight="light" pointSize="20"/>
+                                        </label>
+                                        <label alignment="right" verticalAlignment="center" text="0" textAlignment="center" id="Zem-KA-hI7">
+                                            <color key="textColor" red="0.1707773507" green="0.30895513299999999" blue="0.37797331810000001" alpha="1" colorSpace="calibratedRGB"/>
+                                            <fontDescription key="font" type="system" weight="medium" pointSize="20"/>
+                                        </label>
+                                        <label alignment="right" verticalAlignment="center" text="mp" textAlignment="center" id="sfY-54-2n5">
+                                            <color key="textColor" red="0.1707773507" green="0.30895513299999999" blue="0.37797331810000001" alpha="1" colorSpace="calibratedRGB"/>
+                                            <fontDescription key="font" type="system" weight="light" pointSize="15"/>
+                                        </label>
+                                    </items>
+                                    <color key="backgroundColor" red="0.98624199628829956" green="0.7796865701675415" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                    <edgeInsets key="margins" left="5" right="5" top="0.0" bottom="0.0"/>
+                                </group>
+                                <group width="1" height="33" alignment="left" spacing="4" id="HUU-za-oCV">
+                                    <items>
+                                        <label alignment="left" verticalAlignment="center" text="Time" textAlignment="center" id="SvU-1B-Cup">
+                                            <fontDescription key="font" type="system" weight="light" pointSize="20"/>
+                                        </label>
+                                        <label alignment="right" verticalAlignment="center" text="0" textAlignment="center" id="9eg-Vw-Cwp">
+                                            <fontDescription key="font" type="system" weight="medium" pointSize="20"/>
+                                        </label>
+                                        <label alignment="right" verticalAlignment="center" text="days" textAlignment="center" id="ouh-U0-ADD">
+                                            <fontDescription key="font" type="system" weight="light" pointSize="15"/>
+                                        </label>
+                                    </items>
+                                    <color key="backgroundColor" red="0.19376453757286072" green="0.50850099325180054" blue="0.85232251882553101" alpha="1" colorSpace="calibratedRGB"/>
+                                    <edgeInsets key="margins" left="5" right="5" top="0.0" bottom="0.0"/>
+                                </group>
+                            </items>
+                            <edgeInsets key="margins" left="0.0" right="0.0" top="0.0" bottom="0.0"/>
+                        </group>
+                        <group width="1" height="7" alignment="left" id="9SI-WG-hTr"/>
+                        <separator alignment="left" id="Cwn-FL-aa7">
+                            <color key="color" name="selectedKnobColor" catalog="System" colorSpace="catalog"/>
+                        </separator>
+                        <group width="1" height="5" alignment="left" id="trO-Xr-YCm"/>
+                        <label alignment="center" text="Summary" textAlignment="center" id="j7s-cK-fSQ">
+                            <fontDescription key="font" type="system" weight="light" pointSize="20"/>
+                        </label>
+                        <group width="1" height="5" alignment="left" id="XoD-ec-7q7"/>
+                        <activity height="0.65000000000000002" alignment="center" verticalAlignment="bottom" id="lLD-Uq-UjM"/>
+                        <group width="1" height="30" alignment="left" spacing="5" id="g6I-rA-a3m">
+                            <items>
+                                <label alignment="left" verticalAlignment="center" text="Goal" textAlignment="center" id="LF0-iu-gHT">
+                                    <fontDescription key="font" type="system" pointSize="20"/>
+                                </label>
+                                <label alignment="right" verticalAlignment="center" text="0" textAlignment="center" id="Jmc-hW-T4p">
+                                    <fontDescription key="font" type="system" weight="medium" pointSize="22"/>
+                                </label>
+                                <label alignment="right" verticalAlignment="center" text="mp" textAlignment="center" id="awD-SP-BoP">
+                                    <fontDescription key="font" type="system" weight="light" pointSize="15"/>
+                                </label>
+                            </items>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                            <edgeInsets key="margins" left="6" right="6" top="0.0" bottom="0.0"/>
+                        </group>
+                    </items>
+                    <connections>
+                        <outlet property="dailyGoalRemaining" destination="Zem-KA-hI7" id="3NU-Rn-MEa"/>
+                        <outlet property="goalLabel" destination="Jmc-hW-T4p" id="pEt-Dx-bCN"/>
+                        <outlet property="rings" destination="lLD-Uq-UjM" id="0EA-xs-8ZI"/>
+                        <outlet property="timeRemainingLabel" destination="9eg-Vw-Cwp" id="bl9-AV-ei7"/>
+                        <outlet property="totalBurnedLabel" destination="lTX-hn-RpW" id="TmM-h0-dgA"/>
+                    </connections>
+                </controller>
+            </objects>
+            <point key="canvasLocation" x="111.58974358974359" y="35.743589743589745"/>
+        </scene>
+    </scenes>
+</document>

@@ -7,6 +7,7 @@
 //
 
 #import "HealthKitFunctions.h"
+#import "ViewController.h"
 
 @implementation HealthKitFunctions
 
@@ -162,7 +163,7 @@
     [[HKHealthStore new] executeQuery:sampleQuery];
 }
 
-+ (void)getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:(NSMutableArray *)steps withCompletion:(void (^)(NSNumber *stepEnergy, NSNumber *otherEnergy, NSError *))completion {
++ (void)getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:(NSMutableArray *)steps withCompletion:(void (^)(NSNumber *stepEnergy, NSNumber *otherEnergy, NSNumber *todayEnergy, NSError *))completion {
     
     //[AppDelegate logBackgroundDataToFileWithStats:nil message:@"Beginning Main Calorie Calculating Function" time:[NSDate date]];
     // 2. Order the workouts by date
@@ -224,6 +225,7 @@
                                           //    total workout apps energy
                                           //
                                           double otherEnergy = 0.0;
+                                          
                                           for (HKQuantitySample *other in otherWorkouts) {
                                               otherEnergy += [other.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]];
                                           }
@@ -234,31 +236,45 @@
                                           
                                           //    add up samles from watch or phone
                                           //
+                                          double todaySteps = 0.0;
+                                          
                                           if (watchStepSamples.count > 0) {
                                               for (HKQuantitySample *step in watchStepSamples) {
+                                                  
+                                                  if([self date:step.startDate isBetweenDate:[[NSCalendar currentCalendar] startOfDayForDate:[NSDate date]] andDate:[NSDate date]]) {
+                                                      todaySteps += [step.quantity doubleValueForUnit:[HKUnit countUnit]];
+                                                  }
+                                                  
                                                   nonoverlappingSteps += [step.quantity doubleValueForUnit:[HKUnit countUnit]];
                                               }
                                           } else {
                                               for (HKQuantitySample *step in phoneStepSamples) {
+                                                  
+                                                  if([self date:step.startDate isBetweenDate:[[NSCalendar currentCalendar] startOfDayForDate:[NSDate date]] andDate:[NSDate date]]) {
+                                                      todaySteps += [step.quantity doubleValueForUnit:[HKUnit countUnit]];
+                                                  }
+                                                  
                                                   nonoverlappingSteps += [step.quantity doubleValueForUnit:[HKUnit countUnit]];
                                               }
                                           }
                                           
                                           [self convertStepsToCalories:@(nonoverlappingSteps) withCompletion:^(double cals, NSError *err) {
                                               if (!err) {
-                                                  //[AppDelegate logBackgroundDataToFileWithStats:nil message:@"Successfully Completed Step to Cal Conversion" time:[NSDate date]];
-
-                                                  completion(@(cals), @(otherEnergy), nil);
+                                                  
+                                                  [self convertStepsToCalories:@(todaySteps) withCompletion:^(double today, NSError *err) {
+                                                        completion(@(cals), @(otherEnergy), @(today), nil);
+                                                  }];
+                                                  
                                               } else {
                                                   [AppDelegate logBackgroundDataToFileWithStats:@{@"Error": err} message:@"Failed Calorie Calculating Function with Steps" time:[NSDate date]];
-                                                  completion(nil, nil, err);
+                                                  completion(nil, nil, nil, err);
                                               }
                                           }];
                                           
                                       } else{
                                           NSLog(@"Error retrieving energy %@",error);
                                           [AppDelegate logBackgroundDataToFileWithStats:@{@"Error": error} message:@"Failed Calorie Calculating Function with Steps" time:[NSDate date]];
-                                          completion(nil, nil, error);
+                                          completion(nil, nil, nil, error);
                                       }
                                   }];
     
@@ -280,14 +296,16 @@
                                           
                                           for(HKQuantitySample *samples in results)
                                           {
-                                              NSString *sourceKey = samples.sourceRevision.source.name;
+                                              NSString *sourceKey = samples.sourceRevision.source.bundleIdentifier;
                                               NSNumber *filterEnergy = filterTags[sourceKey];
+                                              
+                                              
                                               
                                               if (filterEnergy) {   //  filter found
                                                   
                                                   NSNumber *increment = @([samples.quantity doubleValueForUnit:[HKUnit kilocalorieUnit]] + [filterEnergy doubleValue]);
                                                   
-                                                  [filterTags setObject:increment forKey:samples.sourceRevision.source.name];
+                                                  [filterTags setObject:increment forKey:samples.sourceRevision.source.bundleIdentifier];
                                               }
                                           }
 
@@ -358,7 +376,6 @@
                                       {
                                           
                                           if(!error && results){
-                                              //[AppDelegate logBackgroundDataToFileWithStats:nil message:@"Successfully Completed Step Sample Retreival" time:[NSDate date]];
                                               completionHandler(results, nil);
                                           }else{
                                               NSLog(@"Error retrieving energy %@",error);
@@ -389,6 +406,25 @@
     }];
     
     [[HKHealthStore new] executeQuery:stepsStats];
+}
+
++ (void)getAllEnergySeperatedBySource:(void (^)(HKStatistics* result, NSError *err))completionHandler {
+    HKQuantityType *energy = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
+    
+    HKStatisticsQuery *sourceStats = [[HKStatisticsQuery alloc] initWithQuantityType:energy quantitySamplePredicate:[HKQuery predicateForSamplesWithStartDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"goalStart"] endDate:[NSDate date] options:HKQueryOptionStrictStartDate] options:HKStatisticsOptionSeparateBySource completionHandler:^(HKStatisticsQuery * _Nonnull query, HKStatistics * _Nullable result, NSError * _Nullable error) {
+        
+        if (result) {
+            
+            //  all steps
+            //int totalSteps = [result.sumQuantity doubleValueForUnit:[HKUnit countUnit]];
+            completionHandler(result, nil);
+            
+        } else {
+            completionHandler(nil, error);
+        }
+    }];
+    
+    [[HKHealthStore new] executeQuery:sourceStats];
 }
 
 + (void)getAllEnergyBurnedFromSteps:(void (^)(double, NSError *))completionHandler {

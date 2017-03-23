@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 #import "HealthKitFunctions.h"
 @import WatchConnectivity;
+#import "ViewController.h"
 
 @interface AppDelegate ()
 
@@ -26,10 +27,6 @@
         [session activateSession];
     }
     
-    [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"goalStart"];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-//    return YES;
-    
     if (self.healthStore == nil) {
         self.healthStore = [HKHealthStore new];
     }
@@ -39,6 +36,7 @@
         if (success) {
         
             HKSampleType *steps = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+            HKSampleType *energyBurned = [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierActiveEnergyBurned];
             
             //  if you have the goal start date, if not it will be set on home page
             //
@@ -66,23 +64,35 @@
                                 //
                                 [HealthKitFunctions getAllStepSamples:^(NSArray *stepSamples, NSError *err) {
                                     
-                                    [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber *other, NSError *err) {
+                                    [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber *other, NSNumber *today, NSError *err) {
                                         
+                                        NSNumber *oldCals = stats[@"current"];
+                                        NSNumber *newCals = @([cals integerValue] + [other integerValue]);
                                         
                                         //  setting new calculated Calories
                                         //
-                                        [stats setValue:@([cals integerValue] + [other integerValue]) forKey:@"current"];
+                                        [stats setValue:newCals forKey:@"current"];
                                         
-                                        [AppDelegate uploadEnergyWithStats:stats withCompletion:^(BOOL success, NSError *err) {
-                                            if (success) {
-                                                [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Sync Succeeded" time:[NSDate date]];
-                                                completionHandler();
-                                                
-                                            } else {
-                                                [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Upload Energy Failed" time:[NSDate date]];
-                                                completionHandler();
-                                            }
-                                        }];
+                                        //  set global
+                                        [self.stats addEntriesFromDictionary:stats];
+                                        
+                                        if ([newCals doubleValue] > [oldCals doubleValue]) {
+                                            [AppDelegate uploadEnergyWithStats:stats withCompletion:^(BOOL success, NSError *err) {
+                                                if (success) {
+                                                    [AppDelegate updateWatchComplication:@{@"goalPoints": stats[@"goal"], @"currentPoints": stats[@"current"], @"days": @([ViewController daysBetweenDate:end andDate:[NSDate date]]), @"today": @([today integerValue])}];
+
+                                                    [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Sync Succeeded" time:[NSDate date]];
+                                                    completionHandler();
+                                                    
+                                                } else {
+                                                    [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Upload Energy Failed" time:[NSDate date]];
+                                                    completionHandler();
+                                                }
+                                            }];
+                                        } else {
+                                            [AppDelegate logBackgroundDataToFileWithStats:@{} message:@"No New Data to Sync." time:[NSDate date]];
+                                            completionHandler();
+                                        }
                                     }];
                                 }];
                                         
@@ -105,6 +115,12 @@
                         NSLog(@"Background Delivery of Step Count is Enabled.");
                     }
                 }];
+                
+                [self.healthStore enableBackgroundDeliveryForType:energyBurned frequency:HKUpdateFrequencyImmediate withCompletion:^(BOOL success, NSError * _Nullable error) {
+                    if (success) {
+                        NSLog(@"Background Delivery of Energy Burned is Enabled.");
+                    }
+                }];
             } else {
                 [AppDelegate logBackgroundDataToFileWithStats:nil message:@"AppDelegate Error - No Goal Start Date, Background Query Not Registered" time:[NSDate new]];
             }
@@ -112,6 +128,20 @@
     }];
 
     return YES;
+}
+
+-(void)applicationDidBecomeActive:(UIApplication *)application {
+    [HealthKitFunctions requestPermission:^(BOOL success, NSError *err) {
+        if (success) {
+            [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
+                if (success) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
+                    });
+                }
+            }];
+        }
+    }];
 }
 
 +(void)logBackgroundDataToFileWithStats:(NSDictionary *)stats message:(NSString *)reason time:(NSDate *)timestamp {
@@ -123,9 +153,11 @@
         
         NSMutableDictionary *mutableStats = [stats mutableCopy];
         
-        [mutableStats setObject:[formatter stringFromDate:[NSDate date]] forKey:@"sent"];
-        //[mutableStats setObject:[formatter stringFromDate:stats[@"start"]] forKey:@"start"];
-        //[mutableStats setObject:[formatter stringFromDate:stats[@"end"]] forKey:@"end"];
+        if (mutableStats.allKeys.count > 1 && stats[@"start"] && stats[@"end"]) {
+            [mutableStats setObject:[formatter stringFromDate:[NSDate date]] forKey:@"sent"];
+            [mutableStats setObject:[formatter stringFromDate:stats[@"start"]] forKey:@"start"];
+            [mutableStats setObject:[formatter stringFromDate:stats[@"end"]] forKey:@"end"];
+        }
         
         NSMutableString *formattedOutput = [NSMutableString new];
         
@@ -164,7 +196,7 @@
         
             BOOL writeResult = [updatedLog writeToURL:logUrl atomically:YES encoding:NSUTF8StringEncoding error:&error];
             
-            if (error) {
+            if (!writeResult) {
                 NSLog(@"Error Writing Log to File: %@", [error description]);
             } else {
                 NSLog(@"Log Successfully Written to File");
@@ -175,19 +207,17 @@
 }
 
 +(void)checkStatus:(void(^)(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error))completion {
-    
-    NSURL* URL = [NSURL URLWithString:@"http://adamr5.sg-host.com/adamrz/myfirstbot/api/active_goal/"];
+
     
     NSString *username = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
     if (username == nil) {
         username = @"";
     }
     
-    NSDictionary* URLParams = @{
-                                @"slack_username": username,
-                                };
+    NSString *urlSub = [NSString stringWithFormat:@"http://adamr5.sg-host.com/adamrz/myfirstbot/api/active_goal/?slack_username=%@", username];
     
-    URL = NSURLByAppendingQueryParameters(URL, URLParams);
+    NSURL* URL = [NSURL URLWithString:urlSub];
+
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:URL];
     request.HTTPMethod = @"GET";
     
@@ -245,17 +275,20 @@
     }
 }
 
--(void)updateWatchComplication:(NSNumber *)energyBurned {
++(void)updateWatchComplication:(NSDictionary *)stats {
     if ([WCSession defaultSession].activationState == WCSessionActivationStateActivated && [[WCSession defaultSession] isComplicationEnabled]) {
         NSLog(@"sending complication data");
-        //[[WCSession defaultSession] transferCurrentComplicationUserInfo:@{@"burned": [[NSUserDefaults standardUserDefaults] objectForKey:@"currentPoints"], @"goal": [[NSUserDefaults standardUserDefaults] objectForKey:@"goalPoints"] }];
-                [[WCSession defaultSession] transferCurrentComplicationUserInfo:@{@"burned": energyBurned, @"goal": @([energyBurned intValue] * 2) }];
         
+        if ([stats[@"currentPoints"] doubleValue] > 0.0 && stats[@"goalPoints"] && stats[@"days"] && stats[@"today"]) {
+            [[WCSession defaultSession] transferCurrentComplicationUserInfo:@{@"currentPoints": stats[@"currentPoints"], @"goalPoints": stats[@"goalPoints"] ,@"days":stats[@"days"], @"today": stats[@"today"]}];
+        } else {
+            [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Complications not updated, points is 0.0" time:[NSDate date]];
+        }
     }
 }
     
 +(void)uploadEnergyWithStats:(NSDictionary *)stats withCompletion:(void(^)(BOOL success, NSError *err))completion {
-//    
+//   
         NSURL* URL = [NSURL URLWithString:@"http://adamr5.sg-host.com/adamrz/myfirstbot/api/active_goal/"];
         NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:URL];
         request.HTTPMethod = @"POST";
@@ -312,53 +345,29 @@
     
     if ([[message valueForKey:@"getEnergy"] isEqualToString:@"yes"]) {
         [HealthKitFunctions getAllStepSamples:^(NSArray *stepSamples, NSError *err) {
-           [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber *other, NSError *err) {
+           [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber *other, NSNumber *today, NSError *err) {
+
                [AppDelegate checkStatus:^(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error) {
-                   replyHandler(@{@"goal":@([goal integerValue]), @"burned":@([cals integerValue] + [other integerValue])});
+                   NSInteger days = labs([ViewController daysBetweenDate:[NSDate date] andDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"end"]]);
+                   
+                   [AppDelegate updateWatchComplication:@{@"goalPoints": @([goal integerValue]), @"currentPoints": @([cals integerValue] + [other integerValue]), @"days":@(days), @"today": @([today integerValue])}];
+                   
+                   replyHandler(@{@"goal":@([goal integerValue]), @"burned":@([cals integerValue] + [other integerValue]), @"days": @(days), @"today": @([today integerValue]) });
                }];
            }];
         }];
+    } else if ([[message valueForKey:@"energy"] isEqualToString:@"yes"]) {
+        [HealthKitFunctions getAllStepSamples:^(NSArray *stepSamples, NSError *err) {
+            [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber *other, NSNumber *today, NSError *err) {
+                
+                [AppDelegate checkStatus:^(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error) {
+                    NSInteger days = [ViewController daysBetweenDate:[NSDate date] andDate:[[NSUserDefaults standardUserDefaults] objectForKey:@"end"]];
+                    replyHandler(@{@"goal":@([goal integerValue]), @"burned":@([cals integerValue] + [other integerValue]), @"days": @(days), @"today": @([today integerValue])});
+                    
+                }];
+            }];
+        }];
     }
-}
-
-
-/*
- * Utils: Add this section before your class implementation
- */
-
-/**
- This creates a new query parameters string from the given NSDictionary. For
- example, if the input is @{@"day":@"Tuesday", @"month":@"January"}, the output
- string will be @"day=Tuesday&month=January".
- @param queryParameters The input dictionary.
- @return The created parameters string.
- */
-static NSString* NSStringFromQueryParameters(NSDictionary* queryParameters)
-{
-    NSMutableArray* parts = [NSMutableArray array];
-    [queryParameters enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
-        NSString *part = [NSString stringWithFormat: @"%@=%@",
-                          [key stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding],
-                          [value stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding]
-                          ];
-        [parts addObject:part];
-    }];
-    return [parts componentsJoinedByString: @"&"];
-}
-
-/**
- Creates a new URL by adding the given query parameters.
- @param URL The input URL.
- @param queryParameters The query parameter dictionary to add.
- @return A new NSURL.
- */
-static NSURL* NSURLByAppendingQueryParameters(NSURL* URL, NSDictionary* queryParameters)
-{
-    NSString* URLString = [NSString stringWithFormat:@"%@?%@",
-                           [URL absoluteString],
-                           NSStringFromQueryParameters(queryParameters)
-                           ];
-    return [NSURL URLWithString:URLString];
 }
 
 @end

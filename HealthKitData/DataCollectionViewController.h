@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ANDBackgroundChartView.h"
 
 @interface DataCollectionViewController : UICollectionViewController <UITableViewDelegate, UITableViewDataSource>
+
++ (UIColor *)colorFromHexString:(NSString *)hexString;
 
 @end
