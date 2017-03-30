@@ -255,6 +255,7 @@
                 [[NSUserDefaults standardUserDefaults] setObject:current forKey:@"currentPoints"];
                 [[NSUserDefaults standardUserDefaults] setObject:startDate forKey:@"goalStart"];
                 [[NSUserDefaults standardUserDefaults] setObject:endDate forKey:@"end"];
+                [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"lastSyncDate"];
                 [[NSUserDefaults standardUserDefaults] synchronize];
                 
                 completion(YES, startDate, endDate, current, goal, nil);

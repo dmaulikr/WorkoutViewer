@@ -15,6 +15,7 @@
 		A88BBF0C1E1656910078649D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A88BBF0A1E1656910078649D /* LaunchScreen.storyboard */; };
 		A88BBF151E165D8A0078649D /* HealthKitFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = A88BBF141E165D8A0078649D /* HealthKitFunctions.m */; };
 		A88BBF191E165E540078649D /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A88BBF181E165E540078649D /* HealthKit.framework */; };
+		C20456E91E8CF98A0000EB75 /* LeaderboardTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C20456E81E8CF98A0000EB75 /* LeaderboardTableViewCell.m */; };
 		C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */; };
 		C22D7A981E837F3E00B7272E /* ScrollableGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22D7A971E837F3E00B7272E /* ScrollableGraphView.swift */; };
 		C22D7A9B1E8388C700B7272E /* CollectionViewHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = C22D7A9A1E8388C700B7272E /* CollectionViewHeader.m */; };
@@ -120,6 +121,8 @@
 		A88BBF141E165D8A0078649D /* HealthKitFunctions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HealthKitFunctions.m; sourceTree = "<group>"; };
 		A88BBF161E165E540078649D /* HealthKitData.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthKitData.entitlements; sourceTree = "<group>"; };
 		A88BBF181E165E540078649D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		C20456E71E8CF98A0000EB75 /* LeaderboardTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeaderboardTableViewCell.h; sourceTree = "<group>"; };
+		C20456E81E8CF98A0000EB75 /* LeaderboardTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeaderboardTableViewCell.m; sourceTree = "<group>"; };
 		C2057EEE1E2EC15800F2FF4F /* InsetTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InsetTextField.h; sourceTree = "<group>"; };
 		C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InsetTextField.m; sourceTree = "<group>"; };
 		C21F51B31E68E37E00DDDDC9 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS3.1.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -240,6 +243,8 @@
 		A88BBEFB1E1656910078649D /* HealthKitData */ = {
 			isa = PBXGroup;
 			children = (
+				C20456E71E8CF98A0000EB75 /* LeaderboardTableViewCell.h */,
+				C20456E81E8CF98A0000EB75 /* LeaderboardTableViewCell.m */,
 				C22D7A9F1E838FDB00B7272E /* GraphCollectionViewCell.h */,
 				C22D7AA01E838FDB00B7272E /* GraphCollectionViewCell.m */,
 				C27CA9041E724B190084B9B8 /* ProgressCollectionViewCell.h */,
@@ -517,6 +522,7 @@
 				C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */,
 				C22D7AA11E838FDB00B7272E /* GraphCollectionViewCell.m in Sources */,
 				A88BBF041E1656910078649D /* ViewController.m in Sources */,
+				C20456E91E8CF98A0000EB75 /* LeaderboardTableViewCell.m in Sources */,
 				C2D302B51E712A8000147784 /* LogsCollectionViewCell.m in Sources */,
 				C22D7AA61E8443AE00B7272E /* TKRadarChart.swift in Sources */,
 				C27CA8FA1E71F8060084B9B8 /* MBCircularProgressBarView.m in Sources */,

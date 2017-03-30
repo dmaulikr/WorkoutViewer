@@ -11,11 +11,8 @@
 @interface LeaderboardCollectionViewCell : UICollectionViewCell
 
 @property (strong, nonatomic) IBOutlet UILabel *leaderboardTitle;
-@property (strong, nonatomic) IBOutlet UIButton *todayButton;
-@property (strong, nonatomic) IBOutlet UIButton *weekButton;
-@property (strong, nonatomic) IBOutlet UIView *topView;
-@property (strong, nonatomic) IBOutlet UIView *bottomView;
-@property (strong, nonatomic) IBOutlet UIView *scalableView;
-
+@property (strong, nonatomic) IBOutlet UITableView *rankTableView;
+@property (strong, nonatomic) IBOutlet UIButton *todayRankButton;
+@property (strong, nonatomic) IBOutlet UIButton *weekRankButton;
 
 @end

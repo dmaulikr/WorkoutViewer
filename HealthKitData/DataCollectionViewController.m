@@ -19,6 +19,7 @@
 #import "HealthKitData-Swift.h"
 #import "CollectionViewHeader.h"
 #import "GraphCollectionViewCell.h"
+#import "LeaderboardCollectionViewCell.h"
 #import <QuartzCore/QuartzCore.h>
 
 @interface DataCollectionViewController ()
@@ -48,8 +49,6 @@
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    
-    //[self.collectionView setBackgroundColor:[DataCollectionViewController colorFromHexString:@"#333333"]];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moveToLogPage) name:@"scrollToLog" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setStatsDictionary:) name:@"setStats" object:nil];
@@ -95,7 +94,7 @@
 
             dispatch_async(dispatch_get_main_queue(), ^{
 
-                [headerCell.currentPointsLabel setText:[NSString stringWithFormat:@"%.0f pts", ([self.stats[@"current"] doubleValue] + [self.stats[@"other"] doubleValue])]];
+                [headerCell.currentPointsLabel setText:[NSString stringWithFormat:@"You've earned %.0f MovePoints this week", ([self.stats[@"current"] doubleValue] + [self.stats[@"other"] doubleValue])]];
                 
                 [headerCell.lastSyncLabel setText:[NSString stringWithFormat:@"Last Sync was %0.fam Today", [@(arc4random_uniform(12.0)) doubleValue]]];
                 
@@ -117,7 +116,11 @@
 
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return 5;
+    if (collectionView.tag == 2) { // Sources CollectionViewCell
+        return 2;
+    } else {
+        return 5;
+    }
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
@@ -139,7 +142,7 @@
             graphView.shouldDrawBarLayer = YES;
             graphView.shouldDrawDataPoint = NO;
             graphView.dataPointSpacing = (cell.frame.size.width / 7) - 5;
-            graphView.leftmostPointPadding = 60;
+            //graphView.leftmostPointPadding = 60;
             
             graphView.lineColor = [UIColor clearColor];
             graphView.barWidth = 30;
@@ -153,12 +156,12 @@
             cell.layer.cornerRadius = 8;
             graphView.backgroundFillColor = [DataCollectionViewController colorFromHexString:@"#27916F"];
 
-            graphView.referenceLineLabelFont = [UIFont systemFontOfSize:10];
+            graphView.referenceLineLabelFont = [UIFont systemFontOfSize:11];
           graphView.referenceLineColor = [[UIColor whiteColor] colorWithAlphaComponent:0.2];
             graphView.referenceLineLabelColor = [UIColor whiteColor];
           graphView.numberOfIntermediateReferenceLines = 3;
             graphView.shouldShowLabels = YES;
-            graphView.dataPointLabelFont = [UIFont systemFontOfSize:10];
+            graphView.dataPointLabelFont = [UIFont systemFontOfSize:11];
             graphView.dataPointLabelColor = [UIColor whiteColor];
             graphView.rightmostPointPadding = 20;
             graphView.dataPointLabelBottomMargin = 0;//50;
@@ -173,6 +176,15 @@
             
             [cell.contentView addSubview:graphView];
             graphView.frame = cell.contentView.bounds;
+            
+            return cell;
+        } else if (indexPath.row == 2) {
+            
+            LeaderboardCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"leaderboard" forIndexPath:indexPath];
+            cell.rankTableView.tag = 3;
+            cell.rankTableView.delegate = self;
+            cell.rankTableView.dataSource = self;
+            cell.backgroundColor = [DataCollectionViewController colorFromHexString:@"AC281C"];
             
             return cell;
         }
@@ -238,7 +250,7 @@
     if (kind == UICollectionElementKindSectionHeader) {
         CollectionViewHeader *header = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header" forIndexPath:indexPath];
         
-        [header.currentPointsLabel setText:[NSString stringWithFormat:@"You have %.0f MovePoints", ([self.stats[@"current"] doubleValue])]];
+        [header.currentPointsLabel setText:[NSString stringWithFormat:@"You've earned %.0f MovePoints", ([self.stats[@"current"] doubleValue])]];
         //[header.currentPointsLabel setTextColor:[DataCollectionViewController colorFromHexString:@"#333333"]];
         
         header.currentPointsLabel.layer.shadowOpacity = 1.0;
@@ -288,7 +300,17 @@
             CollectionViewHeader *headerCell = (CollectionViewHeader*)[overviewCollectionView supplementaryViewForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                float offset = fabs(percentageOffset.y) * 6.0;
+                if (fabs(percentageOffset.y) < 0.001) {
+                    NSLog(@"Updating");
+                    NSDateFormatter *formatter = [NSDateFormatter new];
+                    [formatter setDateStyle:NSDateFormatterShortStyle];
+                    [formatter setTimeStyle:NSDateFormatterShortStyle];
+                    
+                    NSDate *lastSyncDate = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastSyncDate"];
+                    NSString *lastSyncDateString = [formatter stringFromDate:lastSyncDate];
+                    [headerCell.lastSyncLabel setText:[NSString stringWithFormat:@"Last Sync was %@", lastSyncDateString]];
+                }
+                float offset = fabs(percentageOffset.y) * 6.5;
                 [headerCell.lastSyncLabel setAlpha:offset];
             });
         }
