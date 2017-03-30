@@ -7,6 +7,7 @@
 //
 
 #import "LeaderboardCollectionViewCell.h"
+#import "SKUBezierPath+SVG.h"
 
 @implementation LeaderboardCollectionViewCell
 
@@ -15,6 +16,15 @@
     [self.weekRankButton.titleLabel setFont:[UIFont systemFontOfSize:15 weight:UIFontWeightThin]];
     [self.todayRankButton setEnabled:NO];
     [self.todayRankButton.titleLabel setFont:[UIFont systemFontOfSize:15 weight:UIFontWeightMedium]];
+    
+    [self setUserInteractionEnabled:NO];
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        self.viewForFirstBaselineLayout.alpha = 0.5;
+    } completion:^(BOOL finished) {
+        
+    }];
+    
 }
 
 - (IBAction)showWeekStats:(id)sender {
@@ -23,6 +33,11 @@
     [self.todayRankButton setEnabled:YES];
     [self.weekRankButton.titleLabel setFont:[UIFont systemFontOfSize:15 weight:UIFontWeightMedium]];
     
+    [self setUserInteractionEnabled:NO];
+    
+    [UIView animateWithDuration:0.3 animations:^{
+        self.viewForFirstBaselineLayout.alpha = 0.5;
+    }];
 }
 
 @end
