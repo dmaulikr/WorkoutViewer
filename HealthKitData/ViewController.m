@@ -45,7 +45,26 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changePage:) name:@"changePage" object:nil];
     
+    UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"white_logo"]];
     
+    
+    imageView.contentMode = UIViewContentModeScaleAspectFit;
+    
+    CGFloat width = [UIScreen mainScreen].bounds.size.width / 2;
+    imageView.frame = CGRectMake(self.view.center.x - width, self.view.center.y - width, width, width);
+    imageView.center = self.view.center;
+    
+    [self.view insertSubview:imageView.viewForFirstBaselineLayout atIndex:0];
+    [self setNeedsStatusBarAppearanceUpdate];
+}
+
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+    return UIStatusBarStyleLightContent;
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
 }
 
 -(void)viewDidAppear:(BOOL)animated {

@@ -34,15 +34,22 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(calculateEnergyFromSources:) name:@"filterSources" object:nil];
+    
+    [self.collectionView setBackgroundColor:[UIColor clearColor]];
+    
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    
+    [super viewWillAppear:animated];
     
 }
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     
-    [self.collectionView setBackgroundColor:[DataCollectionViewController colorFromHexString:@"#333333"]];
+    //[self.collectionView setBackgroundColor:[DataCollectionViewController colorFromHexString:@"#333333"]];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(moveToLogPage) name:@"scrollToLog" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setStatsDictionary:) name:@"setStats" object:nil];
@@ -89,6 +96,8 @@
             dispatch_async(dispatch_get_main_queue(), ^{
 
                 [headerCell.currentPointsLabel setText:[NSString stringWithFormat:@"%.0f pts", ([self.stats[@"current"] doubleValue] + [self.stats[@"other"] doubleValue])]];
+                
+                [headerCell.lastSyncLabel setText:[NSString stringWithFormat:@"Last Sync was %0.fam Today", [@(arc4random_uniform(12.0)) doubleValue]]];
                 
                 if (self.stats[@"goalPercentage"]) {
                     
@@ -229,7 +238,7 @@
     if (kind == UICollectionElementKindSectionHeader) {
         CollectionViewHeader *header = [collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"header" forIndexPath:indexPath];
         
-        [header.currentPointsLabel setText:[NSString stringWithFormat:@"%.0f pts", ([self.stats[@"current"] doubleValue])]];
+        [header.currentPointsLabel setText:[NSString stringWithFormat:@"You have %.0f MovePoints", ([self.stats[@"current"] doubleValue])]];
         //[header.currentPointsLabel setTextColor:[DataCollectionViewController colorFromHexString:@"#333333"]];
         
         header.currentPointsLabel.layer.shadowOpacity = 1.0;
@@ -244,6 +253,82 @@
 
 -(void)viewDidDisappear:(BOOL)animated {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+// this just calculates the percentages now and passes it off to another method.
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    // vertical
+    CGFloat maximumVerticalOffset = scrollView.contentSize.height - CGRectGetHeight(scrollView.frame);
+    CGFloat currentVerticalOffset = scrollView.contentOffset.y;
+    
+    // horizontal
+    CGFloat maximumHorizontalOffset = scrollView.contentSize.width - CGRectGetWidth(scrollView.frame);
+    CGFloat currentHorizontalOffset = scrollView.contentOffset.x;
+    
+    // percentages
+    CGFloat percentageHorizontalOffset = currentHorizontalOffset / maximumHorizontalOffset;
+    CGFloat percentageVerticalOffset = currentVerticalOffset / maximumVerticalOffset;
+    
+    [self scrollView:scrollView didScrollToPercentageOffset:CGPointMake(percentageHorizontalOffset, percentageVerticalOffset)];
+}
+
+// this just gets the percentage offset.
+// 0,0 = no scroll
+// 1,1 = maximum scroll
+- (void)scrollView:(UIScrollView *)scrollView didScrollToPercentageOffset:(CGPoint)percentageOffset
+{
+
+    for (UICollectionViewCell *c in self.collectionView.visibleCells) {
+        
+        if ([c isKindOfClass:[SourcesCollectionViewCell class]]) {
+            SourcesCollectionViewCell *sourceCell = (SourcesCollectionViewCell *)c;
+            UICollectionView *overviewCollectionView = sourceCell.overviewCollectionView;
+            
+            CollectionViewHeader *headerCell = (CollectionViewHeader*)[overviewCollectionView supplementaryViewForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                float offset = fabs(percentageOffset.y) * 6.0;
+                [headerCell.lastSyncLabel setAlpha:offset];
+            });
+        }
+    }
+}
+
+// HSB color just using Hue
+- (UIColor *)HSBColorForOffsetPercentage:(CGFloat)percentage
+{
+    CGFloat minColorHue = 0.0;
+    CGFloat maxColorHue = 0.2; // this is a guess for the yellow hue.
+    
+    CGFloat actualHue = (maxColorHue - minColorHue) * percentage + minColorHue;
+    
+    // change these values to get the colours you want.
+    // I find reducing the saturation to 0.8 ish gives nicer colours.
+    return [UIColor colorWithHue:actualHue saturation:1.0 brightness:1.0 alpha:1.0];
+}
+
+// RGB color using all R, G, B values
+- (UIColor *)RGBColorForOffsetPercentage:(CGFloat)percentage
+{
+    // RGB 1, 0, 0 = red
+    CGFloat minColorRed = 1.0;
+    CGFloat minColorGreen = 0.0;
+    CGFloat minColorBlue = 0.0;
+    
+    // RGB 1, 1, 0 = yellow
+    CGFloat maxColorRed = 1.0;
+    CGFloat maxColorGreen = 1.0;
+    CGFloat maxColorBlue = 0.0;
+    
+    // if you have specific beginning and end RGB values then set these to min and max respectively.
+    // it should even work if the min value is greater than the max value.
+    
+    CGFloat actualRed = (maxColorRed - minColorRed) * percentage + minColorRed;
+    CGFloat actualGreen = (maxColorGreen - minColorGreen) * percentage + minColorGreen;
+    CGFloat actualBlue = (maxColorBlue - minColorBlue) * percentage + minColorBlue;
+    
+    return [UIColor colorWithRed:actualRed green:actualGreen blue:actualBlue alpha:1.0];
 }
 
 #pragma mark <UICollectionViewDelegate>

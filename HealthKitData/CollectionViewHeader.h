@@ -11,5 +11,6 @@
 @interface CollectionViewHeader : UICollectionReusableView
 
 @property (strong, nonatomic) IBOutlet UILabel *currentPointsLabel;
+@property (strong, nonatomic) IBOutlet UILabel *lastSyncLabel;
 
 @end
