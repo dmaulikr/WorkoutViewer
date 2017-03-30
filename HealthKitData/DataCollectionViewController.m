@@ -20,6 +20,7 @@
 #import "CollectionViewHeader.h"
 #import "GraphCollectionViewCell.h"
 #import "LeaderboardCollectionViewCell.h"
+#import "LeaderboardTableViewCell.h"
 #import <QuartzCore/QuartzCore.h>
 
 @interface DataCollectionViewController ()
@@ -484,6 +485,14 @@
         
         WorkoutTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"workouts"];
         
+        return cell;
+        
+    } else if (tableView.tag == 3) {
+        LeaderboardTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"leaderboardCell"];
+        cell.backgroundColor = [UIColor clearColor];
+        // you'll have alerady loaded everyone's data, trigger animation here and pass data
+        
+        return cell;
     }
     
     return [tableView dequeueReusableCellWithIdentifier:@"source"];
