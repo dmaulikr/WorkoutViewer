@@ -10,6 +10,12 @@
 
 @implementation GraphCollectionViewCell
 
+- (IBAction)showTodayProgress:(id)sender {
+    
+}
 
+- (IBAction)showWeekProgress:(id)sender {
+    
+}
 
 @end

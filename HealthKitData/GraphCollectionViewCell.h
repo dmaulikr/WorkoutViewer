@@ -10,6 +10,10 @@
 
 @interface GraphCollectionViewCell : UICollectionViewCell
 
-
+@property (strong, nonatomic) IBOutlet UIView *graphHolderView;
+@property (strong, nonatomic) IBOutlet UIView *headerBackgroundView;
+@property (strong, nonatomic) IBOutlet UIButton *weekProgressButton;
+@property (strong, nonatomic) IBOutlet UILabel *progressLabel;
+@property (strong, nonatomic) IBOutlet UIButton *todayProgressButton;
 
 @end

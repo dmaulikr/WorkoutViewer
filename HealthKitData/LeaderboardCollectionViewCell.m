@@ -7,7 +7,7 @@
 //
 
 #import "LeaderboardCollectionViewCell.h"
-#import "SKUBezierPath+SVG.h"
+#import "HealthKitData-Swift.h"
 
 @implementation LeaderboardCollectionViewCell
 
@@ -20,8 +20,9 @@
     [self setUserInteractionEnabled:NO];
     
     [UIView animateWithDuration:0.3 animations:^{
-        self.viewForFirstBaselineLayout.alpha = 0.5;
+        self.alpha = 0.5;
     } completion:^(BOOL finished) {
+
         
     }];
     
@@ -36,7 +37,7 @@
     [self setUserInteractionEnabled:NO];
     
     [UIView animateWithDuration:0.3 animations:^{
-        self.viewForFirstBaselineLayout.alpha = 0.5;
+        self.alpha = 0.5;
     }];
 }
 
