@@ -45,8 +45,9 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changePage:) name:@"changePage" object:nil];
     
-    UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"white_logo"]];
+    UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bot"]];
     
+    imageView.tintColor = [UIColor whiteColor];
     
     imageView.contentMode = UIViewContentModeScaleAspectFit;
     
@@ -72,7 +73,7 @@
 
     [HealthKitFunctions requestPermission:^(BOOL success, NSError *err) {
         if (success) {
-            [self refreshFeed:nil];
+            //[self refreshFeed:nil];
             [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
                 
 if (success && (stats[@"current"] != nil)) {
@@ -134,7 +135,7 @@ if (success && (stats[@"current"] != nil)) {
 }
 
 - (IBAction)showLogPage:(id)sender {
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"scrollToLog" object:nil];
+    //[[NSNotificationCenter defaultCenter] postNotificationName:@"scrollToLog" object:nil];
 }
 
 -(void)changePage:(NSNotification *)notification {

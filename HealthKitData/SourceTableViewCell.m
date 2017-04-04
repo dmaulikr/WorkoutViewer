@@ -17,7 +17,7 @@
 
 - (IBAction)include:(UISwitch *)sender {
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"filterSources" object:sender];
+    //[[NSNotificationCenter defaultCenter] postNotificationName:@"filterSources" object:sender];
     
     
     if (!sender.on) {

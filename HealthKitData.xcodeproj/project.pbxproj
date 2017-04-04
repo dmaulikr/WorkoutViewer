@@ -59,6 +59,9 @@
 		C27FBD001E84AB3B00FB41E7 /* ElongationCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27FBCF41E84AB3B00FB41E7 /* ElongationCell.swift */; };
 		C27FBD011E84AB3B00FB41E7 /* ElongationHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27FBCF51E84AB3B00FB41E7 /* ElongationHeader.swift */; };
 		C27FBD051E84BB7F00FB41E7 /* LeaderboardCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C27FBD041E84BB7F00FB41E7 /* LeaderboardCollectionViewCell.m */; };
+		C2A041BD1E92AD1400F7F300 /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A041B81E92AD1400F7F300 /* Palette.swift */; };
+		C2A041BE1E92AD1400F7F300 /* TwicketSegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A041BA1E92AD1400F7F300 /* TwicketSegmentedControl.swift */; };
+		C2A041BF1E92AD1400F7F300 /* UIViewShadowExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A041BB1E92AD1400F7F300 /* UIViewShadowExtension.swift */; };
 		C2BB4C241E7E35C4007F9A31 /* Colors in Resources */ = {isa = PBXBuildFile; fileRef = C2BB4C231E7E35C4007F9A31 /* Colors */; };
 		C2BB4C261E7E3638007F9A31 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BB4C251E7E3638007F9A31 /* QuartzCore.framework */; };
 		C2BB4C281E7E3646007F9A31 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2BB4C271E7E3646007F9A31 /* CoreGraphics.framework */; };
@@ -66,6 +69,7 @@
 		C2D302AF1E71148900147784 /* SourcesCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302AE1E71148900147784 /* SourcesCollectionViewCell.m */; };
 		C2D302B51E712A8000147784 /* LogsCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302B41E712A8000147784 /* LogsCollectionViewCell.m */; };
 		C2D302B81E717C3200147784 /* SourceTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302B71E717C3200147784 /* SourceTableViewCell.m */; };
+		C2DC2A3C1E9313C100B3900D /* SVUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DC2A341E9313C100B3900D /* SVUploader.swift */; };
 		C2EC19711E578B7F0076FA0B /* StatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2EC19701E578B7F0076FA0B /* StatViewController.m */; };
 /* End PBXBuildFile section */
 
@@ -196,6 +200,10 @@
 		C27FBCF51E84AB3B00FB41E7 /* ElongationHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElongationHeader.swift; sourceTree = "<group>"; };
 		C27FBD031E84BB7F00FB41E7 /* LeaderboardCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeaderboardCollectionViewCell.h; sourceTree = "<group>"; };
 		C27FBD041E84BB7F00FB41E7 /* LeaderboardCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeaderboardCollectionViewCell.m; sourceTree = "<group>"; };
+		C2A041B81E92AD1400F7F300 /* Palette.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
+		C2A041B91E92AD1400F7F300 /* TwicketSegmentedControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TwicketSegmentedControl.h; sourceTree = "<group>"; };
+		C2A041BA1E92AD1400F7F300 /* TwicketSegmentedControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TwicketSegmentedControl.swift; sourceTree = "<group>"; };
+		C2A041BB1E92AD1400F7F300 /* UIViewShadowExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIViewShadowExtension.swift; sourceTree = "<group>"; };
 		C2BB4C231E7E35C4007F9A31 /* Colors */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Colors; sourceTree = "<group>"; };
 		C2BB4C251E7E3638007F9A31 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		C2BB4C271E7E3646007F9A31 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -207,6 +215,7 @@
 		C2D302B41E712A8000147784 /* LogsCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogsCollectionViewCell.m; sourceTree = "<group>"; };
 		C2D302B61E717C3200147784 /* SourceTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SourceTableViewCell.h; sourceTree = "<group>"; };
 		C2D302B71E717C3200147784 /* SourceTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SourceTableViewCell.m; sourceTree = "<group>"; };
+		C2DC2A341E9313C100B3900D /* SVUploader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SVUploader.swift; path = SVUploader/SVUploader.swift; sourceTree = "<group>"; };
 		C2EC196F1E578B7F0076FA0B /* StatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StatViewController.h; path = ../StatViewController.h; sourceTree = "<group>"; };
 		C2EC19701E578B7F0076FA0B /* StatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StatViewController.m; path = ../StatViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -287,6 +296,7 @@
 				C27FBCEB1E84AB3B00FB41E7 /* UICollectionView.swift */,
 				C27FBCEC1E84AB3B00FB41E7 /* UIEdgeInsets.swift */,
 				C27FBCED1E84AB3B00FB41E7 /* UITableView.swift */,
+				C2DC2A341E9313C100B3900D /* SVUploader.swift */,
 				C27FBCEE1E84AB3B00FB41E7 /* ElongationConfig.swift */,
 				C27FBCEF1E84AB3B00FB41E7 /* ElongationTransition.swift */,
 				C27FBCF01E84AB3B00FB41E7 /* Expandable.swift */,
@@ -326,6 +336,10 @@
 				A88BBF051E1656910078649D /* Main.storyboard */,
 				C2057EEE1E2EC15800F2FF4F /* InsetTextField.h */,
 				C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */,
+				C2A041B81E92AD1400F7F300 /* Palette.swift */,
+				C2A041B91E92AD1400F7F300 /* TwicketSegmentedControl.h */,
+				C2A041BA1E92AD1400F7F300 /* TwicketSegmentedControl.swift */,
+				C2A041BB1E92AD1400F7F300 /* UIViewShadowExtension.swift */,
 				A88BBF131E165D8A0078649D /* HealthKitFunctions.h */,
 				A88BBF141E165D8A0078649D /* HealthKitFunctions.m */,
 				C22D7A971E837F3E00B7272E /* ScrollableGraphView.swift */,
@@ -548,6 +562,7 @@
 				C20456E91E8CF98A0000EB75 /* LeaderboardTableViewCell.m in Sources */,
 				C20456EE1E8D0A540000EB75 /* SKUBezierPath+SVG.m in Sources */,
 				C2D302B51E712A8000147784 /* LogsCollectionViewCell.m in Sources */,
+				C2A041BF1E92AD1400F7F300 /* UIViewShadowExtension.swift in Sources */,
 				C22D7AA61E8443AE00B7272E /* TKRadarChart.swift in Sources */,
 				C27CA8FA1E71F8060084B9B8 /* MBCircularProgressBarView.m in Sources */,
 				C27FBCFD1E84AB3B00FB41E7 /* ElongationDetailViewController.swift in Sources */,
@@ -555,6 +570,7 @@
 				C27FBCFF1E84AB3B00FB41E7 /* SwipableTableViewController.swift in Sources */,
 				C27FBCFB1E84AB3B00FB41E7 /* ElongationTransition.swift in Sources */,
 				C22D7A9B1E8388C700B7272E /* CollectionViewHeader.m in Sources */,
+				C2A041BD1E92AD1400F7F300 /* Palette.swift in Sources */,
 				C20456F21E8D0BD10000EB75 /* FillableLoader.swift in Sources */,
 				C22D7AA31E83C35600B7272E /* UIColor+colorFromHex.swift in Sources */,
 				C27FBD001E84AB3B00FB41E7 /* ElongationCell.swift in Sources */,
@@ -571,7 +587,9 @@
 				C27CA9031E7249BE0084B9B8 /* ANDLineChartView.m in Sources */,
 				C27CA8F41E718C8B0084B9B8 /* WorkoutTableViewCell.m in Sources */,
 				C27CA9011E7249BE0084B9B8 /* ANDBackgroundChartView.m in Sources */,
+				C2A041BE1E92AD1400F7F300 /* TwicketSegmentedControl.swift in Sources */,
 				C27FBCFC1E84AB3B00FB41E7 /* Expandable.swift in Sources */,
+				C2DC2A3C1E9313C100B3900D /* SVUploader.swift in Sources */,
 				C22D7A981E837F3E00B7272E /* ScrollableGraphView.swift in Sources */,
 				C27AD59E1E8485280021A9AD /* CHIPageControlJaloro.swift in Sources */,
 				C27CA9061E724B190084B9B8 /* ProgressCollectionViewCell.m in Sources */,
@@ -722,6 +740,7 @@
 		A88BBF111E1656910078649D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = HealthKitData/HealthKitData.entitlements;
 				DEFINES_MODULE = YES;
@@ -738,6 +757,7 @@
 		A88BBF121E1656910078649D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = HealthKitData/HealthKitData.entitlements;
 				DEFINES_MODULE = YES;

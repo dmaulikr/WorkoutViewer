@@ -163,6 +163,85 @@
     [[HKHealthStore new] executeQuery:sampleQuery];
 }
 
++(void)getDailyStepsForLast3MonthsWithCompletion:(void (^)(NSMutableDictionary *steps, NSError *err))completion {
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    NSDateComponents *interval = [[NSDateComponents alloc] init];
+    interval.day = 1;
+    
+    NSDateComponents *anchorComponents =
+    [calendar components:NSCalendarUnitDay | NSCalendarUnitMonth |
+     NSCalendarUnitYear | NSCalendarUnitWeekday fromDate:[NSDate date]];
+    
+    NSInteger offset = (7 + anchorComponents.weekday - 2) % 7;
+    anchorComponents.day -= offset;
+    //anchorComponents.hour = 3;
+    
+    NSDate *anchorDate = [calendar dateFromComponents:anchorComponents];
+    
+    HKQuantityType *quantityType =
+    [HKObjectType quantityTypeForIdentifier:HKQuantityTypeIdentifierStepCount];
+    
+    // Create the query
+    HKStatisticsCollectionQuery *query =
+    [[HKStatisticsCollectionQuery alloc]
+     initWithQuantityType:quantityType
+     quantitySamplePredicate:nil
+     options:HKStatisticsOptionCumulativeSum
+     anchorDate:anchorDate
+     intervalComponents:interval];
+    
+    
+    NSDateFormatter *formatter = [NSDateFormatter new];
+    [formatter setDateFormat:@"MM/dd"];
+    
+    NSMutableDictionary *stats = [NSMutableDictionary new];
+    
+    // Set the results handler
+    query.initialResultsHandler =
+    ^(HKStatisticsCollectionQuery *query, HKStatisticsCollection *results, NSError *error) {
+        
+        if (error) {
+            // Perform proper error handling here
+            NSLog(@"*** An error occurred while calculating the statistics: %@ ***",
+                  error.localizedDescription);
+            abort();
+        }
+        
+        NSDate *endDate = [NSDate date];
+        NSDate *startDate = [calendar
+                             dateByAddingUnit:NSCalendarUnitMonth
+                             value:-3
+                             toDate:endDate
+                             options:0];
+        
+        // Plot the weekly step counts over the past 3 months
+        [results
+         enumerateStatisticsFromDate:startDate
+         toDate:endDate
+         withBlock:^(HKStatistics *result, BOOL *stop) {
+             
+             HKQuantity *quantity = result.sumQuantity;
+             if (quantity) {
+                 
+                 NSDate *date = result.startDate;
+                 NSString *key = [formatter stringFromDate:date];
+                 double value = [quantity doubleValueForUnit:[HKUnit countUnit]];
+                 
+                 [HealthKitFunctions convertStepsToCalories:@(value) withCompletion:^(double cals, NSError *err) {
+                     [stats setObject:@(cals) forKey:key];
+                     
+                     if ([[NSCalendar currentCalendar] isDate:result.endDate inSameDayAsDate:[NSDate date]]) {
+                         completion(stats, nil);
+                     }
+                 }];
+             }
+             
+         }];
+    };
+    
+    [[HKHealthStore new] executeQuery:query];
+}
+
 + (void)getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:(NSMutableArray *)steps withCompletion:(void (^)(NSNumber *stepEnergy, NSNumber *otherEnergy, NSNumber *todayEnergy, NSError *))completion {
     
     //[AppDelegate logBackgroundDataToFileWithStats:nil message:@"Beginning Main Calorie Calculating Function" time:[NSDate date]];

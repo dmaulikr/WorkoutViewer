@@ -26,7 +26,7 @@
 + (void)getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:(NSMutableArray *)steps withCompletion:(void (^)(NSNumber *stepEnergy, NSNumber *otherEnergy, NSNumber *todayEnergy, NSError *))completion;
 + (void)getAllEnergyBurnedWithFilters:(NSMutableDictionary *)filterTags withCompletion:(void (^)(NSMutableDictionary *totalSources, NSError *err))completion;
 + (void)getAllEnergySeperatedBySource:(void (^)(HKStatistics* result, NSError *err))completionHandler;
-
++(void)getDailyStepsForLast3MonthsWithCompletion:(void (^)(NSMutableDictionary *steps, NSError *err))completion;
 + (void)getAllEnergyBurnedFromAppleWatch:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedWithoutWatch:(void (^)(NSNumber *, NSError *))completion;
 + (void)getAllEnergyBurnedFromSteps:(void (^)(double, NSError *))completionHandler;

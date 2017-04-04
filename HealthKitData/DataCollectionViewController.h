@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "ANDBackgroundChartView.h"
+#import "HealthKitData-Swift.h"
 
 @interface DataCollectionViewController : UICollectionViewController <UITableViewDelegate, UITableViewDataSource>
 

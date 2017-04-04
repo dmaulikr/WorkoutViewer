@@ -55,6 +55,8 @@
                             NSMutableDictionary *stats = [@{@"start":start, @"end":end, @"current":points, @"goal":goal} mutableCopy];
                             
                             [[NSUserDefaults standardUserDefaults] setObject:start forKey:@"goalStart"];
+                            [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"lastSyncDate"];
+
                             [[NSUserDefaults standardUserDefaults] synchronize];
                             NSLog(@"AD - Start Date: %@", start.description);
                             
@@ -81,6 +83,8 @@
                                                 if (success) {
                                                     [AppDelegate updateWatchComplication:@{@"goalPoints": stats[@"goal"], @"currentPoints": stats[@"current"], @"days": @([ViewController daysBetweenDate:end andDate:[NSDate date]]), @"today": @([today integerValue])}];
 
+                                                    [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:@"lastSyncDate"];
+                                                    [[NSUserDefaults standardUserDefaults] synchronize];
                                                     [AppDelegate logBackgroundDataToFileWithStats:stats message:@"Sync Succeeded" time:[NSDate date]];
                                                     completionHandler();
                                                     
@@ -192,7 +196,7 @@
         if (error == nil) {
             NSString *updatedLog = [NSString stringWithFormat:@"%@\n-----%@", logs, logEntry];
             
-            NSLog(@"Updated Log: %@", updatedLog);
+            //NSLog(@"Updated Log: %@", updatedLog);
         
             BOOL writeResult = [updatedLog writeToURL:logUrl atomically:YES encoding:NSUTF8StringEncoding error:&error];
             

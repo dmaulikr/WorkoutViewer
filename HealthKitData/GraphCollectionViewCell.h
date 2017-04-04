@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HealthKitData-Swift.h"
 
 @interface GraphCollectionViewCell : UICollectionViewCell
 
@@ -15,5 +16,6 @@
 @property (strong, nonatomic) IBOutlet UIButton *weekProgressButton;
 @property (strong, nonatomic) IBOutlet UILabel *progressLabel;
 @property (strong, nonatomic) IBOutlet UIButton *todayProgressButton;
+@property (strong, nonatomic) IBOutlet TwicketSegmentedControl *segmentedController;
 
 @end
