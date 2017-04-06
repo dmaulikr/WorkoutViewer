@@ -10,7 +10,7 @@
 #import "ANDBackgroundChartView.h"
 #import "HealthKitData-Swift.h"
 
-@interface DataCollectionViewController : UICollectionViewController <UITableViewDelegate, UITableViewDataSource>
+@interface DataCollectionViewController : UICollectionViewController <UITableViewDelegate, UITableViewDataSource, TwicketSegmentedControlDelegate>
 
 + (UIColor *)colorFromHexString:(NSString *)hexString;
 

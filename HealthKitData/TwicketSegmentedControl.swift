@@ -8,11 +8,11 @@
 
 import UIKit
 
-public protocol TwicketSegmentedControlDelegate: class {
+@objc public protocol TwicketSegmentedControlDelegate: class {
     func didSelect(_ segmentIndex: Int)
 }
 
-open class TwicketSegmentedControl: UIControl {
+@objc public class TwicketSegmentedControl: UIControl {
     open static let height: CGFloat = Constants.height + Constants.topBottomMargin * 2
 
     private struct Constants {
@@ -21,7 +21,7 @@ open class TwicketSegmentedControl: UIControl {
         static let leadingTrailingMargin: CGFloat = 10
     }
 
-    class SliderView: UIView {
+    public class SliderView: UIView {
         // MARK: - Properties
         fileprivate let sliderMaskView = UIView()
 
@@ -32,13 +32,13 @@ open class TwicketSegmentedControl: UIControl {
             }
         }
 
-        override var frame: CGRect {
+        override public var frame: CGRect {
             didSet {
                 sliderMaskView.frame = frame
             }
         }
 
-        override var center: CGPoint {
+        override public var center: CGPoint {
             didSet {
                 sliderMaskView.center = center
             }
@@ -49,7 +49,7 @@ open class TwicketSegmentedControl: UIControl {
             setup()
         }
 
-        required init?(coder aDecoder: NSCoder) {
+        required public init?(coder aDecoder: NSCoder) {
             super.init(coder: aDecoder)
             setup()
         }
@@ -61,7 +61,7 @@ open class TwicketSegmentedControl: UIControl {
         }
     }
 
-    open weak var delegate: TwicketSegmentedControlDelegate?
+    public weak var delegate: TwicketSegmentedControlDelegate?
 
     open var defaultTextColor: UIColor = Palette.defaultTextColor {
         didSet {

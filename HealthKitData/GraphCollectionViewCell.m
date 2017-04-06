@@ -7,6 +7,7 @@
 //
 
 #import "GraphCollectionViewCell.h"
+#import "HealthKitData-Swift.h"
 
 @implementation GraphCollectionViewCell
 
@@ -18,13 +19,6 @@
     
     return self;
 }
-
-- (IBAction)changeSegment:(TwicketSegmentedControl *)sender {
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"changeGraph" object:sender];
-    NSLog(@"Segment Changed: %zd", sender.selectedSegmentIndex);
-}
-
-
 - (IBAction)showTodayProgress:(id)sender {
     
 }

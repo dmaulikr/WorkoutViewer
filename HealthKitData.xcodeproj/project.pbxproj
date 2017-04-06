@@ -26,7 +26,6 @@
 		C22D7AA11E838FDB00B7272E /* GraphCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C22D7AA01E838FDB00B7272E /* GraphCollectionViewCell.m */; };
 		C22D7AA31E83C35600B7272E /* UIColor+colorFromHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22D7AA21E83C35600B7272E /* UIColor+colorFromHex.swift */; };
 		C22D7AA61E8443AE00B7272E /* TKRadarChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22D7AA51E8443AE00B7272E /* TKRadarChart.swift */; };
-		C22F74CA1E8D140800F29981 /* RMWLogo.m in Sources */ = {isa = PBXBuildFile; fileRef = C22F74C91E8D140800F29981 /* RMWLogo.m */; };
 		C2584CB31E7CAA6300A803EE /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C2584CB11E7CAA6300A803EE /* Interface.storyboard */; };
 		C2584CB51E7CAA6300A803EE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C2584CB41E7CAA6300A803EE /* Assets.xcassets */; };
 		C2584CBC1E7CAA6300A803EE /* Sync Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C2584CBB1E7CAA6300A803EE /* Sync Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -150,8 +149,6 @@
 		C22D7AA21E83C35600B7272E /* UIColor+colorFromHex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+colorFromHex.swift"; sourceTree = "<group>"; };
 		C22D7AA41E8443AE00B7272E /* TKRadarChart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TKRadarChart.h; sourceTree = "<group>"; };
 		C22D7AA51E8443AE00B7272E /* TKRadarChart.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TKRadarChart.swift; sourceTree = "<group>"; };
-		C22F74C81E8D140800F29981 /* RMWLogo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMWLogo.h; sourceTree = "<group>"; };
-		C22F74C91E8D140800F29981 /* RMWLogo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMWLogo.m; sourceTree = "<group>"; };
 		C2584CAF1E7CAA6300A803EE /* Sync.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sync.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2584CB21E7CAA6300A803EE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		C2584CB41E7CAA6300A803EE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -267,8 +264,6 @@
 			children = (
 				C20456E71E8CF98A0000EB75 /* LeaderboardTableViewCell.h */,
 				C20456E81E8CF98A0000EB75 /* LeaderboardTableViewCell.m */,
-				C22F74C81E8D140800F29981 /* RMWLogo.h */,
-				C22F74C91E8D140800F29981 /* RMWLogo.m */,
 				C22D7A9F1E838FDB00B7272E /* GraphCollectionViewCell.h */,
 				C22D7AA01E838FDB00B7272E /* GraphCollectionViewCell.m */,
 				C27CA9041E724B190084B9B8 /* ProgressCollectionViewCell.h */,
@@ -552,7 +547,6 @@
 				C27FBCFA1E84AB3B00FB41E7 /* ElongationConfig.swift in Sources */,
 				C27AD59F1E8485280021A9AD /* CHIBasePageControl.swift in Sources */,
 				C27FBCFE1E84AB3B00FB41E7 /* ElongationViewController.swift in Sources */,
-				C22F74CA1E8D140800F29981 /* RMWLogo.m in Sources */,
 				C27AD5A01E8485280021A9AD /* CHILayer.swift in Sources */,
 				C2D302AC1E6F961800147784 /* DataCollectionViewController.m in Sources */,
 				C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */,

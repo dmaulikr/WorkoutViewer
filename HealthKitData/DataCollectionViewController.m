@@ -132,7 +132,7 @@
     }];
 }
 
--(void)reloadGraphView:(NSNotification *)notification {
+-(void)reloadGraphView:(NSNumber*)number {
     
     for (UICollectionViewCell *c in self.collectionView.visibleCells) {
         
@@ -140,9 +140,9 @@
             SourcesCollectionViewCell *sourceCell = (SourcesCollectionViewCell *)c;
             UICollectionView *overviewCollectionView = sourceCell.overviewCollectionView;
             
-            if (notification) {
-                self.dayWeekOrMonth = @(((TwicketSegmentedControl *)notification.object).selectedSegmentIndex);
-            }
+
+            self.dayWeekOrMonth = number;
+            
             
             dispatch_async(dispatch_get_main_queue(), ^{
 
@@ -219,6 +219,7 @@
             GraphCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"graph" forIndexPath:indexPath];
             cell.alpha = 1.0;
             cell.layer.cornerRadius = 8;
+            cell.segmentedController.delegate = self;
             
             ScrollableGraphView *graphView = [[ScrollableGraphView alloc] initWithFrame:cell.contentView.bounds];
             graphView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -343,6 +344,11 @@
     return cell;
     
 }
+
+-(void)didSelect:(NSInteger)segmentIndex {
+    [self reloadGraphView:@(segmentIndex)];
+}
+
 
 -(UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
     
