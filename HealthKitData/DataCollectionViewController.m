@@ -22,7 +22,7 @@
 #import "LeaderboardCollectionViewCell.h"
 #import "LeaderboardTableViewCell.h"
 #import <QuartzCore/QuartzCore.h>
-
+#import "Chameleon.h"
 
 @interface DataCollectionViewController ()
 
@@ -36,6 +36,8 @@
 @property (strong, nonatomic) NSMutableArray *workouts;
 @property (strong, nonatomic) WavesLoader*loader;
 @property (strong, nonatomic) NSNumber *dayWeekOrMonth;
+@property (strong, nonatomic) NSMutableArray *sortedKeys;
+@property (strong, nonatomic) NSMutableArray *sortedValues;
 
 @end
 
@@ -54,49 +56,29 @@
     self.loader.loaderStrokeWidth = 0;
     self.loader.duration = 1.5;
     
-    self.dayWeekOrMonth = @(1);
+    self.dayWeekOrMonth = @(0);
     
     self.threeMonthStepCounts = [NSMutableDictionary new];
     self.oneMonthStepCounts = [NSMutableDictionary new];
     self.oneWeekStepCounts = [NSMutableDictionary new];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(calculateEnergyFromSources:) name:@"filterSources" object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadGraphView:) name:@"changeGraph" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setStatsDictionary:) name:@"setStats" object:nil];
     
     self.teammates = [@[@"Bryan",@"Eric", @"Adam", @"Derek", @"Meghan", @"Alex W.", @"Ray", @"Satomi", @"Kishore", @"Alden", @"David", @"Katie", @"Kelly", @"Mark"] mutableCopy];
     
     self.collectionView.delegate = self;
-    self.collectionView.allowsMultipleSelection = YES;
-    self.collectionView.allowsSelection = YES;
 
     [self.collectionView setBackgroundColor:[UIColor clearColor]];
 
     [HealthKitFunctions getDailyStepsForLast3MonthsWithCompletion:^(NSMutableDictionary *steps, NSError *err) {
         if (!err) {
             [self.threeMonthStepCounts setDictionary:steps];
-            [self reloadGraphView:nil];
+            self.sortedKeys = [[self.threeMonthStepCounts.allKeys sortedArrayUsingSelector:@selector(compare:)] mutableCopy];
+            self.sortedValues = [[self.threeMonthStepCounts objectsForKeys:self.sortedKeys notFoundMarker:[NSNull null]] mutableCopy];
+            [self reloadGraphView:@(0)];
         }
     }];
-}
-
--(void)seperateStepsIntoWeeksAndMonths {
-//    NSDate *today = [[NSDate alloc] init];
-//    NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-//    
-//    // Get the weekday component of the current date
-//    NSDateComponents *weekdayComponents = [gregorian components:NSWeekdayCalendarUnit fromDate:today];
-//    
-//    /*
-//     Create a date components to represent the number of days to subtract from the current date.
-//     The weekday value for Sunday in the Gregorian calendar is 1, so subtract 1 from the number of days to subtract from the date in question. (If today is Sunday, subtract 0 days.)
-//     */
-//    NSDateComponents *componentsToSubtract = [[NSDateComponents alloc] init];
-//    [componentsToSubtract setDay:(0 - ([weekdayComponents weekday] - 1))];
-//    
-//    NSDate *beginningOfWeek = [gregorian dateByAddingComponents:componentsToSubtract toDate:today options:0];
-    
-    
-    
 }
 
 -(void)viewWillAppear:(BOOL)animated {
@@ -108,28 +90,27 @@
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setStatsDictionary:) name:@"setStats" object:nil];
     
-    [HealthKitFunctions getAllSources:^(NSMutableArray *sources, NSError *err) {
-        if (err == nil) {
-            self.sources = [NSMutableArray arrayWithArray:sources];
-            
-            for (UICollectionViewCell *c in self.collectionView.visibleCells) {
-                if ([c isKindOfClass:[SourcesCollectionViewCell class]]) {
-                    SourcesCollectionViewCell *cell = (SourcesCollectionViewCell *)c;
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        //[cell.tableView reloadData];
-                    });
-                    
-                }
-            }
-        }
-    }];
+//    [HealthKitFunctions getAllSources:^(NSMutableArray *sources, NSError *err) {
+//        if (err == nil) {
+//            self.sources = [NSMutableArray arrayWithArray:sources];
+//            
+//            for (UICollectionViewCell *c in self.collectionView.visibleCells) {
+//                if ([c isKindOfClass:[SourcesCollectionViewCell class]]) {
+//                    SourcesCollectionViewCell *cell = (SourcesCollectionViewCell *)c;
+//                    
+//                    dispatch_async(dispatch_get_main_queue(), ^{
+//                        //[cell.tableView reloadData];
+//                    });
+//                    
+//                }
+//            }
+//        }
+//    }];
     
-    [HealthKitFunctions getAllEnergySeperatedBySource:^(HKStatistics *result, NSError *err) {
-        NSLog(@"%@", result);
-    }];
+//    [HealthKitFunctions getAllEnergySeperatedBySource:^(HKStatistics *result, NSError *err) {
+//        NSLog(@"%@", result);
+//    }];
 }
 
 -(void)reloadGraphView:(NSNumber*)number {
@@ -145,8 +126,32 @@
             
             
             dispatch_async(dispatch_get_main_queue(), ^{
+                
+                GraphCollectionViewCell *cell = (GraphCollectionViewCell *)[overviewCollectionView cellForItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
 
-                [overviewCollectionView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]]];
+//                [overviewCollectionView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]]];
+//                
+//                [cell.segmentedController moveTo:[number integerValue]];
+                
+                NSArray *finalKeys = self.sortedKeys;
+                NSArray *finalValues = self.sortedValues;
+                
+                if (self.sortedKeys.count > 0) {
+                    if ([self.dayWeekOrMonth isEqualToNumber:@(2)]) { //month
+                        finalKeys = [self.sortedKeys subarrayWithRange:NSMakeRange(self.sortedKeys.count - 31, 31)];
+                        finalValues = [self.sortedValues subarrayWithRange:NSMakeRange(self.sortedKeys.count - 31, 31)];
+                        
+                    } else if ([self.dayWeekOrMonth isEqualToNumber:@(1)]) { //week
+                        finalKeys = [self.sortedKeys subarrayWithRange:NSMakeRange(self.sortedKeys.count - 7, 7)];
+                        finalValues = [self.sortedValues subarrayWithRange:NSMakeRange(self.sortedKeys.count - 7, 7)];
+                        
+                    } else if ([self.dayWeekOrMonth isEqualToNumber:@(0)]) {
+                        finalKeys = @[[self.sortedKeys lastObject]];
+                        finalValues = @[[self.sortedValues lastObject]];
+                    }
+                    
+                    [cell resetGraph:finalValues yValues:finalKeys];
+                }
             });
         }
     }
@@ -217,79 +222,75 @@
         if (indexPath.row == 0) {
             
             GraphCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"graph" forIndexPath:indexPath];
-            cell.alpha = 1.0;
-            cell.layer.cornerRadius = 8;
+//            cell.alpha = 1.0;
+//            cell.layer.cornerRadius = 8;
             cell.segmentedController.delegate = self;
-            
-            ScrollableGraphView *graphView = [[ScrollableGraphView alloc] initWithFrame:cell.contentView.bounds];
-            graphView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            graphView.dataPointType = ScrollableGraphViewDataPointTypeSquare;
-            graphView.dataPointSpacing = (cell.frame.size.width / 7) - 3;
-            graphView.leftmostPointPadding = 80;
-            graphView.topMargin = 15;
-
-            
-            graphView.lineColor = [UIColor clearColor];
+//            
+//            ScrollableGraphView *graphView = [[ScrollableGraphView alloc] initWithFrame:cell.contentView.bounds];
+//            graphView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+//            graphView.dataPointType = ScrollableGraphViewDataPointTypeSquare;
+//            graphView.dataPointSpacing = (cell.frame.size.width / 7) - 3;
+//            graphView.leftmostPointPadding = 80;
+//            graphView.topMargin = 15;
+//
+//            
+//            graphView.lineColor = [UIColor clearColor];
             //graphView.barWidth = 25;
             //graphView.barLineWidth = 0.5;
-            graphView.barLineColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
-            graphView.barColor =  [[UIColor whiteColor] colorWithAlphaComponent:0.3];
-            cell.clipsToBounds = YES;
-            graphView.clipsToBounds = YES;
-            graphView.shouldAutomaticallyDetectRange = YES;
-            graphView.shouldAnimateOnStartup = YES;
-            graphView.shouldAdaptRange = YES;
-            graphView.shouldRangeAlwaysStartAtZero = YES;
-            graphView.shouldDrawBarLayer = YES;
-            graphView.shouldDrawDataPoint = NO;
-            graphView.backgroundFillColor = [DataCollectionViewController colorFromHexString:@"#27916F"];
-
-            graphView.referenceLineLabelFont = [UIFont systemFontOfSize:11];
-            graphView.referenceLineColor = [[UIColor whiteColor] colorWithAlphaComponent:0.2];
-            graphView.referenceLineLabelColor = [UIColor whiteColor];
-            graphView.numberOfIntermediateReferenceLines = 3;
-            graphView.shouldShowLabels = YES;
-            graphView.dataPointLabelFont = [UIFont systemFontOfSize:11];
-            graphView.dataPointLabelColor = [UIColor whiteColor];
-            graphView.rightmostPointPadding = 20;
-            graphView.dataPointLabelBottomMargin = 0;//50;
-            graphView.referenceLineUnits = @"Cal";
-            graphView.adaptAnimationType = ScrollableGraphViewAnimationTypeEaseOut;
-            graphView.animationDuration = 1.5;
-
+//            graphView.barLineColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
+//            graphView.barColor =  [[UIColor whiteColor] colorWithAlphaComponent:0.3];
+//            cell.clipsToBounds = YES;
+//            graphView.clipsToBounds = YES;
+//            graphView.shouldAutomaticallyDetectRange = YES;
+//            graphView.shouldAnimateOnStartup = YES;
+//            graphView.shouldAdaptRange = YES;
+//            graphView.shouldRangeAlwaysStartAtZero = YES;
+//            graphView.shouldDrawBarLayer = YES;
+//            graphView.shouldDrawDataPoint = NO;
+//            graphView.backgroundFillColor = [DataCollectionViewController colorFromHexString:@"#27916F"];
+//
+//            graphView.referenceLineLabelFont = [UIFont systemFontOfSize:11];
+//            graphView.referenceLineColor = [[UIColor whiteColor] colorWithAlphaComponent:0.2];
+//            graphView.referenceLineLabelColor = [UIColor whiteColor];
+//            graphView.numberOfIntermediateReferenceLines = 3;
+//            graphView.shouldShowLabels = YES;
+//            graphView.dataPointLabelFont = [UIFont systemFontOfSize:11];
+//            graphView.dataPointLabelColor = [UIColor whiteColor];
+//            graphView.rightmostPointPadding = 20;
+//            graphView.dataPointLabelBottomMargin = 0;//50;
+//            graphView.referenceLineUnits = @"Cal";
+//            graphView.adaptAnimationType = ScrollableGraphViewAnimationTypeEaseOut;
+//            graphView.animationDuration = 1.5;
             
-            NSArray *sortedKeys = [self.threeMonthStepCounts.allKeys sortedArrayUsingSelector:@selector(compare:)];
-            NSArray *sortedValues = [self.threeMonthStepCounts objectsForKeys:sortedKeys notFoundMarker:[NSNull null]];
+            NSArray *finalKeys;
+            NSArray *finalValues;
             
-            if (sortedKeys.count > 0) {
-                if ([self.dayWeekOrMonth isEqualToNumber:@(0)]) { //day
-                    [graphView set:sortedValues withLabels:sortedKeys];
-
+            if (self.sortedKeys.count > 0) {
+                if ([self.dayWeekOrMonth isEqualToNumber:@(2)]) { //month
+                    finalKeys = [self.sortedKeys subarrayWithRange:NSMakeRange(self.sortedKeys.count - 31, 31)];
+                    finalValues = [self.sortedValues subarrayWithRange:NSMakeRange(self.sortedKeys.count - 31, 31)];
+                    
                 } else if ([self.dayWeekOrMonth isEqualToNumber:@(1)]) { //week
-                    NSArray *weekKeys = [sortedKeys subarrayWithRange:NSMakeRange(sortedKeys.count - 7, 7)];
-                    NSArray *weekValues = [sortedValues subarrayWithRange:NSMakeRange(sortedKeys.count - 7, 7)];
-                    [graphView set:weekValues withLabels:weekKeys];
-
-                } else { // month
-                    NSArray *monthKeys = [sortedKeys subarrayWithRange:NSMakeRange(sortedKeys.count - 30, 30)];
-                    NSArray *monthValues = [sortedValues subarrayWithRange:NSMakeRange(sortedKeys.count - 30, 30)];
-                    [graphView set:monthValues withLabels:monthKeys];
+                    finalKeys = [self.sortedKeys subarrayWithRange:NSMakeRange(self.sortedKeys.count - 7, 7)];
+                    finalValues = [self.sortedValues subarrayWithRange:NSMakeRange(self.sortedKeys.count - 7, 7)];
                 }
+                
+                [cell resetGraph:finalValues yValues:finalKeys];
             }
         
-            
-            [cell.segmentedController setSegmentItems:@[@"Today", @"Week", @"Month"]];
-            cell.segmentedController.sliderBackgroundColor = [DataCollectionViewController colorFromHexString:@"#27916F"];
-            cell.segmentedController.backgroundColor = [UIColor clearColor];
-            cell.segmentedController.isSliderShadowHidden = YES;
-            cell.segmentedController.segmentsBackgroundColor = [UIColor clearColor];
-            
-            cell.graphHolderView.layer.cornerRadius = 8;
-            graphView.shouldShowLabels = YES;
-            
-            graphView.frame = cell.graphHolderView.bounds;
-            
-            [cell.graphHolderView addSubview:graphView];
+//        
+//            
+//            [cell.segmentedController setSegmentItems:@[@"Today", @"Week", @"Month"]];
+//            cell.segmentedController.sliderBackgroundColor = [DataCollectionViewController colorFromHexString:@"#27916F"];
+//            cell.segmentedController.backgroundColor = [UIColor clearColor];
+//            cell.segmentedController.isSliderShadowHidden = YES;
+//            cell.segmentedController.segmentsBackgroundColor = [UIColor clearColor];
+//            
+//            cell.graphHolderView.layer.cornerRadius = 8;
+//            graphView.shouldShowLabels = YES;
+//            graphView.frame = cell.graphHolderView.bounds;
+//            
+//            [cell.graphHolderView addSubview:graphView];
             
             return cell;
             
@@ -635,7 +636,7 @@
         
     } else if (tableView.tag == 3) {
 
-        [tableView setBackgroundColor:[UIColor clearColor]];
+        [tableView setBackgroundColor:[UIColor colorWithGradientStyle:UIGradientStyleTopToBottom withFrame:tableView.frame andColors:@[FlatRed, FlatYellow]]];
         tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         
         LeaderboardTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"leaderboardCell"];
@@ -648,18 +649,21 @@
         [cell.progressView setProgress:0.75];
         
         
-        UIColor *progressRed = [DataCollectionViewController colorFromHexString:@"#C93F45"];// colorWithAlphaComponent:(1.0 - (0.1 * indexPath.row))];
+        
+        
+        //UIColor *progressRed = [DataCollectionViewController colorFromHexString:@"#C93F45"];// colorWithAlphaComponent:(1.0 - (0.1 * indexPath.row))];
+        
         
         UIColor *backgroundWhite = [[UIColor whiteColor] colorWithAlphaComponent:(0.0 + (0.1 * indexPath.row))];
         
         [cell.contentView setBackgroundColor:[UIColor clearColor]];
 
-        UIView *colorView = [[UIView alloc] initWithFrame:CGRectMake(cell.frame.origin.x, cell.frame.origin.y, 0, cell.contentView.bounds.size.height)];
+        UIView *colorView = [[UIView alloc] initWithFrame:CGRectMake(cell.frame.origin.x, cell.frame.origin.y - 2, 0, cell.contentView.bounds.size.height)];
         
-        [colorView setBackgroundColor:[DataCollectionViewController blendWithColor:backgroundWhite color2:progressRed alpha:1.0]];
+        //[colorView setBackgroundColor:[DataCollectionViewController blendWithColor:backgroundWhite color2:progressRed alpha:1.0]];
 
         
-        [cell.contentView insertSubview:colorView atIndex:0];
+        //[cell.contentView insertSubview:colorView atIndex:0];
         
         [cell.usernameLabel setBackgroundColor:[UIColor clearColor]];
         cell.userImageView.layer.cornerRadius = cell.userImageView.frame.size.height / 2.0;

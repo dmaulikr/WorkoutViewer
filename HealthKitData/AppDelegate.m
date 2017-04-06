@@ -150,63 +150,63 @@
 
 +(void)logBackgroundDataToFileWithStats:(NSDictionary *)stats message:(NSString *)reason time:(NSDate *)timestamp {
     
-    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"]) {
-        
-        NSDateFormatter *formatter = [NSDateFormatter new];
-        [formatter setDateFormat:@"MMM dd, YYYY @ HH:mm:ss"];
-        
-        NSMutableDictionary *mutableStats = [stats mutableCopy];
-        
-        if (mutableStats.allKeys.count > 1 && stats[@"start"] && stats[@"end"]) {
-            [mutableStats setObject:[formatter stringFromDate:[NSDate date]] forKey:@"sent"];
-            [mutableStats setObject:[formatter stringFromDate:stats[@"start"]] forKey:@"start"];
-            [mutableStats setObject:[formatter stringFromDate:stats[@"end"]] forKey:@"end"];
-        }
-        
-        NSMutableString *formattedOutput = [NSMutableString new];
-        
-        for (NSString *key in mutableStats.allKeys) {
-            [formattedOutput appendString:[NSString stringWithFormat:@"%@ = %@\n", key, [mutableStats[key] description]]];
-        }
-        
-        NSString *logEntry = [NSString stringWithFormat:@"\n%@ - %@\n%@", reason, [formatter stringFromDate:timestamp], formattedOutput];
-        
-        NSLog(@"%@", logEntry);
-        
-        NSError *error;
-        
-        NSURL *logUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask][0] URLByAppendingPathComponent:@"/activity.txt"];
-        
-        BOOL fileMade = NO;
-        
-        BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:logUrl.relativePath];
-        
-        if(!exists) {
-            fileMade = [[NSFileManager defaultManager] createFileAtPath:logUrl.relativePath contents:[logEntry dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
-            
-            exists = [[NSFileManager defaultManager] fileExistsAtPath:logUrl.relativePath];
-        }
-        
-        NSData *data = [NSData dataWithContentsOfURL:logUrl];
-        
-        NSString *logs = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-
-        NSLog(@"Log File Made? %zd, Exists? %d", fileMade, exists);
-        
-        if (error == nil) {
-            NSString *updatedLog = [NSString stringWithFormat:@"%@\n-----%@", logs, logEntry];
-            
-            //NSLog(@"Updated Log: %@", updatedLog);
-        
-            BOOL writeResult = [updatedLog writeToURL:logUrl atomically:YES encoding:NSUTF8StringEncoding error:&error];
-            
-            if (!writeResult) {
-                NSLog(@"Error Writing Log to File: %@", [error description]);
-            } else {
-                NSLog(@"Log Successfully Written to File");
-            }
-        }
-    }
+//    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"]) {
+//        
+//        NSDateFormatter *formatter = [NSDateFormatter new];
+//        [formatter setDateFormat:@"MMM dd, YYYY @ HH:mm:ss"];
+//        
+//        NSMutableDictionary *mutableStats = [stats mutableCopy];
+//        
+//        if (mutableStats.allKeys.count > 1 && stats[@"start"] && stats[@"end"]) {
+//            [mutableStats setObject:[formatter stringFromDate:[NSDate date]] forKey:@"sent"];
+//            [mutableStats setObject:[formatter stringFromDate:stats[@"start"]] forKey:@"start"];
+//            [mutableStats setObject:[formatter stringFromDate:stats[@"end"]] forKey:@"end"];
+//        }
+//        
+//        NSMutableString *formattedOutput = [NSMutableString new];
+//        
+//        for (NSString *key in mutableStats.allKeys) {
+//            [formattedOutput appendString:[NSString stringWithFormat:@"%@ = %@\n", key, [mutableStats[key] description]]];
+//        }
+//        
+//        NSString *logEntry = [NSString stringWithFormat:@"\n%@ - %@\n%@", reason, [formatter stringFromDate:timestamp], formattedOutput];
+//        
+//        NSLog(@"%@", logEntry);
+//        
+//        NSError *error;
+//        
+//        NSURL *logUrl = [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask][0] URLByAppendingPathComponent:@"/activity.txt"];
+//        
+//        BOOL fileMade = NO;
+//        
+//        BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:logUrl.relativePath];
+//        
+//        if(!exists) {
+//            fileMade = [[NSFileManager defaultManager] createFileAtPath:logUrl.relativePath contents:[logEntry dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
+//            
+//            exists = [[NSFileManager defaultManager] fileExistsAtPath:logUrl.relativePath];
+//        }
+//        
+//        NSData *data = [NSData dataWithContentsOfURL:logUrl];
+//        
+//        NSString *logs = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+//
+//        NSLog(@"Log File Made? %zd, Exists? %d", fileMade, exists);
+//        
+//        if (error == nil) {
+//            NSString *updatedLog = [NSString stringWithFormat:@"%@\n-----%@", logs, logEntry];
+//            
+//            //NSLog(@"Updated Log: %@", updatedLog);
+//        
+//            BOOL writeResult = [updatedLog writeToURL:logUrl atomically:YES encoding:NSUTF8StringEncoding error:&error];
+//            
+//            if (!writeResult) {
+//                NSLog(@"Error Writing Log to File: %@", [error description]);
+//            } else {
+//                NSLog(@"Log Successfully Written to File");
+//            }
+//        }
+//    }
     
 }
 

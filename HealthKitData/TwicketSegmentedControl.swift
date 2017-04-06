@@ -270,7 +270,7 @@ import UIKit
         delegate?.didSelect(index)
     }
 
-    open func move(to index: Int) {
+    public func move(to index: Int) {
         let correctOffset = center(at: index)
         animate(to: correctOffset)
 
