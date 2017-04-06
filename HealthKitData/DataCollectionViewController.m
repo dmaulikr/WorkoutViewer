@@ -48,15 +48,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.loader = [WavesLoader createLoaderWith:[DataCollectionViewController getRMWLogoBezierPath].CGPath on:self.collectionView.viewForFirstBaselineLayout];
-    self.loader.center = self.collectionView.viewForFirstBaselineLayout.center;
-    self.loader.viewForFirstBaselineLayout.layer.cornerRadius = 8.0;
+    self.loader = [WavesLoader createLoaderWith:[DataCollectionViewController getRMWLogoBezierPath].CGPath on:self.view];
+    self.loader.center = self.view.center;
     self.loader.rectSize = ([UIScreen mainScreen].bounds.size.width * 0.75) / [DataCollectionViewController getRMWLogoBezierPath].bounds.size.width;
-    self.loader.backgroundColor = [[UIColor clearColor] colorWithAlphaComponent:0.0];
+    self.loader.backgroundColor = [[UIColor colorWithHexString:@"#305B70"] colorWithAlphaComponent:0.5];
     
-    self.loader.loaderColor = [UIColor colorWithHexString:@"#305B70"];
-    self.loader.loaderStrokeWidth = 0;
-    self.loader.duration = 1.5;
+    self.loader.loaderColor = [UIColor flatWhiteColor];
+    self.loader.loaderStrokeWidth = 2;
+    self.loader.duration = 2;
     
     self.dayWeekOrMonth = @(2);
     
@@ -232,7 +231,7 @@
             cell.alpha = 1.0;
             
             cell.rankTableView.tag = 3;
-            cell.rankTableView.rowHeight = 60;
+            cell.rankTableView.rowHeight = 50;
             cell.rankTableView.delegate = self;
             cell.rankTableView.dataSource = self;
             cell.backgroundColor = [UIColor clearColor];
@@ -425,16 +424,6 @@
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     
     if (collectionView.tag == 2 && [[collectionView cellForItemAtIndexPath:indexPath] isKindOfClass:[LeaderboardCollectionViewCell class]]) { // Here
-
-        [self.loader showLoader];
-    
-        [NSTimer scheduledTimerWithTimeInterval:2.0 repeats:NO block:^(NSTimer * _Nonnull timer) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.loader removeLoader:YES];
-                [self.loader removeFromSuperview];
-                
-            });
-        }];
     }
 }
 

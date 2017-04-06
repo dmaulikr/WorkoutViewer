@@ -70,18 +70,18 @@
     self.graphView.shouldDrawDataPoint = NO;
     self.graphView.backgroundFillColor = [UIColor colorWithHexString:@"#27916F"];
     
-    self.graphView.referenceLineLabelFont = [UIFont systemFontOfSize:12];
+    self.graphView.referenceLineLabelFont = [UIFont systemFontOfSize:10];
     self.graphView.referenceLineColor = [[UIColor whiteColor] colorWithAlphaComponent:0.2];
     self.graphView.referenceLineLabelColor = [UIColor whiteColor];
     self.graphView.numberOfIntermediateReferenceLines = 4;
     self.graphView.shouldShowLabels = YES;
-    self.graphView.dataPointLabelFont = [UIFont systemFontOfSize:12];
+    self.graphView.dataPointLabelFont = [UIFont systemFontOfSize:10];
     self.graphView.dataPointLabelColor = [UIColor whiteColor];
     self.graphView.rightmostPointPadding = 20;
     self.graphView.dataPointLabelBottomMargin = 0;//50;
     self.graphView.referenceLineUnits = @"Cal";
     self.graphView.adaptAnimationType = ScrollableGraphViewAnimationTypeEaseOut;
-    self.graphView.animationDuration = 1.5;
+    self.graphView.animationDuration = 1.0;
     
     [self.graphView set:xValues withLabels:yValues];
     
