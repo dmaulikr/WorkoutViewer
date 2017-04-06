@@ -12,6 +12,5 @@
 
 @interface DataCollectionViewController : UICollectionViewController <UITableViewDelegate, UITableViewDataSource, TwicketSegmentedControlDelegate>
 
-+ (UIColor *)colorFromHexString:(NSString *)hexString;
 
 @end

@@ -42,9 +42,7 @@
     self.store.healthStore = [HKHealthStore new];
     
     self.slackUsername = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changePage:) name:@"changePage" object:nil];
-    
+        
     UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bot"]];
     
     imageView.tintColor = [UIColor whiteColor];
@@ -53,10 +51,12 @@
     
     CGFloat width = [UIScreen mainScreen].bounds.size.width / 2;
     imageView.frame = CGRectMake(self.view.center.x - width, self.view.center.y - width, width, width);
-    imageView.center = self.view.center;
+    imageView.center = CGPointMake(self.view.center.x, self.view.center.y + (width / 2));
     
     [self.view insertSubview:imageView.viewForFirstBaselineLayout atIndex:0];
     [self setNeedsStatusBarAppearanceUpdate];
+    
+    self.pageControl.hidden = YES;
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle
@@ -73,37 +73,38 @@
 
     [HealthKitFunctions requestPermission:^(BOOL success, NSError *err) {
         if (success) {
-            //[self refreshFeed:nil];
-            [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
+            
+            if (self.slackUsername == nil) {
+                [self showAddUsernameAlert];
+            } else {
                 
-if (success && (stats[@"current"] != nil)) {
-    dispatch_async(dispatch_get_main_queue(), ^{
-
-       //  update UI
-        NSInteger days = [ViewController daysBetweenDate:[NSDate date] andDate:stats[@"end"]];
-        int goalPercentage = [@(([stats[@"current"] doubleValue] / [stats[@"goal"] doubleValue]) * 100.0) intValue];
-        
-        [stats setObject:@(days) forKey:@"daysLeft"];
-        [stats setObject:@(goalPercentage) forKey:@"goalPercentage"];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
-        
-        [self.spinner stopAnimating];
-        
-    });
-} else {
-     dispatch_async(dispatch_get_main_queue(), ^{
-         [self.spinner stopAnimating];
-     });
-}
-                
-            }];
+                [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
+                    
+                    if (success && (stats[@"current"] != nil)) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            
+                            //  update UI
+                            NSInteger days = [ViewController daysBetweenDate:[NSDate date] andDate:stats[@"end"]];
+                            int goalPercentage = [@(([stats[@"current"] doubleValue] / [stats[@"goal"] doubleValue]) * 100.0) intValue];
+                            
+                            [stats setObject:@(days) forKey:@"daysLeft"];
+                            [stats setObject:@(goalPercentage) forKey:@"goalPercentage"];
+                            
+                            [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
+                            
+                            [self.spinner stopAnimating];
+                            
+                        });
+                    } else {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self.spinner stopAnimating];
+                        });
+                    }
+                    
+                }];
+            }
         }
     }];
-    
-    if (self.slackUsername == nil) {
-        [self showAddUsernameAlert];
-    }
 }
 
 -(void)showAddUsernameAlert {

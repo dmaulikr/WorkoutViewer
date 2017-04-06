@@ -30,8 +30,10 @@
 @property (strong, nonatomic) NSMutableDictionary *threeMonthStepCounts;
 @property (strong, nonatomic) NSMutableDictionary *oneMonthStepCounts;
 @property (strong, nonatomic) NSMutableDictionary *oneWeekStepCounts;
-@property (strong, nonatomic) NSMutableArray *sources;
-@property (strong, nonatomic) NSMutableArray *teammates;
+@property (strong, nonatomic) NSMutableDictionary *leaderboard;
+@property (strong, nonatomic) NSMutableArray *sortedPercentages;
+@property (strong, nonatomic) NSMutableDictionary *fullStats;
+
 @property (strong, nonatomic) NSMutableDictionary *filteredSources;
 @property (strong, nonatomic) NSMutableArray *workouts;
 @property (strong, nonatomic) WavesLoader*loader;
@@ -52,65 +54,70 @@
     self.loader.rectSize = ([UIScreen mainScreen].bounds.size.width * 0.75) / [DataCollectionViewController getRMWLogoBezierPath].bounds.size.width;
     self.loader.backgroundColor = [[UIColor clearColor] colorWithAlphaComponent:0.0];
     
-    self.loader.loaderColor = [DataCollectionViewController colorFromHexString:@"305B70"];
+    self.loader.loaderColor = [UIColor colorWithHexString:@"#305B70"];
     self.loader.loaderStrokeWidth = 0;
     self.loader.duration = 1.5;
     
-    self.dayWeekOrMonth = @(0);
+    self.dayWeekOrMonth = @(2);
     
     self.threeMonthStepCounts = [NSMutableDictionary new];
     self.oneMonthStepCounts = [NSMutableDictionary new];
     self.oneWeekStepCounts = [NSMutableDictionary new];
+    self.leaderboard = [NSMutableDictionary new];
+    self.fullStats = [NSMutableDictionary new];
+    self.sortedPercentages = [NSMutableArray new];
+
+
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(calculateEnergyFromSources:) name:@"filterSources" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setStatsDictionary:) name:@"setStats" object:nil];
-    
-    self.teammates = [@[@"Bryan",@"Eric", @"Adam", @"Derek", @"Meghan", @"Alex W.", @"Ray", @"Satomi", @"Kishore", @"Alden", @"David", @"Katie", @"Kelly", @"Mark"] mutableCopy];
     
     self.collectionView.delegate = self;
 
     [self.collectionView setBackgroundColor:[UIColor clearColor]];
-
-    [HealthKitFunctions getDailyStepsForLast3MonthsWithCompletion:^(NSMutableDictionary *steps, NSError *err) {
-        if (!err) {
-            [self.threeMonthStepCounts setDictionary:steps];
-            self.sortedKeys = [[self.threeMonthStepCounts.allKeys sortedArrayUsingSelector:@selector(compare:)] mutableCopy];
-            self.sortedValues = [[self.threeMonthStepCounts objectsForKeys:self.sortedKeys notFoundMarker:[NSNull null]] mutableCopy];
-            [self reloadGraphView:@(0)];
+    
+    [HealthKitFunctions requestPermission:^(BOOL success, NSError *err) {
+        if (success) {
+            [self.loader showLoader];
+            [HealthKitFunctions getDailyStepsForLast3MonthsWithCompletion:^(NSMutableDictionary *steps, NSError *err) {
+                if (!err) {
+                    [self.threeMonthStepCounts setDictionary:steps];
+                    self.sortedKeys = [[self.threeMonthStepCounts.allKeys sortedArrayUsingSelector:@selector(compare:)] mutableCopy];
+                    self.sortedValues = [[self.threeMonthStepCounts objectsForKeys:self.sortedKeys notFoundMarker:[NSNull null]] mutableCopy];
+                    [self reloadGraphView:@(2)];
+                    [self getCurrentLeaderboardWithCompletion:^(NSMutableDictionary *stats, NSError *err) {
+                        
+                        self.sortedPercentages = [[[stats[@"sortedPercentage"] reverseObjectEnumerator] allObjects] mutableCopy];
+                        self.leaderboard = stats[@"leaderboard"];
+                        self.fullStats = stats[@"fullStats"];
+                        
+                        for (UICollectionViewCell *c in self.collectionView.visibleCells) {
+                            if ([c isKindOfClass:[SourcesCollectionViewCell class]]) {
+                                SourcesCollectionViewCell *sourceCell = (SourcesCollectionViewCell *)c;
+                                UICollectionView *overviewCollectionView = sourceCell.overviewCollectionView;
+                                for (UICollectionViewCell *o in overviewCollectionView.visibleCells) {
+                                    if ([o isKindOfClass:[LeaderboardCollectionViewCell class]]) {
+                                        LeaderboardCollectionViewCell *leaderboardCell = (LeaderboardCollectionViewCell *)o;
+                                        dispatch_async(dispatch_get_main_queue(), ^{
+                                            [self.loader removeLoader:YES];
+                                            [leaderboardCell.rankTableView reloadData];
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }];
+                }
+            }];
         }
     }];
 }
 
 -(void)viewWillAppear:(BOOL)animated {
-    
     [super viewWillAppear:animated];
-    
 }
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    
-    
-//    [HealthKitFunctions getAllSources:^(NSMutableArray *sources, NSError *err) {
-//        if (err == nil) {
-//            self.sources = [NSMutableArray arrayWithArray:sources];
-//            
-//            for (UICollectionViewCell *c in self.collectionView.visibleCells) {
-//                if ([c isKindOfClass:[SourcesCollectionViewCell class]]) {
-//                    SourcesCollectionViewCell *cell = (SourcesCollectionViewCell *)c;
-//                    
-//                    dispatch_async(dispatch_get_main_queue(), ^{
-//                        //[cell.tableView reloadData];
-//                    });
-//                    
-//                }
-//            }
-//        }
-//    }];
-    
-//    [HealthKitFunctions getAllEnergySeperatedBySource:^(HKStatistics *result, NSError *err) {
-//        NSLog(@"%@", result);
-//    }];
 }
 
 -(void)reloadGraphView:(NSNumber*)number {
@@ -121,44 +128,35 @@
             SourcesCollectionViewCell *sourceCell = (SourcesCollectionViewCell *)c;
             UICollectionView *overviewCollectionView = sourceCell.overviewCollectionView;
             
-
             self.dayWeekOrMonth = number;
-            
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 
                 GraphCollectionViewCell *cell = (GraphCollectionViewCell *)[overviewCollectionView cellForItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
-
-//                [overviewCollectionView reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]]];
-//                
-//                [cell.segmentedController moveTo:[number integerValue]];
                 
                 NSArray *finalKeys = self.sortedKeys;
                 NSArray *finalValues = self.sortedValues;
                 
                 if (self.sortedKeys.count > 0) {
-                    if ([self.dayWeekOrMonth isEqualToNumber:@(2)]) { //month
+                    if ([self.dayWeekOrMonth isEqualToNumber:@(1)]) { //month
                         finalKeys = [self.sortedKeys subarrayWithRange:NSMakeRange(self.sortedKeys.count - 31, 31)];
                         finalValues = [self.sortedValues subarrayWithRange:NSMakeRange(self.sortedKeys.count - 31, 31)];
                         
-                    } else if ([self.dayWeekOrMonth isEqualToNumber:@(1)]) { //week
+                    } else if ([self.dayWeekOrMonth isEqualToNumber:@(2)]) { //week
                         finalKeys = [self.sortedKeys subarrayWithRange:NSMakeRange(self.sortedKeys.count - 7, 7)];
                         finalValues = [self.sortedValues subarrayWithRange:NSMakeRange(self.sortedKeys.count - 7, 7)];
                         
-                    } else if ([self.dayWeekOrMonth isEqualToNumber:@(0)]) {
-                        finalKeys = @[[self.sortedKeys lastObject]];
-                        finalValues = @[[self.sortedValues lastObject]];
+                    } else if ([self.dayWeekOrMonth isEqualToNumber:@(0)]) { // all
+                        finalKeys = self.sortedKeys;
+                        finalValues = self.sortedValues;
                     }
                     
+                    [cell.segmentedController moveTo:[number integerValue]];
                     [cell resetGraph:finalValues yValues:finalKeys];
                 }
             });
         }
     }
-}
-
-- (void)moveToLogPage {
-    [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0] atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
 }
 
 -(void)setStatsDictionary:(NSNotification *)notification {
@@ -201,9 +199,9 @@
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
     if (collectionView.tag == 2) { // Sources CollectionViewCell
-        return 3;
+        return 2;
     } else {
-        return 3;
+        return 1;
     }
 }
 
@@ -222,75 +220,8 @@
         if (indexPath.row == 0) {
             
             GraphCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"graph" forIndexPath:indexPath];
-//            cell.alpha = 1.0;
-//            cell.layer.cornerRadius = 8;
             cell.segmentedController.delegate = self;
-//            
-//            ScrollableGraphView *graphView = [[ScrollableGraphView alloc] initWithFrame:cell.contentView.bounds];
-//            graphView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-//            graphView.dataPointType = ScrollableGraphViewDataPointTypeSquare;
-//            graphView.dataPointSpacing = (cell.frame.size.width / 7) - 3;
-//            graphView.leftmostPointPadding = 80;
-//            graphView.topMargin = 15;
-//
-//            
-//            graphView.lineColor = [UIColor clearColor];
-            //graphView.barWidth = 25;
-            //graphView.barLineWidth = 0.5;
-//            graphView.barLineColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
-//            graphView.barColor =  [[UIColor whiteColor] colorWithAlphaComponent:0.3];
-//            cell.clipsToBounds = YES;
-//            graphView.clipsToBounds = YES;
-//            graphView.shouldAutomaticallyDetectRange = YES;
-//            graphView.shouldAnimateOnStartup = YES;
-//            graphView.shouldAdaptRange = YES;
-//            graphView.shouldRangeAlwaysStartAtZero = YES;
-//            graphView.shouldDrawBarLayer = YES;
-//            graphView.shouldDrawDataPoint = NO;
-//            graphView.backgroundFillColor = [DataCollectionViewController colorFromHexString:@"#27916F"];
-//
-//            graphView.referenceLineLabelFont = [UIFont systemFontOfSize:11];
-//            graphView.referenceLineColor = [[UIColor whiteColor] colorWithAlphaComponent:0.2];
-//            graphView.referenceLineLabelColor = [UIColor whiteColor];
-//            graphView.numberOfIntermediateReferenceLines = 3;
-//            graphView.shouldShowLabels = YES;
-//            graphView.dataPointLabelFont = [UIFont systemFontOfSize:11];
-//            graphView.dataPointLabelColor = [UIColor whiteColor];
-//            graphView.rightmostPointPadding = 20;
-//            graphView.dataPointLabelBottomMargin = 0;//50;
-//            graphView.referenceLineUnits = @"Cal";
-//            graphView.adaptAnimationType = ScrollableGraphViewAnimationTypeEaseOut;
-//            graphView.animationDuration = 1.5;
-            
-            NSArray *finalKeys;
-            NSArray *finalValues;
-            
-            if (self.sortedKeys.count > 0) {
-                if ([self.dayWeekOrMonth isEqualToNumber:@(2)]) { //month
-                    finalKeys = [self.sortedKeys subarrayWithRange:NSMakeRange(self.sortedKeys.count - 31, 31)];
-                    finalValues = [self.sortedValues subarrayWithRange:NSMakeRange(self.sortedKeys.count - 31, 31)];
-                    
-                } else if ([self.dayWeekOrMonth isEqualToNumber:@(1)]) { //week
-                    finalKeys = [self.sortedKeys subarrayWithRange:NSMakeRange(self.sortedKeys.count - 7, 7)];
-                    finalValues = [self.sortedValues subarrayWithRange:NSMakeRange(self.sortedKeys.count - 7, 7)];
-                }
-                
-                [cell resetGraph:finalValues yValues:finalKeys];
-            }
-        
-//        
-//            
-//            [cell.segmentedController setSegmentItems:@[@"Today", @"Week", @"Month"]];
-//            cell.segmentedController.sliderBackgroundColor = [DataCollectionViewController colorFromHexString:@"#27916F"];
-//            cell.segmentedController.backgroundColor = [UIColor clearColor];
-//            cell.segmentedController.isSliderShadowHidden = YES;
-//            cell.segmentedController.segmentsBackgroundColor = [UIColor clearColor];
-//            
-//            cell.graphHolderView.layer.cornerRadius = 8;
-//            graphView.shouldShowLabels = YES;
-//            graphView.frame = cell.graphHolderView.bounds;
-//            
-//            [cell.graphHolderView addSubview:graphView];
+            [self reloadGraphView:@(1)];
             
             return cell;
             
@@ -301,7 +232,7 @@
             cell.alpha = 1.0;
             
             cell.rankTableView.tag = 3;
-            cell.rankTableView.rowHeight = 70;
+            cell.rankTableView.rowHeight = 60;
             cell.rankTableView.delegate = self;
             cell.rankTableView.dataSource = self;
             cell.backgroundColor = [UIColor clearColor];
@@ -433,49 +364,13 @@
                         [headerCell.lastSyncLabel setText:[NSString stringWithFormat:@"Last Sync was %@", lastSyncDateString]];
                     }
 
-                    [headerCell setBackgroundColor:[[DataCollectionViewController colorFromHexString:@"#222E40"] colorWithAlphaComponent:percentageOffset.y * 6.5]];
+                    [headerCell setBackgroundColor:[[UIColor colorWithHexString:@"#222E40"] colorWithAlphaComponent:percentageOffset.y * 6.5]];
                     
                     [headerCell.lastSyncLabel setAlpha:offset];
                 }
             });
         }
     }
-}
-
-// HSB color just using Hue
-- (UIColor *)HSBColorForOffsetPercentage:(CGFloat)percentage
-{
-    CGFloat minColorHue = 0.0;
-    CGFloat maxColorHue = 0.2; // this is a guess for the yellow hue.
-    
-    CGFloat actualHue = (maxColorHue - minColorHue) * percentage + minColorHue;
-    
-    // change these values to get the colours you want.
-    // I find reducing the saturation to 0.8 ish gives nicer colours.
-    return [UIColor colorWithHue:actualHue saturation:1.0 brightness:1.0 alpha:1.0];
-}
-
-// RGB color using all R, G, B values
-- (UIColor *)RGBColorForOffsetPercentage:(CGFloat)percentage
-{
-    // RGB 1, 0, 0 = red
-    CGFloat minColorRed = 1.0;
-    CGFloat minColorGreen = 0.0;
-    CGFloat minColorBlue = 0.0;
-    
-    // RGB 1, 1, 0 = yellow
-    CGFloat maxColorRed = 1.0;
-    CGFloat maxColorGreen = 1.0;
-    CGFloat maxColorBlue = 0.0;
-    
-    // if you have specific beginning and end RGB values then set these to min and max respectively.
-    // it should even work if the min value is greater than the max value.
-    
-    CGFloat actualRed = (maxColorRed - minColorRed) * percentage + minColorRed;
-    CGFloat actualGreen = (maxColorGreen - minColorGreen) * percentage + minColorGreen;
-    CGFloat actualBlue = (maxColorBlue - minColorBlue) * percentage + minColorBlue;
-    
-    return [UIColor colorWithRed:actualRed green:actualGreen blue:actualBlue alpha:1.0];
 }
 
 #pragma mark <UICollectionViewDelegate>
@@ -495,6 +390,8 @@
         if (collectionView.tag == 2) {
             if (indexPath.row == 1 && indexPath.section == 0) {
                 return CGSizeMake(self.collectionView.frame.size.width - 20, 940);
+            } else if (indexPath.row == 2 && indexPath.section == 0) {
+                return CGSizeMake(self.collectionView.frame.size.width - 20, 150);
             } else {
                 return CGSizeMake(self.collectionView.frame.size.width - 20, self.collectionView.frame.size.height / 3);
             }
@@ -542,34 +439,7 @@
 }
 
 -(void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath {
-    
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"changePage" object:@(indexPath.row)];
-    NSLog(@"%zd", collectionView.tag);
-    
-    if (indexPath.row == 0) {
-        SourcesCollectionViewCell *cell = (SourcesCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-        cell.overviewCollectionView.delegate = self;
-        
-        if (self.stats != nil) {
-        
-            [HealthKitFunctions requestPermission:^(BOOL success, NSError *err) {
-                if (success) {
-                    [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
-                        if (success && (stats[@"current"] != nil)) {
-                            dispatch_async(dispatch_get_main_queue(), ^{
-//                                stats[@"current"] doubleValue] + [stats[@"other"] doubleValue
-                            });
-                        }
-                    }];
-                }
-            }];
-        }
-    }
-    
-    if (indexPath.row == 2) {
-        //LogsCollectionViewCell *cell = (LogsCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-    }
+
 }
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -578,7 +448,7 @@
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     if (tableView.tag == 3) {
-        return self.teammates.count;
+        return self.sortedPercentages.count;
     } else if (tableView.tag == 2) {
         return 5;
     } else {
@@ -587,48 +457,9 @@
 }
 
 
--(void)calculateEnergyFromSources:(NSNotification *)notification {
-    
-    UISwitch *toggle = (UISwitch *)notification.object;
-    
-    SourcesCollectionViewCell *cell = (SourcesCollectionViewCell *)[self.collectionView cellForItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
-    
-    //CGPoint hitPoint = [toggle convertPoint:CGPointZero toView:cell.tableView];
-    //NSIndexPath *index = [cell.tableView indexPathForRowAtPoint:hitPoint];
-        
-    if (!self.filteredSources) {
-        self.filteredSources = [NSMutableDictionary new];
-    }
-
-    
-    [HealthKitFunctions getAllEnergyBurnedWithFilters:self.filteredSources withCompletion:^(NSMutableDictionary *totalSources, NSError *err) {
-        NSLog(@"%@", totalSources.description);
-        
-        double allPoints = 0.0;
-        for (NSString *key in totalSources.allKeys) {
-            allPoints += [totalSources[key] doubleValue];
-        }
-        
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            [cell.sourcePointsLabel setText:[NSString stringWithFormat:@"%.0f pts", allPoints]];
-//        });
-    }];
-}
-
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    //    source table view
-    if (tableView.tag == 1) {
-        SourceTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"source"];
-        
-        HKSource *source = [self.sources objectAtIndex:indexPath.row];
-        
-        [cell.sourceLabel setText:source.name];
-        [cell.includeSwitch setOn:NO];
-        
-        return cell;
-        
-    } else if (tableView.tag == 2) {
+    if (tableView.tag == 2) {
         
         WorkoutTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"workouts"];
         
@@ -636,38 +467,32 @@
         
     } else if (tableView.tag == 3) {
 
-        [tableView setBackgroundColor:[UIColor colorWithGradientStyle:UIGradientStyleTopToBottom withFrame:tableView.frame andColors:@[FlatRed, FlatYellow]]];
+        [tableView setBackgroundColor:[[UIColor colorWithGradientStyle:UIGradientStyleTopToBottom withFrame:tableView.frame andColors:@[FlatRed, FlatYellow]] colorWithAlphaComponent:0.8]];
         tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
         
         LeaderboardTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"leaderboardCell"];
         cell.selectedBackgroundView.backgroundColor = [UIColor clearColor];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         
-        
-        cell.progressView.image = [UIImage imageNamed:@"bot"];
-        
-        [cell.progressView setProgress:0.75];
-        
-        
-        
-        
-        //UIColor *progressRed = [DataCollectionViewController colorFromHexString:@"#C93F45"];// colorWithAlphaComponent:(1.0 - (0.1 * indexPath.row))];
-        
-        
-        UIColor *backgroundWhite = [[UIColor whiteColor] colorWithAlphaComponent:(0.0 + (0.1 * indexPath.row))];
+        cell.contentView.clipsToBounds = NO;
+
         
         [cell.contentView setBackgroundColor:[UIColor clearColor]];
 
-        UIView *colorView = [[UIView alloc] initWithFrame:CGRectMake(cell.frame.origin.x, cell.frame.origin.y - 2, 0, cell.contentView.bounds.size.height)];
+        UIView *colorView = [[UIView alloc] initWithFrame:CGRectMake(cell.frame.origin.x, cell.frame.origin.y, 0, cell.contentView.bounds.size.height)];
         
-        //[colorView setBackgroundColor:[DataCollectionViewController blendWithColor:backgroundWhite color2:progressRed alpha:1.0]];
-
+        [colorView setBackgroundColor:cell.progressColorView.backgroundColor];
+        [cell.progressColorView setBackgroundColor:[UIColor clearColor]];
+        colorView.clipsToBounds = NO;
         
-        //[cell.contentView insertSubview:colorView atIndex:0];
+        [cell.contentView insertSubview:colorView atIndex:0];
         
         [cell.usernameLabel setBackgroundColor:[UIColor clearColor]];
         cell.userImageView.layer.cornerRadius = cell.userImageView.frame.size.height / 2.0;
-        [cell.usernameLabel setText:self.teammates[indexPath.row]];
+        
+        NSNumber *userKeyPercentage = self.sortedPercentages[indexPath.row];
+        [cell.percentGoalLabel setText:[NSString stringWithFormat:@"%0.f%%", [userKeyPercentage doubleValue]]];
+        [cell.usernameLabel setText:[self.leaderboard objectForKey:userKeyPercentage]];
         
         colorView.layer.shadowOpacity = 0.8;
         colorView.layer.shadowRadius = 0.0;
@@ -676,31 +501,12 @@
         
         [cell.rankLabel setText:[@(indexPath.row + 1) stringValue]];
         
-        [colorView setFrame:CGRectMake(cell.frame.origin.x, cell.frame.origin.y, cell.contentView.bounds.size.width - ((cell.contentView.bounds.size.width * 0.05) * indexPath.row), cell.contentView.bounds.size.height)];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [UIView animateWithDuration:3.0 animations:^{
-                [colorView layoutIfNeeded];
-            }];
-        });
-        
-        // you'll have alerady loaded everyone's data, trigger animation here and pass data
+        [colorView setFrame:CGRectMake(cell.frame.size.width * ([userKeyPercentage floatValue] / 100.0), cell.frame.origin.y, cell.frame.size.width - (cell.frame.size.width * ([userKeyPercentage floatValue] / 100.0)), cell.contentView.bounds.size.height)];
         
         return cell;
     }
     
     return [tableView dequeueReusableCellWithIdentifier:@"source"];
-}
-
-+ (UIColor *)darkerColor:(UIColor *)clr
-{
-    CGFloat h, s, b, a;
-    if ([clr getHue:&h saturation:&s brightness:&b alpha:&a])
-        return [UIColor colorWithHue:h
-                          saturation:s
-                          brightness:b * 0.30
-                               alpha:a];
-    return nil;
 }
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -709,21 +515,6 @@
         SourceTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
         [cell include:nil];
     }
-}
-
--(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
-    //if ([cell isKindOfClass:[LeaderboardTableViewCell class]]) {
-        //LeaderboardTableViewCell *leader = (LeaderboardTableViewCell*)[tableView cellForRowAtIndexPath:indexPath];
-        //[leader.progressView startUpload];
-    //2}
-}
-
-+ (UIColor *)colorFromHexString:(NSString *)hexString {
-    unsigned rgbValue = 0;
-    NSScanner *scanner = [NSScanner scannerWithString:hexString];
-    [scanner setScanLocation:1]; // bypass '#' character
-    [scanner scanHexInt:&rgbValue];
-    return [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:1.0];
 }
 
 +(NSString *)getFirstNameForSlackUsername:(NSString *)slackUsername {
@@ -744,20 +535,58 @@
     return names[slackUsername];
 }
 
-+ (UIColor*)blendWithColor:(UIColor *)color1 color2:(UIColor*)color2 alpha:(CGFloat)alpha2
-{
-    alpha2 = MIN( 1.0, MAX( 0.0, alpha2 ) );
-    CGFloat beta = 1.0 - alpha2;
-    CGFloat r1, g1, b1, a1, r2, g2, b2, a2;
-    [color1 getRed:&r1 green:&g1 blue:&b1 alpha:&a1];
-    [color2 getRed:&r2 green:&g2 blue:&b2 alpha:&a2];
-    CGFloat red     = r1 * beta + r2 * alpha2;
-    CGFloat green   = g1 * beta + g2 * alpha2;
-    CGFloat blue    = b1 * beta + b2 * alpha2;
-    CGFloat alpha   = a1 * beta + a2 * alpha2;
-    return [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
+-(void)getCurrentLeaderboardWithCompletion:(void (^)(NSMutableDictionary *steps, NSError *err))completion {
+    NSURL* URL = [NSURL URLWithString:@"https://fitbotdev.rockmyrun.com/v1/points/leaderboard/old"];
+    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:URL];
+    request.HTTPMethod = @"GET";
+    
+    NSURLSessionDataTask* task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (error == nil) {
+            
+            NSError *err;
+            // Success
+            if (((NSHTTPURLResponse*)response).statusCode == 200) {
+                NSArray *payload = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&err];
+                if (err) {
+                    NSLog(@"Error Unencoding JSON for Leaderboard: %@", [err description]);
+                } else {
+                    //  Turn dates into NSDate start & end date
+                    NSDateFormatter *formatter = [NSDateFormatter new];
+                    [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss.SSSZ"];
+                    [formatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
+                    NSMutableArray *sortedPercentage = [NSMutableArray new];
+                    NSMutableDictionary *leaderboard = [NSMutableDictionary new];
+                    NSMutableDictionary *fullStats = [NSMutableDictionary new];
+                    
+                    for (NSDictionary *d in payload) {
+                        NSString *fullName = [NSString stringWithFormat:@"%@ %@", d[@"first_name"], d[@"last_name"]];
+                        NSString *trimName = [NSString stringWithFormat:@"%@ %@", d[@"first_name"], [d[@"last_name"] substringToIndex:1]];
+                        NSString *firstName = d[@"first_name"];
+                        NSString *lastName = d[@"last_name"];
+                        NSDate *startDate = [formatter dateFromString:d[@"start_date"]];
+                        NSDate *endDate = [formatter dateFromString:d[@"end_date"]];
+                        NSNumber *goalPoints = d[@"goal_points"];
+                        NSNumber *currentPoints = d[@"current_points"];
+                        NSNumber *percentage = @(([currentPoints doubleValue] / [goalPoints doubleValue]) * 100.0);
+                        
+                        [leaderboard setObject:trimName forKey:percentage];
+                        [fullStats setObject:@{@"":fullName,@"":trimName,@"firstName":firstName,@"lastName":lastName,@"startDate":startDate,@"endDate":endDate,@"goalPoints":goalPoints,@"currentPoints":currentPoints,@"percentage": percentage} forKey:fullName];
+                        
+                    }
+                    
+                    sortedPercentage = [[leaderboard.allKeys sortedArrayUsingSelector:@selector(compare:)] mutableCopy];
+                    completion([@{@"sortedPercentage":sortedPercentage, @"leaderboard":leaderboard, @"fullStats":fullStats} mutableCopy],nil);
+                }
+            }
+        }
+        else {
+            // Failure
+            NSLog(@"URL Session Task Failed: %@", [error localizedDescription]);
+        }
+    }];
+    [task resume];
+    [[NSURLSession sharedSession] finishTasksAndInvalidate];
 }
-
 
 +(UIBezierPath *)getRMWLogoBezierPath {
 

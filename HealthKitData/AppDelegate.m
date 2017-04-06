@@ -135,17 +135,17 @@
 }
 
 -(void)applicationDidBecomeActive:(UIApplication *)application {
-    [HealthKitFunctions requestPermission:^(BOOL success, NSError *err) {
-        if (success) {
-            [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
-                if (success) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
-                    });
-                }
-            }];
-        }
-    }];
+//    [HealthKitFunctions requestPermission:^(BOOL success, NSError *err) {
+//        if (success) {
+//            [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
+//                if (success) {
+//                    dispatch_async(dispatch_get_main_queue(), ^{
+//                        [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
+//                    });
+//                }
+//            }];
+//        }
+//    }];
 }
 
 +(void)logBackgroundDataToFileWithStats:(NSDictionary *)stats message:(NSString *)reason time:(NSDate *)timestamp {

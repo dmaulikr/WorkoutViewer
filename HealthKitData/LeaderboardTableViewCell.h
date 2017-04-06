@@ -11,7 +11,6 @@
 
 @interface LeaderboardTableViewCell : UITableViewCell
 
-@property (strong, nonatomic) IBOutlet SVUploader *progressView;
 @property (strong, nonatomic) IBOutlet UIView *userImageView;
 @property (strong, nonatomic) IBOutlet UILabel *usernameLabel;
 @property (strong, nonatomic) IBOutlet UIView *progressColorView;

@@ -9,6 +9,7 @@
 #import "GraphCollectionViewCell.h"
 #import "HealthKitData-Swift.h"
 #import "DataCollectionViewController.h"
+#import "Chameleon.h"
 
 @implementation GraphCollectionViewCell
 
@@ -27,8 +28,8 @@
 
 -(void)layoutSubviews {
     [super layoutSubviews];
-    [self.segmentedController setSegmentItems:@[@"Today", @"Week", @"Month"]];
-    self.segmentedController.sliderBackgroundColor = [DataCollectionViewController colorFromHexString:@"#27916F"];
+    [self.segmentedController setSegmentItems:@[@"All", @"Month", @"Week"]];
+    self.segmentedController.sliderBackgroundColor = [UIColor colorWithHexString:@"#27916F"];
     self.segmentedController.backgroundColor = [UIColor clearColor];
     self.segmentedController.isSliderShadowHidden = YES;
     self.segmentedController.segmentsBackgroundColor = [UIColor clearColor];
@@ -48,13 +49,11 @@
     self.graphView.topMargin = 20;
     self.graphView.lineColor = [UIColor clearColor];
     self.graphView.barLineWidth = 0.5;
-    self.graphView.barWidth = 30;
-    self.graphView.dataPointSpacing = 15;
 
     if (xValues.count == 7) {
-        self.graphView.barWidth = (self.frame.size.width / 7) - 15;
-        self.graphView.dataPointSpacing = self.graphView.barWidth + 15;
-    } else if (xValues.count == 31) {
+        self.graphView.barWidth = (self.frame.size.width / 7) - 20;
+        self.graphView.dataPointSpacing = self.graphView.barWidth + 10;
+    } else if (xValues.count >= 31) {
         self.graphView.barWidth = 25;
         self.graphView.dataPointSpacing = 45;
     }
@@ -69,7 +68,7 @@
     self.graphView.shouldRangeAlwaysStartAtZero = YES;
     self.graphView.shouldDrawBarLayer = YES;
     self.graphView.shouldDrawDataPoint = NO;
-    self.graphView.backgroundFillColor = [DataCollectionViewController colorFromHexString:@"#27916F"];
+    self.graphView.backgroundFillColor = [UIColor colorWithHexString:@"#27916F"];
     
     self.graphView.referenceLineLabelFont = [UIFont systemFontOfSize:12];
     self.graphView.referenceLineColor = [[UIColor whiteColor] colorWithAlphaComponent:0.2];

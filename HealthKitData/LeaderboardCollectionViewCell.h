@@ -12,7 +12,7 @@
 
 @property (strong, nonatomic) IBOutlet UILabel *leaderboardTitle;
 @property (strong, nonatomic) IBOutlet UITableView *rankTableView;
-@property (strong, nonatomic) IBOutlet UIButton *todayRankButton;
-@property (strong, nonatomic) IBOutlet UIButton *weekRankButton;
+@property (weak, nonatomic) IBOutlet UILabel *dateRangeLabel;
+
 
 @end

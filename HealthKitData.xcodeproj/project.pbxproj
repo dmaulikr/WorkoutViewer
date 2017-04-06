@@ -40,8 +40,6 @@
 		C27AD5A11E8485280021A9AD /* CHIPageControllable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C27AD59D1E8485280021A9AD /* CHIPageControllable.swift */; };
 		C27CA8F11E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F01E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m */; };
 		C27CA8F41E718C8B0084B9B8 /* WorkoutTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F31E718C8A0084B9B8 /* WorkoutTableViewCell.m */; };
-		C27CA8F91E71F8060084B9B8 /* MBCircularProgressBarLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */; };
-		C27CA8FA1E71F8060084B9B8 /* MBCircularProgressBarView.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */; };
 		C27CA9011E7249BE0084B9B8 /* ANDBackgroundChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8FC1E7249BE0084B9B8 /* ANDBackgroundChartView.m */; };
 		C27CA9021E7249BE0084B9B8 /* ANDInternalLineChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8FE1E7249BE0084B9B8 /* ANDInternalLineChartView.m */; };
 		C27CA9031E7249BE0084B9B8 /* ANDLineChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA9001E7249BE0084B9B8 /* ANDLineChartView.m */; };
@@ -183,9 +181,6 @@
 		C27CA8F21E718C8A0084B9B8 /* WorkoutTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorkoutTableViewCell.h; sourceTree = "<group>"; };
 		C27CA8F31E718C8A0084B9B8 /* WorkoutTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WorkoutTableViewCell.m; sourceTree = "<group>"; };
 		C27CA8F51E71F8060084B9B8 /* MBCircularProgressBarLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBCircularProgressBarLayer.h; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarLayer.h"; sourceTree = "<group>"; };
-		C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBCircularProgressBarLayer.m; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarLayer.m"; sourceTree = "<group>"; };
-		C27CA8F71E71F8060084B9B8 /* MBCircularProgressBarView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBCircularProgressBarView.h; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarView.h"; sourceTree = "<group>"; };
-		C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBCircularProgressBarView.m; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarView.m"; sourceTree = "<group>"; };
 		C27CA8FB1E7249BE0084B9B8 /* ANDBackgroundChartView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ANDBackgroundChartView.h; sourceTree = "<group>"; };
 		C27CA8FC1E7249BE0084B9B8 /* ANDBackgroundChartView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ANDBackgroundChartView.m; sourceTree = "<group>"; };
 		C27CA8FD1E7249BE0084B9B8 /* ANDInternalLineChartView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ANDInternalLineChartView.h; sourceTree = "<group>"; };
@@ -339,9 +334,6 @@
 				C27FBD031E84BB7F00FB41E7 /* LeaderboardCollectionViewCell.h */,
 				C27FBD041E84BB7F00FB41E7 /* LeaderboardCollectionViewCell.m */,
 				C27FBCF51E84AB3B00FB41E7 /* ElongationHeader.swift */,
-				C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */,
-				C27CA8F71E71F8060084B9B8 /* MBCircularProgressBarView.h */,
-				C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */,
 				C2D302B61E717C3200147784 /* SourceTableViewCell.h */,
 				C2D302B71E717C3200147784 /* SourceTableViewCell.m */,
 				C27CA8FB1E7249BE0084B9B8 /* ANDBackgroundChartView.h */,
@@ -517,7 +509,7 @@
 		A88BBEF11E1656910078649D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0820;
+				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = "Rock My World, Inc.";
 				TargetAttributes = {
 					A88BBEF81E1656910078649D = {
@@ -625,7 +617,6 @@
 				C2D302B51E712A8000147784 /* LogsCollectionViewCell.m in Sources */,
 				C2A041BF1E92AD1400F7F300 /* UIViewShadowExtension.swift in Sources */,
 				C22D7AA61E8443AE00B7272E /* TKRadarChart.swift in Sources */,
-				C27CA8FA1E71F8060084B9B8 /* MBCircularProgressBarView.m in Sources */,
 				C27FBCFD1E84AB3B00FB41E7 /* ElongationDetailViewController.swift in Sources */,
 				C2C746861E95FFD700B79613 /* UIImage+ChameleonPrivate.m in Sources */,
 				A88BBF011E1656910078649D /* AppDelegate.m in Sources */,
@@ -645,7 +636,6 @@
 				C20456F01E8D0AAF0000EB75 /* WavesLoader.swift in Sources */,
 				C27CA9021E7249BE0084B9B8 /* ANDInternalLineChartView.m in Sources */,
 				C27CA8F11E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m in Sources */,
-				C27CA8F91E71F8060084B9B8 /* MBCircularProgressBarLayer.m in Sources */,
 				C27FBD011E84AB3B00FB41E7 /* ElongationHeader.swift in Sources */,
 				C27AD5A11E8485280021A9AD /* CHIPageControllable.swift in Sources */,
 				C27FBD051E84BB7F00FB41E7 /* LeaderboardCollectionViewCell.m in Sources */,
@@ -801,6 +791,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
