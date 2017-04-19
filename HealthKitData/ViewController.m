@@ -22,7 +22,6 @@
 
 @property (strong, nonatomic) IBOutlet CHIPageControlJaloro *pageControl;
 
-
 @property (strong, nonatomic) IBOutlet UIButton *syncButton;
 @property (strong, nonatomic) IBOutlet UIButton *showLogButton;
 @property (strong, nonatomic) UIActivityIndicatorView *spinner;
@@ -75,15 +74,19 @@
         if (success) {
             
             if (self.slackUsername == nil) {
-                [self showAddUsernameAlert];
+
+                BOOL hiddenByModal = nil != [self presentedViewController];
+                if (!hiddenByModal) {
+                    [self showAddUsernameAlert];
+                }
+                
             } else {
                 
                 [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
                     
                     if (success && (stats[@"current"] != nil)) {
+                        
                         dispatch_async(dispatch_get_main_queue(), ^{
-                            
-                            //  update UI
                             NSInteger days = [ViewController daysBetweenDate:[NSDate date] andDate:stats[@"end"]];
                             int goalPercentage = [@(([stats[@"current"] doubleValue] / [stats[@"goal"] doubleValue]) * 100.0) intValue];
                             
@@ -91,16 +94,8 @@
                             [stats setObject:@(goalPercentage) forKey:@"goalPercentage"];
                             
                             [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
-                            
-                            [self.spinner stopAnimating];
-                            
-                        });
-                    } else {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            [self.spinner stopAnimating];
                         });
                     }
-                    
                 }];
             }
         }
@@ -108,31 +103,45 @@
 }
 
 -(void)showAddUsernameAlert {
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"Add your Slack username to Sync Data"
-                                                                   message:@"ex: \"adamrz\""
-                                                            preferredStyle:UIAlertControllerStyleAlert];
     
-    [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
-        textField.placeholder = @"slack username";
-        textField.textColor = [UIColor blueColor];
-        textField.clearButtonMode = UITextFieldViewModeWhileEditing;
-        textField.borderStyle = UITextBorderStyleRoundedRect;
+    PMAlertController *controller = [[PMAlertController alloc] initWithTitle:@"Link your Slack Username!" description:@"FitBot needs this to link your activity" image:[UIImage imageNamed:@"bot"] style:PMAlertControllerStyleWalkthrough];
+    
+    [controller addTextField:^(UITextField * _Nullable field) {
+        [field setPlaceholder:@"Slack Username (without @, ex: adamrz)"];
     }];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"Do it." style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-        NSArray * textfields = alert.textFields;
-        UITextField * usernameField = textfields[0];
-        NSLog(@"Slack Username: %@",usernameField.text);
-        
-        if (usernameField.text.length > 1) {
-            [[NSUserDefaults standardUserDefaults] setObject:[usernameField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] forKey:@"slackUsername"];
-            [[NSUserDefaults standardUserDefaults] synchronize];
-            [self syncWorkouts:nil];
-        }
-        
+    [controller addAction:[[PMAlertAction alloc] initWithTitle:@"Link" style:PMAlertActionStyleDefault action:^{
+
+           UITextField * slackNameTextField = controller.textFields[0];
+           
+           NSLog(@"Slack Username: %@",slackNameTextField.text);
+           
+           if (slackNameTextField.text.length > 1) {
+                [[NSUserDefaults standardUserDefaults] setObject:[slackNameTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] forKey:@"slackUsername"];
+                [[NSUserDefaults standardUserDefaults] synchronize];
+               
+               [ViewController updateAllDataWithCompletion:^(BOOL success, NSMutableDictionary *stats, NSError *error) {
+                   
+                   if (success && (stats[@"current"] != nil)) {
+                       
+                       dispatch_async(dispatch_get_main_queue(), ^{
+                           NSInteger days = [ViewController daysBetweenDate:[NSDate date] andDate:stats[@"end"]];
+                           int goalPercentage = [@(([stats[@"current"] doubleValue] / [stats[@"goal"] doubleValue]) * 100.0) intValue];
+                           
+                           [stats setObject:@(days) forKey:@"daysLeft"];
+                           [stats setObject:@(goalPercentage) forKey:@"goalPercentage"];
+                           
+                           [[NSNotificationCenter defaultCenter] postNotificationName:@"setStats" object:stats];
+                       });
+                   }
+               }];
+           }
+       
     }]];
     
-    [self presentViewController:alert animated:YES completion:nil];
+    [self presentViewController:controller animated:YES completion:^{
+        
+    }];
 }
 
 - (IBAction)showLogPage:(id)sender {

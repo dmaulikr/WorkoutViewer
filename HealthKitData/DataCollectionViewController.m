@@ -40,6 +40,8 @@
 @property (strong, nonatomic) NSNumber *dayWeekOrMonth;
 @property (strong, nonatomic) NSMutableArray *sortedKeys;
 @property (strong, nonatomic) NSMutableArray *sortedValues;
+@property (assign, nonatomic) BOOL selected;
+
 
 @end
 
@@ -48,25 +50,17 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.loader = [WavesLoader createLoaderWith:[DataCollectionViewController getRMWLogoBezierPath].CGPath on:self.view];
-    self.loader.center = self.view.center;
-    self.loader.rectSize = ([UIScreen mainScreen].bounds.size.width * 0.75) / [DataCollectionViewController getRMWLogoBezierPath].bounds.size.width;
-    self.loader.backgroundColor = [[UIColor colorWithHexString:@"#305B70"] colorWithAlphaComponent:0.5];
-    
-    self.loader.loaderColor = [UIColor flatWhiteColor];
-    self.loader.loaderStrokeWidth = 2;
-    self.loader.duration = 2;
-    
-    self.dayWeekOrMonth = @(2);
-    
     self.threeMonthStepCounts = [NSMutableDictionary new];
     self.oneMonthStepCounts = [NSMutableDictionary new];
     self.oneWeekStepCounts = [NSMutableDictionary new];
     self.leaderboard = [NSMutableDictionary new];
     self.fullStats = [NSMutableDictionary new];
     self.sortedPercentages = [NSMutableArray new];
-
-
+    
+    [self setupLoader];
+    
+    self.dayWeekOrMonth = @(1);
+    self.selected = NO;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(setStatsDictionary:) name:@"setStats" object:nil];
     
@@ -78,16 +72,19 @@
         if (success) {
             [self.loader showLoader];
             [HealthKitFunctions getDailyStepsForLast3MonthsWithCompletion:^(NSMutableDictionary *steps, NSError *err) {
-                if (!err) {
+                
+                if (!err && [steps valueForKey:@"error"]) {
                     [self.threeMonthStepCounts setDictionary:steps];
                     self.sortedKeys = [[self.threeMonthStepCounts.allKeys sortedArrayUsingSelector:@selector(compare:)] mutableCopy];
                     self.sortedValues = [[self.threeMonthStepCounts objectsForKeys:self.sortedKeys notFoundMarker:[NSNull null]] mutableCopy];
-                    [self reloadGraphView:@(2)];
-                    [self getCurrentLeaderboardWithCompletion:^(NSMutableDictionary *stats, NSError *err) {
+                    [self reloadGraphView:@(1)];
+                    
+                    [DataCollectionViewController getCurrentLeaderboardWithCompletion:^(NSMutableDictionary *stats, NSError *err) {
                         
                         self.sortedPercentages = [[[stats[@"sortedPercentage"] reverseObjectEnumerator] allObjects] mutableCopy];
                         self.leaderboard = stats[@"leaderboard"];
                         self.fullStats = stats[@"fullStats"];
+                        NSLog(@"%@", [self.fullStats description]);
                         
                         for (UICollectionViewCell *c in self.collectionView.visibleCells) {
                             if ([c isKindOfClass:[SourcesCollectionViewCell class]]) {
@@ -96,15 +93,23 @@
                                 for (UICollectionViewCell *o in overviewCollectionView.visibleCells) {
                                     if ([o isKindOfClass:[LeaderboardCollectionViewCell class]]) {
                                         LeaderboardCollectionViewCell *leaderboardCell = (LeaderboardCollectionViewCell *)o;
+                                        
+                                        NSString *username = [[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"];
+                                        NSDictionary *userStats = [self.fullStats objectForKey:username];
+
                                         dispatch_async(dispatch_get_main_queue(), ^{
                                             [self.loader removeLoader:YES];
-                                            [leaderboardCell.rankTableView reloadData];
+
+                                            [overviewCollectionView reloadItemsAtIndexPaths:@[[overviewCollectionView indexPathForCell:leaderboardCell]]];
+
                                         });
                                     }
                                 }
                             }
                         }
                     }];
+                } else {
+                    [self.loader removeLoader:YES];
                 }
             }];
         }
@@ -117,6 +122,17 @@
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+}
+
+-(void)setupLoader {
+    self.loader = [WavesLoader createLoaderWith:[DataCollectionViewController getRMWLogoBezierPath].CGPath on:self.view];
+    self.loader.center = self.view.center;
+    self.loader.frame = self.view.frame;
+    
+    self.loader.loaderColor = [[UIColor colorWithHexString:@"#305B70"] colorWithAlphaComponent:1];
+    self.loader.mainBgColor =  [[UIColor flatWhiteColor] colorWithAlphaComponent:0.4];
+    self.loader.loaderStrokeWidth = 0;
+    self.loader.duration = 1;
 }
 
 -(void)reloadGraphView:(NSNumber*)number {
@@ -136,18 +152,15 @@
                 NSArray *finalKeys = self.sortedKeys;
                 NSArray *finalValues = self.sortedValues;
                 
-                if (self.sortedKeys.count > 0) {
-                    if ([self.dayWeekOrMonth isEqualToNumber:@(1)]) { //month
+                if (self.sortedKeys.count > 0 && ![finalKeys containsObject:@"error"]) {
+                    if ([self.dayWeekOrMonth isEqualToNumber:@(0)]) { //month
                         finalKeys = [self.sortedKeys subarrayWithRange:NSMakeRange(self.sortedKeys.count - 31, 31)];
                         finalValues = [self.sortedValues subarrayWithRange:NSMakeRange(self.sortedKeys.count - 31, 31)];
                         
-                    } else if ([self.dayWeekOrMonth isEqualToNumber:@(2)]) { //week
+                    } else if ([self.dayWeekOrMonth isEqualToNumber:@(1)]) { //week
                         finalKeys = [self.sortedKeys subarrayWithRange:NSMakeRange(self.sortedKeys.count - 7, 7)];
                         finalValues = [self.sortedValues subarrayWithRange:NSMakeRange(self.sortedKeys.count - 7, 7)];
                         
-                    } else if ([self.dayWeekOrMonth isEqualToNumber:@(0)]) { // all
-                        finalKeys = self.sortedKeys;
-                        finalValues = self.sortedValues;
                     }
                     
                     [cell.segmentedController moveTo:[number integerValue]];
@@ -170,7 +183,6 @@
             CollectionViewHeader *headerCell = (CollectionViewHeader*)[overviewCollectionView supplementaryViewForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
 
             dispatch_async(dispatch_get_main_queue(), ^{
-                [headerCell.currentPointsLabel setText:[NSString stringWithFormat:@"%.0f Cals", ([self.stats[@"current"] doubleValue] + [self.stats[@"other"] doubleValue])]];
                 
                 NSDateFormatter *formatter = [NSDateFormatter new];
                 [formatter setDateStyle:NSDateFormatterShortStyle];
@@ -179,6 +191,15 @@
                 NSDate *lastSyncDate = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastSyncDate"];
                 NSString *lastSyncDateString = [formatter stringFromDate:lastSyncDate];
                 [headerCell.lastSyncLabel setText:[NSString stringWithFormat:@"Last Sync was %@", lastSyncDateString]];
+                [headerCell.currentPointsLabel setText:[NSString stringWithFormat:@"%.0f Cals", ([self.stats[@"current"] doubleValue] + [self.stats[@"other"] doubleValue])]];
+                
+                NSString *username = [DataCollectionViewController getFirstNameForSlackUsername:[[NSUserDefaults standardUserDefaults] objectForKey:@"slackUsername"]];
+                
+                if (!username) {
+                    [headerCell.titleHeaderMessageLabel setText:@"FitBot + Me"];
+                } else {
+                    [headerCell.titleHeaderMessageLabel setText:[NSString stringWithFormat:@"%@ + FitBot", username]];
+                }
                 
                 if (self.stats[@"goalPercentage"]) {
                     
@@ -229,12 +250,13 @@
             LeaderboardCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"leaderboard" forIndexPath:indexPath];
             cell.autoresizingMask = UIViewAutoresizingFlexibleHeight;
             cell.alpha = 1.0;
+        
             
             cell.rankTableView.tag = 3;
-            cell.rankTableView.rowHeight = 50;
+            cell.rankTableView.rowHeight = 65;
             cell.rankTableView.delegate = self;
             cell.rankTableView.dataSource = self;
-            cell.backgroundColor = [UIColor clearColor];
+            
             
             return cell;
         }
@@ -351,7 +373,7 @@
                 
                 if (percentageOffset.y > -0.1) {
                     
-                    float offset = fabs(percentageOffset.y) * 6.5;
+                    float offset = fabs(percentageOffset.y) * 8.5;
                     if (fabs(percentageOffset.y) < 0.001) {
                         NSLog(@"Updating");
                         NSDateFormatter *formatter = [NSDateFormatter new];
@@ -363,8 +385,8 @@
                         [headerCell.lastSyncLabel setText:[NSString stringWithFormat:@"Last Sync was %@", lastSyncDateString]];
                     }
 
-                    [headerCell setBackgroundColor:[[UIColor colorWithHexString:@"#222E40"] colorWithAlphaComponent:percentageOffset.y * 6.5]];
-                    
+                    [headerCell setBackgroundColor:[[UIColor colorWithHexString:@"#222E40"] colorWithAlphaComponent:percentageOffset.y * 8.5]];
+
                     [headerCell.lastSyncLabel setAlpha:offset];
                 }
             });
@@ -380,7 +402,7 @@
     
     if (UIInterfaceOrientationIsLandscape(UIApplication.sharedApplication.statusBarOrientation)) {
         if (collectionView.tag == 2) {
-            return CGSizeMake(self.collectionView.frame.size.width - 20 , self.collectionView.frame.size.height / 4);
+            return CGSizeMake(self.collectionView.frame.size.width - 15 , self.collectionView.frame.size.height / 4);
         } else {
             return CGSizeMake(self.collectionView.frame.size.width /2 , self.collectionView.frame.size.height / 2);
 
@@ -388,11 +410,19 @@
     } else {
         if (collectionView.tag == 2) {
             if (indexPath.row == 1 && indexPath.section == 0) {
-                return CGSizeMake(self.collectionView.frame.size.width - 20, 940);
-            } else if (indexPath.row == 2 && indexPath.section == 0) {
-                return CGSizeMake(self.collectionView.frame.size.width - 20, 150);
+                LeaderboardCollectionViewCell *cell = (LeaderboardCollectionViewCell*)[collectionView cellForItemAtIndexPath:indexPath];
+                
+                if (self.selected) {
+                    return CGSizeMake(self.collectionView.frame.size.width - 15, self.sortedPercentages.count * 65 + cell.topLeaderboardView.frame.size.height);
+                } else {
+                    return CGSizeMake(self.collectionView.frame.size.width - 15, 65 * 3 + cell.topLeaderboardView.frame.size.height);
+                }
+            } else
+                
+            if (indexPath.row == 2 && indexPath.section == 0) {
+                return CGSizeMake(self.collectionView.frame.size.width - 15, 150);
             } else {
-                return CGSizeMake(self.collectionView.frame.size.width - 20, self.collectionView.frame.size.height / 3);
+                return CGSizeMake(self.collectionView.frame.size.width - 15, self.collectionView.frame.size.height / 3.4);
             }
         } else {
             return CGSizeMake(self.collectionView.frame.size.width, self.collectionView.frame.size.height);
@@ -400,14 +430,12 @@
     }
 }
 
-
-
 -(BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     return YES;
 }
 
 -(BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
-    return NO;
+    return YES;
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
@@ -424,6 +452,55 @@
 -(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     
     if (collectionView.tag == 2 && [[collectionView cellForItemAtIndexPath:indexPath] isKindOfClass:[LeaderboardCollectionViewCell class]]) { // Here
+        self.selected = !self.selected;
+        
+//        [collectionView performBatchUpdates:^{
+//            [collectionView reloadItemsAtIndexPaths:@[indexPath]];
+//        } completion:^(BOOL finished) {
+//            
+//        }];
+        
+        [collectionView.collectionViewLayout invalidateLayout];
+        LeaderboardCollectionViewCell *__weak cell = (LeaderboardCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath]; // Avoid retain cycles
+        
+        if (!self.selected) {
+
+            void (^animateChangeHeight)() = ^()
+            {
+                CGRect frame = cell.frame;
+                frame.size = CGSizeMake(self.collectionView.frame.size.width - 15, self.sortedPercentages.count * cell.rankTableView.rowHeight + cell.topLeaderboardView.frame.size.height);
+                cell.frame = frame;
+            };
+        
+                [UIView transitionWithView:cell.contentView duration:1.0 options: UIViewAnimationOptionLayoutSubviews animations:animateChangeHeight completion:^(BOOL finished) {
+                    if (finished) {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            LeaderboardCollectionViewCell *cell = (LeaderboardCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+                            //[cell.rankTableView setBackgroundColor:[UIColor clearColor]];
+                            //[cell.rankTableView setBackgroundColor:[[UIColor colorWithGradientStyle:UIGradientStyleTopToBottom withFrame:cell.frame andColors:@[FlatRed, FlatYellow]] colorWithAlphaComponent:0.8]];
+                        });
+                    }
+                }];
+
+        } else {
+        
+            void (^animateChangeHeight)() = ^()
+            {
+                CGRect frame = cell.frame;
+                frame.size = CGSizeMake(self.collectionView.frame.size.width - 15, cell.rankTableView.rowHeight * 3 + cell.topLeaderboardView.frame.size.height);
+                cell.frame = frame;
+            };
+            
+            [UIView transitionWithView:cell.contentView duration:1.0 options: UIViewAnimationOptionLayoutSubviews animations:animateChangeHeight completion:^(BOOL finished) {
+                if (finished) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        LeaderboardCollectionViewCell *cell = (LeaderboardCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+                        [cell.rankTableView setBackgroundColor:[UIColor clearColor]];
+                        [cell.rankTableView setBackgroundColor:[[UIColor colorWithGradientStyle:UIGradientStyleTopToBottom withFrame:cell.frame andColors:@[FlatRed, FlatYellow]] colorWithAlphaComponent:0.8]];
+                    });
+                }
+            }];
+        }
     }
 }
 
@@ -456,8 +533,9 @@
         
     } else if (tableView.tag == 3) {
 
-        [tableView setBackgroundColor:[[UIColor colorWithGradientStyle:UIGradientStyleTopToBottom withFrame:tableView.frame andColors:@[FlatRed, FlatYellow]] colorWithAlphaComponent:0.8]];
+        //[tableView setBackgroundColor:[[UIColor colorWithGradientStyle:UIGradientStyleTopToBottom withFrame:tableView.viewForFirstBaselineLayout.frame andColors:@[FlatRed, FlatYellow]] colorWithAlphaComponent:0.8]];
         tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+        tableView.userInteractionEnabled = NO;
         
         LeaderboardTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"leaderboardCell"];
         cell.selectedBackgroundView.backgroundColor = [UIColor clearColor];
@@ -465,12 +543,12 @@
         
         cell.contentView.clipsToBounds = NO;
 
-        
         [cell.contentView setBackgroundColor:[UIColor clearColor]];
 
         UIView *colorView = [[UIView alloc] initWithFrame:CGRectMake(cell.frame.origin.x, cell.frame.origin.y, 0, cell.contentView.bounds.size.height)];
         
-        [colorView setBackgroundColor:cell.progressColorView.backgroundColor];
+        UIColor *blue = [UIColor colorWithCGColor:cell.progressColorView.backgroundColor.CGColor];
+        [colorView setBackgroundColor:blue];
         [cell.progressColorView setBackgroundColor:[UIColor clearColor]];
         colorView.clipsToBounds = NO;
         
@@ -480,17 +558,28 @@
         cell.userImageView.layer.cornerRadius = cell.userImageView.frame.size.height / 2.0;
         
         NSNumber *userKeyPercentage = self.sortedPercentages[indexPath.row];
-        [cell.percentGoalLabel setText:[NSString stringWithFormat:@"%0.f%%", [userKeyPercentage doubleValue]]];
-        [cell.usernameLabel setText:[self.leaderboard objectForKey:userKeyPercentage]];
+        NSNumber *userKey;
         
-        colorView.layer.shadowOpacity = 0.8;
-        colorView.layer.shadowRadius = 0.0;
-        colorView.layer.shadowColor = [UIColor darkGrayColor].CGColor;
-        colorView.layer.shadowOffset = CGSizeMake(2.0, 2.0);
+        if ([userKeyPercentage intValue] < 0) {
+            userKey = [[self.leaderboard objectForKey:userKeyPercentage] objectForKey:@"percentage"];
+            [cell.percentGoalLabel setText:[NSString stringWithFormat:@"%0.f%%", [userKey doubleValue]]];
+            [cell.usernameLabel setText:[[self.leaderboard objectForKey:userKeyPercentage] objectForKey:@"trimName"]];
+            [colorView setFrame:CGRectMake(cell.contentView.frame.size.width * ([userKey floatValue] / 100.0), cell.contentView.frame.origin.y, cell.frame.size.width - (cell.bounds.size.width * ([userKey floatValue] / 100.0)) + 5, cell.contentView.frame.size.height)];
+        } else {
+            [cell.percentGoalLabel setText:[NSString stringWithFormat:@"%0.f%%", [userKeyPercentage doubleValue]]];
+            [cell.usernameLabel setText:[self.leaderboard objectForKey:userKeyPercentage]];
+            [colorView setFrame:CGRectMake(cell.contentView.frame.size.width * ([userKeyPercentage floatValue] / 100.0), cell.contentView.frame.origin.y, cell.bounds.size.width - (cell.frame.size.width * ([userKeyPercentage floatValue] / 100.0)) + 5, cell.contentView.frame.size.height)];
+        }
         
         [cell.rankLabel setText:[@(indexPath.row + 1) stringValue]];
+
+    
         
-        [colorView setFrame:CGRectMake(cell.frame.size.width * ([userKeyPercentage floatValue] / 100.0), cell.frame.origin.y, cell.frame.size.width - (cell.frame.size.width * ([userKeyPercentage floatValue] / 100.0)), cell.contentView.bounds.size.height)];
+        UIView * additionalSeparator = [[UIView alloc] initWithFrame:CGRectMake(0,cell.contentView.frame.size.height-5,cell.contentView.frame.size.width + 5,5)];
+        additionalSeparator.backgroundColor = colorView.backgroundColor;
+        additionalSeparator.layer.zPosition = 100;
+        
+        [cell.contentView insertSubview:additionalSeparator atIndex:0];
         
         return cell;
     }
@@ -524,7 +613,7 @@
     return names[slackUsername];
 }
 
--(void)getCurrentLeaderboardWithCompletion:(void (^)(NSMutableDictionary *steps, NSError *err))completion {
++(void)getCurrentLeaderboardWithCompletion:(void (^)(NSMutableDictionary *steps, NSError *err))completion {
     NSURL* URL = [NSURL URLWithString:@"https://fitbotdev.rockmyrun.com/v1/points/leaderboard/old"];
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:URL];
     request.HTTPMethod = @"GET";
@@ -545,26 +634,60 @@
                     [formatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
                     NSMutableArray *sortedPercentage = [NSMutableArray new];
                     NSMutableDictionary *leaderboard = [NSMutableDictionary new];
+                    NSMutableDictionary *leaderboardBySlackUsername = [NSMutableDictionary new];
+
                     NSMutableDictionary *fullStats = [NSMutableDictionary new];
+                    NSMutableDictionary *duplicateLeaderboardEnteries = [NSMutableDictionary new];
                     
                     for (NSDictionary *d in payload) {
                         NSString *fullName = [NSString stringWithFormat:@"%@ %@", d[@"first_name"], d[@"last_name"]];
                         NSString *trimName = [NSString stringWithFormat:@"%@ %@", d[@"first_name"], [d[@"last_name"] substringToIndex:1]];
                         NSString *firstName = d[@"first_name"];
                         NSString *lastName = d[@"last_name"];
+                        NSString *slackUsername = d[@"slack_username"];
                         NSDate *startDate = [formatter dateFromString:d[@"start_date"]];
                         NSDate *endDate = [formatter dateFromString:d[@"end_date"]];
                         NSNumber *goalPoints = d[@"goal_points"];
                         NSNumber *currentPoints = d[@"current_points"];
-                        NSNumber *percentage = @(([currentPoints doubleValue] / [goalPoints doubleValue]) * 100.0);
+                        NSNumber *percentage;
                         
-                        [leaderboard setObject:trimName forKey:percentage];
-                        [fullStats setObject:@{@"":fullName,@"":trimName,@"firstName":firstName,@"lastName":lastName,@"startDate":startDate,@"endDate":endDate,@"goalPoints":goalPoints,@"currentPoints":currentPoints,@"percentage": percentage} forKey:fullName];
+                        if ([currentPoints isEqualToNumber:@(0)]) {
+                            percentage = @(0);
+                        } else {
+                            percentage = @(([currentPoints doubleValue] / [goalPoints doubleValue]) * 100.0);
+                        }
+                        
+                        //  if there's a duplicate key in dictionary (or many 0s that would overlap)
+                        if ( [leaderboard.allKeys containsObject:percentage]) {
+                            [duplicateLeaderboardEnteries setObject:@{@"trimName":trimName, @"percentage":percentage} forKey:@(0 - [@([payload indexOfObject:d]) intValue])];
+                        } else {
+                           [leaderboard setObject:trimName forKey:percentage];
+                        }
+                        
+                        [leaderboardBySlackUsername setObject:percentage forKey:slackUsername];
+                        
+                        [fullStats setObject:@{@"fullName":fullName,@"trimName":trimName,@"firstName":firstName,@"lastName":lastName,@"startDate":startDate,@"endDate":endDate,@"goalPoints":goalPoints,@"currentPoints":currentPoints,@"percentage": @([percentage doubleValue]), @"slackUsername": slackUsername} forKey:slackUsername];
                         
                     }
                     
+                    //scan through sorted keys and insert when they match percentage and insert the - int, to look up
                     sortedPercentage = [[leaderboard.allKeys sortedArrayUsingSelector:@selector(compare:)] mutableCopy];
-                    completion([@{@"sortedPercentage":sortedPercentage, @"leaderboard":leaderboard, @"fullStats":fullStats} mutableCopy],nil);
+                    NSMutableArray *sortedDuplicatePercentages = [sortedPercentage mutableCopy];
+                    
+                    for (NSNumber *percent in sortedPercentage) {
+                        for (NSDictionary *dupliates in duplicateLeaderboardEnteries.allValues) {
+                            if ([[dupliates valueForKey:@"percentage"] isEqualToNumber:percent]) {
+                                NSUInteger index = [sortedPercentage indexOfObject:percent];
+                                int duplicate = [(NSNumber *)[[duplicateLeaderboardEnteries allKeysForObject:dupliates] lastObject] intValue];
+                                [sortedDuplicatePercentages insertObject:@(duplicate) atIndex:index];
+                                NSLog(@"Added Duplicate to Array: %@", [sortedDuplicatePercentages description]);
+                            }
+                        }
+                    }
+                    
+                    [leaderboard addEntriesFromDictionary:duplicateLeaderboardEnteries];
+                    
+                    completion([@{@"sortedPercentage":sortedDuplicatePercentages, @"duplicateLeaderboardEntries":duplicateLeaderboardEnteries, @"leaderboard":leaderboard, @"fullStats":fullStats, @"leaderboardBySlackUsername":leaderboardBySlackUsername} mutableCopy],nil);
                 }
             }
         }

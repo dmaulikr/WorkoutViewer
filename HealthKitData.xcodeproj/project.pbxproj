@@ -79,6 +79,9 @@
 		C2D302B81E717C3200147784 /* SourceTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302B71E717C3200147784 /* SourceTableViewCell.m */; };
 		C2DC2A3C1E9313C100B3900D /* SVUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DC2A341E9313C100B3900D /* SVUploader.swift */; };
 		C2EC19711E578B7F0076FA0B /* StatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2EC19701E578B7F0076FA0B /* StatViewController.m */; };
+		C2FE19171E96E46E00040297 /* PMAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FE19141E96E46E00040297 /* PMAlertController.swift */; };
+		C2FE19181E96E46E00040297 /* PMAlertAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FE19151E96E46E00040297 /* PMAlertAction.swift */; };
+		C2FE19191E96E46E00040297 /* PMAlertController.xib in Resources */ = {isa = PBXBuildFile; fileRef = C2FE19161E96E46E00040297 /* PMAlertController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -247,6 +250,9 @@
 		C2DC2A341E9313C100B3900D /* SVUploader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SVUploader.swift; path = SVUploader/SVUploader.swift; sourceTree = "<group>"; };
 		C2EC196F1E578B7F0076FA0B /* StatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StatViewController.h; path = ../StatViewController.h; sourceTree = "<group>"; };
 		C2EC19701E578B7F0076FA0B /* StatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StatViewController.m; path = ../StatViewController.m; sourceTree = "<group>"; };
+		C2FE19141E96E46E00040297 /* PMAlertController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PMAlertController.swift; sourceTree = "<group>"; };
+		C2FE19151E96E46E00040297 /* PMAlertAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PMAlertAction.swift; sourceTree = "<group>"; };
+		C2FE19161E96E46E00040297 /* PMAlertController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PMAlertController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -301,6 +307,9 @@
 				C27CA9041E724B190084B9B8 /* ProgressCollectionViewCell.h */,
 				C27CA9051E724B190084B9B8 /* ProgressCollectionViewCell.m */,
 				C22D7AA21E83C35600B7272E /* UIColor+colorFromHex.swift */,
+				C2FE19141E96E46E00040297 /* PMAlertController.swift */,
+				C2FE19151E96E46E00040297 /* PMAlertAction.swift */,
+				C2FE19161E96E46E00040297 /* PMAlertController.xib */,
 				C27CA8F21E718C8A0084B9B8 /* WorkoutTableViewCell.h */,
 				C27CA8F31E718C8A0084B9B8 /* WorkoutTableViewCell.m */,
 				C27CA8EF1E718A3F0084B9B8 /* WorkoutsCollectionViewCell.h */,
@@ -566,6 +575,7 @@
 				A88BBF0C1E1656910078649D /* LaunchScreen.storyboard in Resources */,
 				A88BBF091E1656910078649D /* Assets.xcassets in Resources */,
 				A88BBF071E1656910078649D /* Main.storyboard in Resources */,
+				C2FE19191E96E46E00040297 /* PMAlertController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -618,6 +628,7 @@
 				C2A041BF1E92AD1400F7F300 /* UIViewShadowExtension.swift in Sources */,
 				C22D7AA61E8443AE00B7272E /* TKRadarChart.swift in Sources */,
 				C27FBCFD1E84AB3B00FB41E7 /* ElongationDetailViewController.swift in Sources */,
+				C2FE19181E96E46E00040297 /* PMAlertAction.swift in Sources */,
 				C2C746861E95FFD700B79613 /* UIImage+ChameleonPrivate.m in Sources */,
 				A88BBF011E1656910078649D /* AppDelegate.m in Sources */,
 				C27FBCFF1E84AB3B00FB41E7 /* SwipableTableViewController.swift in Sources */,
@@ -640,6 +651,7 @@
 				C27AD5A11E8485280021A9AD /* CHIPageControllable.swift in Sources */,
 				C27FBD051E84BB7F00FB41E7 /* LeaderboardCollectionViewCell.m in Sources */,
 				C2C746831E95FFD700B79613 /* UIButton+Chameleon.m in Sources */,
+				C2FE19171E96E46E00040297 /* PMAlertController.swift in Sources */,
 				A88BBEFE1E1656910078649D /* main.m in Sources */,
 				C27CA9031E7249BE0084B9B8 /* ANDLineChartView.m in Sources */,
 				C27CA8F41E718C8B0084B9B8 /* WorkoutTableViewCell.m in Sources */,

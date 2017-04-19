@@ -10,6 +10,7 @@
 #import "HealthKitFunctions.h"
 @import WatchConnectivity;
 #import "ViewController.h"
+#import "DataCollectionViewController.h"
 
 @interface AppDelegate ()
 
@@ -208,6 +209,12 @@
 //        }
 //    }
     
+}
+
++(void)checkStatusForUsername:(NSString *)username withCompletion:(void(^)(NSDictionary *stats, NSError *err))completion {
+    [DataCollectionViewController getCurrentLeaderboardWithCompletion:^(NSMutableDictionary *steps, NSError *err) {
+        
+    }];
 }
 
 +(void)checkStatus:(void(^)(BOOL success, NSDate *start, NSDate *end, NSNumber *points, NSNumber *goal, NSError *error))completion {

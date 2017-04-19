@@ -12,5 +12,6 @@
 
 @interface DataCollectionViewController : UICollectionViewController <UITableViewDelegate, UITableViewDataSource, TwicketSegmentedControlDelegate>
 
++(void)getCurrentLeaderboardWithCompletion:(void (^)(NSMutableDictionary *steps, NSError *err))completion;
 
 @end

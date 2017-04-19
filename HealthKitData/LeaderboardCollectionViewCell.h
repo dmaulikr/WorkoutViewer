@@ -13,6 +13,6 @@
 @property (strong, nonatomic) IBOutlet UILabel *leaderboardTitle;
 @property (strong, nonatomic) IBOutlet UITableView *rankTableView;
 @property (weak, nonatomic) IBOutlet UILabel *dateRangeLabel;
-
+@property (strong, nonatomic) IBOutlet UIView *topLeaderboardView;
 
 @end

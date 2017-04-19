@@ -33,6 +33,7 @@
     }];
 }
 
+
 - (void)getAllEnergyBurned:(void (^)(NSMutableArray *, NSError *))completion {
     
     // 2. Order the workouts by date
@@ -164,6 +165,7 @@
 }
 
 +(void)getDailyStepsForLast3MonthsWithCompletion:(void (^)(NSMutableDictionary *steps, NSError *err))completion {
+    
     NSCalendar *calendar = [NSCalendar currentCalendar];
     NSDateComponents *interval = [[NSDateComponents alloc] init];
     interval.day = 1;
@@ -193,7 +195,7 @@
     
     NSDateFormatter *formatter = [NSDateFormatter new];
     [formatter setDateFormat:@"MM/dd"];
-    
+
     NSMutableDictionary *stats = [NSMutableDictionary new];
     
     // Set the results handler
@@ -235,7 +237,7 @@
                      }
                  }];
              }
-             
+             completion([@{@"error":@"query not finished"} mutableCopy], nil);
          }];
     };
     
@@ -350,7 +352,7 @@
                                               }
                                           }];
                                           
-                                      } else{
+                                      } else{  
                                           NSLog(@"Error retrieving energy %@",error);
                                           [AppDelegate logBackgroundDataToFileWithStats:@{@"Error": error} message:@"Failed Calorie Calculating Function with Steps" time:[NSDate date]];
                                           completion(nil, nil, nil, error);
