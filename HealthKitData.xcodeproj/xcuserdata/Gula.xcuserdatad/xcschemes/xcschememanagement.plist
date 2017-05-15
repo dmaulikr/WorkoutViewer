@@ -4,6 +4,16 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>FitBotSync (Notification).xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>FitBotSync.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 		<key>HealthKitData.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -13,6 +23,11 @@
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>A88BBEF81E1656910078649D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C2E526971E36E574000FF99A</key>
 		<dict>
 			<key>primary</key>
 			<true/>

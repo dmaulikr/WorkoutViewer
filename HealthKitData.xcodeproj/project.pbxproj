@@ -18,8 +18,6 @@
 		C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */; };
 		C27CA8F11E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F01E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m */; };
 		C27CA8F41E718C8B0084B9B8 /* WorkoutTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F31E718C8A0084B9B8 /* WorkoutTableViewCell.m */; };
-		C27CA8F91E71F8060084B9B8 /* MBCircularProgressBarLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */; };
-		C27CA8FA1E71F8060084B9B8 /* MBCircularProgressBarView.m in Sources */ = {isa = PBXBuildFile; fileRef = C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */; };
 		C2D302AC1E6F961800147784 /* DataCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302AB1E6F961800147784 /* DataCollectionViewController.m */; };
 		C2D302AF1E71148900147784 /* SourcesCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302AE1E71148900147784 /* SourcesCollectionViewCell.m */; };
 		C2D302B51E712A8000147784 /* LogsCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C2D302B41E712A8000147784 /* LogsCollectionViewCell.m */; };
@@ -57,28 +55,10 @@
 		A88BBF181E165E540078649D /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		C2057EEE1E2EC15800F2FF4F /* InsetTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InsetTextField.h; sourceTree = "<group>"; };
 		C2057EEF1E2EC15800F2FF4F /* InsetTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InsetTextField.m; sourceTree = "<group>"; };
-		C21F51921E68E26200DDDDC9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
-		C21F51941E68E26200DDDDC9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C21F51961E68E26200DDDDC9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C21F51A01E68E26200DDDDC9 /* InterfaceController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InterfaceController.h; sourceTree = "<group>"; };
-		C21F51A11E68E26200DDDDC9 /* InterfaceController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InterfaceController.m; sourceTree = "<group>"; };
-		C21F51A31E68E26200DDDDC9 /* ExtensionDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExtensionDelegate.h; sourceTree = "<group>"; };
-		C21F51A41E68E26200DDDDC9 /* ExtensionDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExtensionDelegate.m; sourceTree = "<group>"; };
-		C21F51A61E68E26200DDDDC9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C21F51A81E68E26200DDDDC9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C21F51B31E68E37E00DDDDC9 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS3.1.sdk/System/Library/Frameworks/HealthKit.framework; sourceTree = DEVELOPER_DIR; };
-		C21F51B51E68E37E00DDDDC9 /* SyncWatch Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "SyncWatch Extension.entitlements"; sourceTree = "<group>"; };
-		C21F52001E693A7E00DDDDC9 /* SyncWatch Extension-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SyncWatch Extension-Bridging-Header.h"; sourceTree = "<group>"; };
-		C21F52011E693A7E00DDDDC9 /* Complication.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Complication.swift; sourceTree = "<group>"; };
-		C21F52031E6AF87A00DDDDC9 /* ClockKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ClockKit.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS3.1.sdk/System/Library/Frameworks/ClockKit.framework; sourceTree = DEVELOPER_DIR; };
 		C27CA8EF1E718A3F0084B9B8 /* WorkoutsCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorkoutsCollectionViewCell.h; sourceTree = "<group>"; };
 		C27CA8F01E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WorkoutsCollectionViewCell.m; sourceTree = "<group>"; };
 		C27CA8F21E718C8A0084B9B8 /* WorkoutTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorkoutTableViewCell.h; sourceTree = "<group>"; };
 		C27CA8F31E718C8A0084B9B8 /* WorkoutTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WorkoutTableViewCell.m; sourceTree = "<group>"; };
-		C27CA8F51E71F8060084B9B8 /* MBCircularProgressBarLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBCircularProgressBarLayer.h; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarLayer.h"; sourceTree = "<group>"; };
-		C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBCircularProgressBarLayer.m; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarLayer.m"; sourceTree = "<group>"; };
-		C27CA8F71E71F8060084B9B8 /* MBCircularProgressBarView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MBCircularProgressBarView.h; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarView.h"; sourceTree = "<group>"; };
-		C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MBCircularProgressBarView.m; path = "../../../../../../Downloads/MBCircularProgressBar-master/Pod/Classes/MBCircularProgressBarView.m"; sourceTree = "<group>"; };
 		C2D302AA1E6F961800147784 /* DataCollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataCollectionViewController.h; sourceTree = "<group>"; };
 		C2D302AB1E6F961800147784 /* DataCollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataCollectionViewController.m; sourceTree = "<group>"; };
 		C2D302AD1E71148900147784 /* SourcesCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SourcesCollectionViewCell.h; sourceTree = "<group>"; };
@@ -107,8 +87,6 @@
 			isa = PBXGroup;
 			children = (
 				A88BBEFB1E1656910078649D /* HealthKitData */,
-				C21F51901E68E26200DDDDC9 /* SyncWatch */,
-				C21F519F1E68E26200DDDDC9 /* SyncWatch Extension */,
 				A88BBEFA1E1656910078649D /* Products */,
 				A88BBF171E165E540078649D /* Frameworks */,
 			);
@@ -129,10 +107,6 @@
 				C27CA8F31E718C8A0084B9B8 /* WorkoutTableViewCell.m */,
 				C27CA8EF1E718A3F0084B9B8 /* WorkoutsCollectionViewCell.h */,
 				C27CA8F01E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m */,
-				C27CA8F51E71F8060084B9B8 /* MBCircularProgressBarLayer.h */,
-				C27CA8F61E71F8060084B9B8 /* MBCircularProgressBarLayer.m */,
-				C27CA8F71E71F8060084B9B8 /* MBCircularProgressBarView.h */,
-				C27CA8F81E71F8060084B9B8 /* MBCircularProgressBarView.m */,
 				C2D302B61E717C3200147784 /* SourceTableViewCell.h */,
 				C2D302B71E717C3200147784 /* SourceTableViewCell.m */,
 				C2D302B31E712A8000147784 /* LogsCollectionViewCell.h */,
@@ -172,37 +146,9 @@
 		A88BBF171E165E540078649D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				C21F52031E6AF87A00DDDDC9 /* ClockKit.framework */,
-				C21F51B31E68E37E00DDDDC9 /* HealthKit.framework */,
 				A88BBF181E165E540078649D /* HealthKit.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		C21F51901E68E26200DDDDC9 /* SyncWatch */ = {
-			isa = PBXGroup;
-			children = (
-				C21F51911E68E26200DDDDC9 /* Interface.storyboard */,
-				C21F51941E68E26200DDDDC9 /* Assets.xcassets */,
-				C21F51961E68E26200DDDDC9 /* Info.plist */,
-			);
-			path = SyncWatch;
-			sourceTree = "<group>";
-		};
-		C21F519F1E68E26200DDDDC9 /* SyncWatch Extension */ = {
-			isa = PBXGroup;
-			children = (
-				C21F51B51E68E37E00DDDDC9 /* SyncWatch Extension.entitlements */,
-				C21F51A01E68E26200DDDDC9 /* InterfaceController.h */,
-				C21F51A11E68E26200DDDDC9 /* InterfaceController.m */,
-				C21F51A31E68E26200DDDDC9 /* ExtensionDelegate.h */,
-				C21F51A41E68E26200DDDDC9 /* ExtensionDelegate.m */,
-				C21F51A61E68E26200DDDDC9 /* Assets.xcassets */,
-				C21F51A81E68E26200DDDDC9 /* Info.plist */,
-				C21F52011E693A7E00DDDDC9 /* Complication.swift */,
-				C21F52001E693A7E00DDDDC9 /* SyncWatch Extension-Bridging-Header.h */,
-			);
-			path = "SyncWatch Extension";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -293,11 +239,9 @@
 				C2057EF01E2EC15800F2FF4F /* InsetTextField.m in Sources */,
 				A88BBF041E1656910078649D /* ViewController.m in Sources */,
 				C2D302B51E712A8000147784 /* LogsCollectionViewCell.m in Sources */,
-				C27CA8FA1E71F8060084B9B8 /* MBCircularProgressBarView.m in Sources */,
 				A88BBF011E1656910078649D /* AppDelegate.m in Sources */,
 				A88BBF151E165D8A0078649D /* HealthKitFunctions.m in Sources */,
 				C27CA8F11E718A3F0084B9B8 /* WorkoutsCollectionViewCell.m in Sources */,
-				C27CA8F91E71F8060084B9B8 /* MBCircularProgressBarLayer.m in Sources */,
 				A88BBEFE1E1656910078649D /* main.m in Sources */,
 				C27CA8F41E718C8B0084B9B8 /* WorkoutTableViewCell.m in Sources */,
 			);
@@ -320,14 +264,6 @@
 				A88BBF0B1E1656910078649D /* Base */,
 			);
 			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-		C21F51911E68E26200DDDDC9 /* Interface.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				C21F51921E68E26200DDDDC9 /* Base */,
-			);
-			name = Interface.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

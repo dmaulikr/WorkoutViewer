@@ -144,7 +144,9 @@
                 [HealthKitFunctions getAllEnergyWithoutWatchOrHumanAndSortFromStepSamples:[stepSamples mutableCopy] withCompletion:^(NSNumber *cals, NSNumber* other, NSError *err) {
                     
                     NSMutableDictionary *stats = [@{@"start":start, @"end":end, @"current":@([cals integerValue]), @"other": other,@"goal":goal} mutableCopy];
-                    
+					[stats setValue:@([cals integerValue] + [other integerValue]) forKey:@"current"];
+
+					
                     if (success) {
                         [AppDelegate uploadEnergyWithStats:stats withCompletion:^(BOOL success, NSError *err) {
                             if (success) {

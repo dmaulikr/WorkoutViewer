@@ -92,7 +92,7 @@
 
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
-    return 5;
+    return 2;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
@@ -108,14 +108,6 @@
         
         return cell;
     } else if (indexPath.row == 1) {
-        identifier = @"workouts";
-        WorkoutsCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
-        cell.tableView.tag = 2;
-        cell.tableView.delegate = self;
-        cell.tableView.layer.borderColor = [UIColor whiteColor].CGColor;
-        
-        return cell;
-    } else if (indexPath.row == 2) {
         identifier = @"logs";
         LogsCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
         cell.logsTextView.layer.borderColor = [UIColor whiteColor].CGColor;
@@ -136,13 +128,7 @@
         
         return cell;
         
-    } else if (indexPath.row == 3) {
-        identifier = @"week";
-    } else if (indexPath.row == 4) {
-        identifier = @"bot";
-        return [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
     }
-
 
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:identifier forIndexPath:indexPath];
     cell.layer.borderColor = [UIColor whiteColor].CGColor;
